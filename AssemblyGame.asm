@@ -1,7 +1,7 @@
 ;-------------------------------------------------------------------------------------------------------------------
 ; Assembly Game - (c) Robbe Mahieu
 ; nasm -fwin64 AssemblyGame.asm
-; ld -o AssemblyGame.exe C:\Windows\System32\user32.dll C:\Windows\System32\kernel32.dll AssemblyGame.obj
+; GoLink AssemblyGame.obj user32.dll kernel32.dll
 ;-------------------------------------------------------------------------------------------------------------------
 
 ; Compiler directives and includes
@@ -42,7 +42,8 @@ CommandLine resd 1                                      ; Pointer to the launchi
 SECTION .text                                           ; Program start
 ;-------------------------------------------------------------------------------------------------------------------
 
-MainEntry:
+global START
+START:
     PUSH 0                                              ; Get instance handle of our app (0 = this)
     CALL [GetModuleHandleA]                             ; Return value in eax
     MOV dword [hInstance], eax                          ; cache return value to hInstance
