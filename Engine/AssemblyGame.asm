@@ -71,7 +71,9 @@ WinMain:
     call [UpdateWindow]
 
     ; Update loop
+    push dword [ebp-28]
     call UpdateLoop
+    add esp, 4
 
     ; Cleanup
     .WinMainReturn:
@@ -138,35 +140,39 @@ InitWindow:
 ;
 
 UpdateLoop:
+    mov ecx, [esp+4]                                    ; Get HWND parameter
     lea ebx, [ebp-24]                                   ; Cache message address in ebx
 
-    ; GetMessage(MSG, 0, 0, 0)
+    .PeekMessage:
+    ; PeekMessage(MSG, HWND, 0, 0, 0)
     push 0
     push 0
     push 0
-    lea ebx, [ebp-24]                                   ; Cache message address in ebx
+    push ecx
     push ebx
-    call [GetMessageA]                                  ; Get message from the thread
+    call [PeekMessageA]                                 ; Get message from the thread
 
-    cmp eax, 0                                          ; Message == 0? Stop
-    jz .DoneMessages
+    cmp eax, 0                                          ; Is there a message
+    jz .GameLoop
 
-    ; TranslateMessage(MSG)
-    lea ebx, [ebp-24]                                   ; Cache message address in ebx
-    push ebx
+    ; Decode message
+    cmp ebx, 0                                          ; Message == 0 => Done
+    jz .UpdateLoopRet
+
+    push ebx                                            ; TranslateMessage(MSG)
     call [TranslateMessage]
-
-    ; DispatchMessage(MSG)
-    lea ebx, [ebp-24]                                   ; Cache message address in ebx
-    push ebx
+    push ebx                                            ; DispatchMessage(MSG)
     call [DispatchMessageA]
 
-    JMP UpdateLoop
+    JMP .PeekMessage
 
-    .DoneMessages: 
-    lea ebx, [ebp-24]                                   ; Cache message address in ebx                                   
+    .GameLoop:
+    NOP
+    JMP .PeekMessage
+
+    .UpdateLoopRet:                                  
     mov eax, [ebx+08]                                   ; Save msg.wParam to eax
-    ret;
+    ret
 
 ;
 ; WndProc Function

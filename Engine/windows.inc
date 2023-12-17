@@ -6,6 +6,7 @@ extern LoadCursorA
 extern RegisterClassExA
 extern UpdateWindow
 extern GetMessageA
+extern PeekMessageA
 extern TranslateMessage
 extern DispatchMessageA
 extern PostQuitMessage
