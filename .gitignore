@@ -10,5 +10,6 @@
 .history/
 
 #builds
+Build/
 *.obj
 *.exe

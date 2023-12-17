@@ -6,7 +6,7 @@
 
 ; Compiler directives and includes
 
-CPU x64                                                 ; Limit instructions to only x64 instructions
+;CPU x64                                                 ; Limit instructions to only x64 instructions
 
 ; Includes
 extern GetModuleHandleA
