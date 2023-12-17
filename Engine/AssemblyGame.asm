@@ -8,20 +8,7 @@
 CPU x64                                                 ; Limit instructions to only x64 instructions
 
 ; Includes
-
-extern GetModuleHandleA
-extern GetCommandLineA
-extern ExitProcess
-extern LoadIconA
-extern LoadCursorA
-extern RegisterClassExA
-extern UpdateWindow
-extern GetMessageA
-extern TranslateMessage
-extern DispatchMessageA
-extern PostQuitMessage
-extern CreateWindowExA
-extern DefWindowProcA
+%include "windows.inc" 
 
 ; Constants and Data
 
@@ -77,8 +64,8 @@ WinMain:
     lea ebx, [ebp-48]
 
     ; Fill in WNDCLASSEX
-    mov dword [ebx+00], 48                              ; Struct size
-    mov dword [ebx+04], 3                               ; Window style
+    mov dword [ebx+00], WNDCLASSEX_SIZE                 ; Struct size
+    mov dword [ebx+04], CS_HREDRAW + CS_VREDRAW         ; Window style
     mov dword [ebx+08], WndProc                         ; Windows message callback function
     mov dword [ebx+12], 0                               ; Extra class data
     mov dword [ebx+16], 0                               ; Extra window data
@@ -86,17 +73,17 @@ WinMain:
     mov eax, hInstance                                  ; Put window handle in eax
     mov dword [ebx+20], eax                             ; hInstance ref
 
-    mov dword [ebx+32], 5 + 1                           ; Default brush color
+    mov dword [ebx+32], 0                               ; Background color
     mov dword [ebx+36], 0                               ; App menu
     mov dword [ebx+40], ClassName                       ; Class Name
 
-    push dword 32512                                    ; Load default icon
+    push dword IDI_APPLICATION                          ; Load default icon
     push dword 0
     call [LoadIconA]
     mov dword [ebx+24], eax                             ; Normal Icon handle
     mov dword [ebx+44], eax                             ; Small Icon handle
 
-    push dword 32512                                    ; Load default cursor
+    push dword IDC_ARROW                                ; Load default cursor
     push dword 0
     call [LoadCursorA]
 
@@ -112,9 +99,9 @@ WinMain:
     push dword 0
     push dword WindowHeight
     push dword WindowWidth
-    push dword 0x80000000                               ; CW_USEDEFAULT
-    push dword 0x80000000                               ; CW_USEDEFAULT
-    push dword 0x00 | 0xC00000 | 0x80000 | 0x40000 | 0x20000 | 0x10000 | 0x10000000  ; WS_OVERLAPPEDWINDOW + WS_VISIBLE
+    push dword CW_USEDEFAULT
+    push dword CW_USEDEFAULT
+    push dword WS_OVERLAPPEDWINDOW + WS_VISIBLE
     push dword AppName
     push dword ClassName
     push dword 0
@@ -170,7 +157,7 @@ WndProc:
     enter 0,0
     
     mov eax, dword [ebp+12]                             ; Get second parameter
-    CMP eax, 2                                          ; Check if it's WM_DESTROY
+    CMP eax, WM_DESTROY
     JNE NotWMDestroy                                    
 
     ; On WM_DESTROY
