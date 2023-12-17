@@ -14,6 +14,8 @@ extern DefWindowProcA
 
 %define WNDCLASSEX_SIZE 48
 
+%define SW_SHOWDEFAULT 10
+
 %define CS_HREDRAW 2
 %define CS_VREDRAW 1
 

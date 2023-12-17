@@ -12,5 +12,3 @@ cd %BUILD_FOLDER%
 GoLink AssemblyGame.obj user32.dll kernel32.dll
 
 AssemblyGame.exe
-
-PAUSE

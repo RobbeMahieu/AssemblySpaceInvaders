@@ -31,23 +31,24 @@ SECTION .text                                           ; Program start
 
 global START
 START:
-    PUSH 0                                              ; Get instance handle of our app (0 = this)
-    CALL [GetModuleHandleA]                             ; Return value in eax
-    MOV dword [hInstance], eax                          ; cache return value to hInstance
+    push 0                                              ; Get instance handle of our app (0 = this)
+    call [GetModuleHandleA]                             ; Return value in eax
+    mov [hInstance], eax                                ; cache return value to hInstance
 
-    CALL [GetCommandLineA]                              ; Get command line pointer in eax
-    MOV dword [CommandLine], eax                        ; cache the value to CommandLine
+    call [GetCommandLineA]                              ; Get command line pointer in eax
+    mov [CommandLine], eax                              ; cache the value to CommandLine
 
     ; Call WinMain(hInstance, 0, CommandLine, SW_SHOWDEFAULT)
-    PUSH 10
-    PUSH dword [CommandLine]
-    PUSH 0
-    PUSH dword [hInstance]
-    CALL WinMain
+    push SW_SHOWDEFAULT
+    push dword [CommandLine]
+    push 0
+    push dword [hInstance]
+    call WinMain
+    add esp, 16                                         ; Clear parameters from stack
 
-    ; Put whatever WindowMain returned on the stack and exit
-    PUSH eax
-    CALL [ExitProcess]
+    ; Put whatever WinMain returned on the stack and exit
+    push eax
+    call [ExitProcess]
 
 ;
 ; WinMain Function
@@ -55,99 +56,117 @@ START:
 
 WinMain:
     ; Reserve local variables
+    ; [ebp-24] MSG
+    ; [ebp-28] HWND
+    enter 28,0  
+
+    ; Initialization
+    call InitWindow
+
+    CMP eax, 0                                          ; Check if window was successfully created
+    JE .WinMainReturn                                   ; Failed
+    mov [ebp-28], eax                                   ; Move the window handle to the local variable
+
+    push dword [ebp-28]                                 ; Force update the window UpdateWindow(HWND)
+    call [UpdateWindow]
+
+    ; Update loop
+    call UpdateLoop
+
+    ; Cleanup
+    .WinMainReturn:
+    leave
+    ret
+
+;
+; Init Window
+;
+
+InitWindow:
+    ; Reserve local variables
     ; [ebp-48] WNDCLASSEX
-    ; [ebp-72] MSG
-    ; [ebp-76] HWND
-    enter 76,0  
-
-    ; Load ebx with WNDCLASSEX struct address
-    lea ebx, [ebp-48]
-
+    enter 48,0  
+   
     ; Fill in WNDCLASSEX
+    lea ebx, [ebp-48]                                   ; Load ebx with WNDCLASSEX struct address
     mov dword [ebx+00], WNDCLASSEX_SIZE                 ; Struct size
     mov dword [ebx+04], CS_HREDRAW + CS_VREDRAW         ; Window style
     mov dword [ebx+08], WndProc                         ; Windows message callback function
     mov dword [ebx+12], 0                               ; Extra class data
     mov dword [ebx+16], 0                               ; Extra window data
-
-    mov eax, hInstance                                  ; Put window handle in eax
-    mov dword [ebx+20], eax                             ; hInstance ref
+    mov dword [ebx+20], hInstance                       ; hInstance ref
 
     mov dword [ebx+32], 0                               ; Background color
     mov dword [ebx+36], 0                               ; App menu
     mov dword [ebx+40], ClassName                       ; Class Name
 
-    push dword IDI_APPLICATION                          ; Load default icon
-    push dword 0
+    push IDI_APPLICATION                                ; Load default icon
+    push 0
     call [LoadIconA]
-    mov dword [ebx+24], eax                             ; Normal Icon handle
-    mov dword [ebx+44], eax                             ; Small Icon handle
+    mov [ebx+24], eax                                   ; Normal Icon handle
+    mov [ebx+44], eax                                   ; Small Icon handle
 
-    push dword IDC_ARROW                                ; Load default cursor
-    push dword 0
+    push IDC_ARROW                                      ; Load default cursor
+    push 0
     call [LoadCursorA]
 
-    mov dword [ebx+28], eax                             ; Cursor
+    mov [ebx+28], eax                                   ; Cursor
 
     push ebx                                            ; Register the window
     call [RegisterClassExA]                 
 
     ; CreateWindowEx(0, ClassName, Title, WS_OVERLAPPEDWINDOW, x, y, width, height, parentHandle, menuHandle, hInstance, NULL)
-    push dword 0
-    push dword hInstance
-    push dword 0
-    push dword 0
-    push dword WindowHeight
-    push dword WindowWidth
-    push dword CW_USEDEFAULT
-    push dword CW_USEDEFAULT
-    push dword WS_OVERLAPPEDWINDOW + WS_VISIBLE
-    push dword AppName
-    push dword ClassName
-    push dword 0
-    call [CreateWindowExA]
+    push 0
+    push hInstance
+    push 0
+    push 0
+    push WindowHeight
+    push WindowWidth
+    push CW_USEDEFAULT
+    push CW_USEDEFAULT
+    push WS_OVERLAPPEDWINDOW + WS_VISIBLE
+    push AppName
+    push ClassName
+    push 0
+    call [CreateWindowExA]                              ; HWND in eax
 
-    ; Check if window was successfully created
-    CMP eax, 0
-    JE WinMainRet                                       ; Failed
+    leave
+    ret
 
-    mov dword [ebp-76], eax                             ; Move the window handle to the local variable
+;
+; Update Loop
+;
 
-    ; Force update the window UpdateWindow(HWND)
-    push dword [ebp-76]
-    call [UpdateWindow]
+UpdateLoop:
+    lea ebx, [ebp-24]                                   ; Cache message address in ebx
 
-MessageLoop:
     ; GetMessage(MSG, 0, 0, 0)
-    push dword 0
-    push dword 0
-    push dword 0
-    lea eax, [ebp-72]
-    push eax
+    push 0
+    push 0
+    push 0
+    lea ebx, [ebp-24]                                   ; Cache message address in ebx
+    push ebx
     call [GetMessageA]                                  ; Get message from the thread
 
     cmp eax, 0                                          ; Message == 0? Stop
-    jz DoneMessages
+    jz .DoneMessages
 
     ; TranslateMessage(MSG)
-    lea eax, [ebp-72]
-    push eax
+    lea ebx, [ebp-24]                                   ; Cache message address in ebx
+    push ebx
     call [TranslateMessage]
 
     ; DispatchMessage(MSG)
-    lea eax, [ebp-72]
-    push eax
+    lea ebx, [ebp-24]                                   ; Cache message address in ebx
+    push ebx
     call [DispatchMessageA]
 
-    JMP MessageLoop
+    JMP UpdateLoop
 
-DoneMessages:
-    lea ebx, [ebp-72]                                   ; Save msg.wParam to eax   
-    mov eax, dword [ebx+08]
-
-WinMainRet:
-    leave                                               ; Clear local variable
-    ret
+    .DoneMessages: 
+    lea ebx, [ebp-24]                                   ; Cache message address in ebx                                   
+    mov eax, [ebx+08]                                   ; Save msg.wParam to eax
+    ret;
 
 ;
 ; WndProc Function
@@ -156,9 +175,9 @@ WinMainRet:
 WndProc:
     enter 0,0
     
-    mov eax, dword [ebp+12]                             ; Get second parameter
+    mov eax, [ebp+12]                                   ; Get second parameter
     CMP eax, WM_DESTROY
-    JNE NotWMDestroy                                    
+    JNE .NotWMDestroy                                    
 
     ; On WM_DESTROY
     PUSH 0;
@@ -168,7 +187,7 @@ WndProc:
     leave
     ret
 
-NotWMDestroy:
+.NotWMDestroy:
     
     ; DefWindowProcA()
     push dword [ebp+20]
