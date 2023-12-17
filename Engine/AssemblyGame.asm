@@ -1,14 +1,14 @@
 ;-------------------------------------------------------------------------------------------------------------------
 ; Assembly Game - (c) Robbe Mahieu
-; nasm -fwin64 AssemblyGame.asm
-; GoLink AssemblyGame.obj user32.dll kernel32.dll
+; 
 ;-------------------------------------------------------------------------------------------------------------------
 
 ; Compiler directives and includes
 
-;CPU x64                                                 ; Limit instructions to only x64 instructions
+CPU x64                                                 ; Limit instructions to only x64 instructions
 
 ; Includes
+
 extern GetModuleHandleA
 extern GetCommandLineA
 extern ExitProcess
