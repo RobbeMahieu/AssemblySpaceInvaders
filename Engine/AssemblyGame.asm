@@ -56,22 +56,21 @@ START:
 
 WinMain:
     ; Reserve local variables
-    ; [ebp-24] MSG
     ; [ebp-28] HWND
-    enter 28,0  
+    enter 4,0  
 
     ; Initialization
     call InitWindow
 
     CMP eax, 0                                          ; Check if window was successfully created
     JE .WinMainReturn                                   ; Failed
-    mov [ebp-28], eax                                   ; Move the window handle to the local variable
+    mov [ebp-4], eax                                    ; Move the window handle to the local variable
 
-    push dword [ebp-28]                                 ; Force update the window UpdateWindow(HWND)
+    push dword [ebp-4]                                  ; Force update the window UpdateWindow(HWND)
     call [UpdateWindow]
 
     ; Update loop
-    push dword [ebp-28]
+    push dword [ebp-4]
     call UpdateLoop
     add esp, 4
 
@@ -117,7 +116,7 @@ InitWindow:
     push ebx                                            ; Register the window
     call [RegisterClassExA]                 
 
-    ; CreateWindowEx(0, ClassName, Title, WS_OVERLAPPEDWINDOW, x, y, width, height, parentHandle, menuHandle, hInstance, NULL)
+    ; CreateWindowEx(0, ClassName, Title, Window style, x, y, width, height, parentHandle, menuHandle, hInstance, NULL)
     push 0
     push hInstance
     push 0
@@ -140,15 +139,19 @@ InitWindow:
 ;
 
 UpdateLoop:
+    ; Reserve local variables
+    ; [ebp-24] MSG
+    enter 24, 0
+
     mov ecx, [esp+4]                                    ; Get HWND parameter
     lea ebx, [ebp-24]                                   ; Cache message address in ebx
 
     .PeekMessage:
-    ; PeekMessage(MSG, HWND, 0, 0, 0)
+    ; PeekMessage(MSG, HWND, 0, 0, remove msg)
+    push PM_REMOVE
     push 0
     push 0
     push 0
-    push ecx
     push ebx
     call [PeekMessageA]                                 ; Get message from the thread
 
@@ -156,8 +159,8 @@ UpdateLoop:
     jz .GameLoop
 
     ; Decode message
-    cmp ebx, 0                                          ; Message == 0 => Done
-    jz .UpdateLoopRet
+    cmp dword [ebx+4], WM_QUIT                          ; Message == WM_QUIT => Done
+    je .UpdateLoopRet
 
     push ebx                                            ; TranslateMessage(MSG)
     call [TranslateMessage]
@@ -172,6 +175,8 @@ UpdateLoop:
 
     .UpdateLoopRet:                                  
     mov eax, [ebx+08]                                   ; Save msg.wParam to eax
+
+    leave
     ret
 
 ;
@@ -179,8 +184,8 @@ UpdateLoop:
 ; 
 
 WndProc:
-    enter 0,0
-    
+    enter 0, 0
+
     mov eax, [ebp+12]                                   ; Get second parameter
     CMP eax, WM_DESTROY
     JNE .NotWMDestroy                                    

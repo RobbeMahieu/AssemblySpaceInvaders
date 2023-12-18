@@ -35,3 +35,6 @@ extern DefWindowProcA
 %define CW_USEDEFAULT 0x80000000
 
 %define WM_DESTROY 0x0002
+%define WM_QUIT 0x0012
+
+%define PM_REMOVE 1h
