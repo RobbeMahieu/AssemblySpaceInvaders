@@ -13,8 +13,19 @@ extern PostQuitMessage
 extern CreateWindowExA
 extern DefWindowProcA  
 extern MessageBoxA
+extern CreateSolidBrush
+extern CreatePen
+extern Rectangle
+extern DeleteObject
 extern GetDC
 extern ReleaseDC
+extern GetClientRect
+extern CreateCompatibleDC
+extern CreateCompatibleBitmap
+extern DeleteDC
+extern SelectObject
+extern BitBlt
+extern OutputDebugStringA
 
 %define WNDCLASSEX_SIZE 48
 
@@ -41,3 +52,8 @@ extern ReleaseDC
 %define WM_QUIT         0x0012
 
 %define PM_REMOVE 1h
+
+%define SRCCOPY         0x00CC0020
+%define BLACKNESS       0x00000042
+
+%define PS_SOLID 0

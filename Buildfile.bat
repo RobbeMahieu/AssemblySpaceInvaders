@@ -7,7 +7,7 @@ rd /S /q %BUILD_FOLDER%
 mkdir %BUILD_FOLDER%
 
 cd %ENGINE_FOLDER%
-nasm -fwin32 -gcv8 %PROJECT_NAME%.asm -o %BUILD_FOLDER%\%PROJECT_NAME%.obj
+nasm -f win32 %PROJECT_NAME%.asm -o %BUILD_FOLDER%\%PROJECT_NAME%.obj   
 
 cd %BUILD_FOLDER%
 GoLink %PROJECT_NAME%.obj user32.dll kernel32.dll Gdi32.dll
