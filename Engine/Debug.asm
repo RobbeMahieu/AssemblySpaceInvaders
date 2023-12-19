@@ -19,7 +19,7 @@ buffer resb 50
 section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
-DebugRegister:
+DebugValue:
     enter 0,0
     
     push dword [ebp+8]
