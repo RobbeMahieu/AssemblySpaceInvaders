@@ -5,28 +5,29 @@
 
 ; Compiler directives and includes
 
-CPU x64                                                 ; Limit instructions to only x64 instructions
+cpu x64                                                 ; Limit instructions to only x64 instructions
 
 ; Includes
-%include "windows.inc" 
+%include "windows.inc"
+%include "./graphics.asm"
 
 ; Constants and Data
 
 WindowWidth equ 640                                     ; Window width constant
 WindowHeight equ 480                                    ; Window height constant
 
-SECTION .data
+section .data
 
 ClassName db "WindowClass", 0                           ; Window class name
 AppName db "Assembly Game", 0                           ; Window title
 
-SECTION .bss
+section .bss
 
 hInstance resd 1                                        ; Instance handle
 CommandLine resd 1                                      ; Pointer to the launching cmd
 
 ;-------------------------------------------------------------------------------------------------------------------
-SECTION .text                                           ; Program start
+section .text                                           ; Program start
 ;-------------------------------------------------------------------------------------------------------------------
 
 global START
@@ -44,7 +45,7 @@ START:
     push 0
     push dword [hInstance]
     call WinMain
-    add esp, 16                                         ; Clear parameters from stack
+    add esp, 16
 
     ; Put whatever WinMain returned on the stack and exit
     push eax
@@ -56,20 +57,20 @@ START:
 
 WinMain:
     ; Reserve local variables
-    ; [ebp-28] HWND
-    enter 4,0  
+    ; [ebp-4] HWND
+    enter 4, 0
 
     ; Initialization
     call InitWindow
 
-    CMP eax, 0                                          ; Check if window was successfully created
-    JE .WinMainReturn                                   ; Failed
+    cmp eax, 0                                          ; Check if window was successfully created
+    jz .WinMainReturn                                   ; Failed
     mov [ebp-4], eax                                    ; Move the window handle to the local variable
 
     push dword [ebp-4]                                  ; Force update the window UpdateWindow(HWND)
     call [UpdateWindow]
 
-    ; Update loop
+    ; UpdateLoop(HWND)
     push dword [ebp-4]
     call UpdateLoop
     add esp, 4
@@ -77,7 +78,7 @@ WinMain:
     ; Cleanup
     .WinMainReturn:
     leave
-    ret
+    ret 
 
 ;
 ; Init Window
@@ -87,6 +88,7 @@ InitWindow:
     ; Reserve local variables
     ; [ebp-48] WNDCLASSEX
     enter 48,0  
+    push ebx                                            ; Save registers
    
     ; Fill in WNDCLASSEX
     lea ebx, [ebp-48]                                   ; Load ebx with WNDCLASSEX struct address
@@ -131,6 +133,7 @@ InitWindow:
     push 0
     call [CreateWindowExA]                              ; HWND in eax
 
+    pop ebx                                             ; Restore registers
     leave
     ret
 
@@ -139,15 +142,15 @@ InitWindow:
 ;
 
 UpdateLoop:
-    ; Reserve local variables
-    ; [ebp-24] MSG
-    enter 24, 0
+    ; Local variables
+    ; [ebp-28] MSG
+    enter 28, 0
+    push ebx                                            ; Save registers
 
-    mov ecx, [esp+4]                                    ; Get HWND parameter
-    lea ebx, [ebp-24]                                   ; Cache message address in ebx
+    lea ebx, [ebp-28]                                   ; Cache message address in ebx
 
     .PeekMessage:
-    ; PeekMessage(MSG, HWND, 0, 0, remove msg)
+    ; PeekMessage(MSG, HWND, 0, 0, remove)
     push PM_REMOVE
     push 0
     push 0
@@ -170,12 +173,31 @@ UpdateLoop:
     JMP .PeekMessage
 
     .GameLoop:
-    NOP
+
+    ; Get HDC
+    ;call GetDC
+    ;mov [HDC], eax
+
+    ; Clear Screen
+    ;push 0                                              ; black
+    ;push WindowHeight
+    ;push WindowWidth
+    ;push 0
+    ;push 0
+    ;call FillRectangle
+    ;add esp, 20
+
+    ;push HDC
+    ;push dword [ebp]                                    ; HWND
+    ;call ReleaseDC
+
     JMP .PeekMessage
 
-    .UpdateLoopRet:                                  
+    .UpdateLoopRet:              
     mov eax, [ebx+08]                                   ; Save msg.wParam to eax
 
+
+    pop ebx                                             ; Restore registers
     leave
     ret
 
@@ -187,19 +209,16 @@ WndProc:
     enter 0, 0
 
     mov eax, [ebp+12]                                   ; Get second parameter
-    CMP eax, WM_DESTROY
-    JNE .NotWMDestroy                                    
+    cmp eax, WM_DESTROY
+    jne .NotWMDestroy                                    
 
     ; On WM_DESTROY
-    PUSH 0;
-    CALL [PostQuitMessage]
-    XOR eax, eax
+    push 0;
+    call [PostQuitMessage]
+    xor eax, eax
+    jmp .WndProcRet
 
-    leave
-    ret
-
-.NotWMDestroy:
-    
+    .NotWMDestroy:
     ; DefWindowProcA()
     push dword [ebp+20]
     push dword [ebp+16]
@@ -207,5 +226,6 @@ WndProc:
     push dword [ebp+08]
     call [DefWindowProcA]
 
+    .WndProcRet:
     leave
     ret
