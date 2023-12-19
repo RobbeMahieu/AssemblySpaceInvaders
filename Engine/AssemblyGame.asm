@@ -9,7 +9,8 @@ cpu x64                                                 ; Limit instructions to 
 
 ; Includes
 %include "windows.inc"
-%include "./graphics.asm"
+%include "./Graphics.asm"
+%include "./Debug.asm"
 
 ; Constants and Data
 
@@ -57,7 +58,9 @@ START:
 ;
 
 WinMain:
-    enter 0, 0
+    ; Local variables
+    ; [ebp-4] HWND
+    enter 40, 0
 
     ; Initialization
     call InitWindow
@@ -65,9 +68,6 @@ WinMain:
     cmp eax, 0                                          ; Check if window was successfully created
     jz .WinMainReturn                                   ; Failed
     mov [HWND], eax                                     ; Move the window handle to the local variable
-
-    push HWND                                           ; Force update the window UpdateWindow(HWND)
-    call [UpdateWindow]
 
     ; Update Loop
     call UpdateLoop
@@ -215,46 +215,47 @@ GameLoop:
     ; [ebp-8] Buffer bitmap
     ; [ebp-12] Previous bitmap
     ; [ebp-16] Screen HDC
-    enter 28,0
+    enter 16,0
+    push ebx
 
     ; GetDC(HWND)
-    push HWND                                           ; HWND
-    call GetDC
+    push dword [HWND]
+    call [GetDC]
     mov [ebp-16], eax                                   ; Cache HDC
 
     ; CreateCompatibleDC(HDC)
     push dword [ebp-16]
-    call CreateCompatibleDC
+    call [CreateCompatibleDC]
     mov [ebp-4], eax                                    ; Cache Buffer HDC
 
-    ; CreateCompatibleBitmap(HDC, width, height)        ; Create buffer image
-    ;push WindowHeight
-    ;push WindowWidth
-    ;push dword [ebp-16]
-    ;call CreateCompatibleBitmap                         
-    ;mov [ebp-8], eax                                    ; Cache buffer image
+    ; CreateCompatibleBitmap(HDC, width, height)         ; Create buffer image
+    push WindowHeight
+    push WindowWidth
+    push dword [ebp-16]
+    call [CreateCompatibleBitmap]                         
+    mov [ebp-8], eax                                    ; Cache buffer image
 
     ; SelectObject(DC, Object)                          ; Set current drawing bitmap
-    ;push dword [ebp-8]
-    ;push dword [ebp-4]
-    ;call SelectObject
-    ;mov [ebp-12], eax                                   ; Cache previous bitmap
+    push dword [ebp-8]
+    push dword [ebp-4]
+    call [SelectObject]
+    mov [ebp-12], eax                                   ; Cache previous bitmap
     
     ; Pass on current Drawing HDC
-    ;lea eax, [ebp-20]
-    ;mov [HDC], eax
+    mov eax, [ebp-4]
+    mov [HDC], eax
 
     ; Clear Screen
-    ;push 0x00555555                                              ; black
-    ;push WindowHeight
-    ;push WindowWidth
-    ;push 0
-    ;push 0
-    ;call FillRectangle
-    ;add esp, 20
+    push 0x00FF00FF                                     ; black
+    push WindowHeight
+    push WindowWidth
+    push 0
+    push 0
+    call FillRectangle
+    add esp, 20
 
     ; BitBlt(HDC, x, y, width, height, HDC2, x1, y1, mode); Swap buffer
-    push BLACKNESS
+    push SRCCOPY
     push 0
     push 0
     push dword [ebp-4]
@@ -263,22 +264,18 @@ GameLoop:
     push 0
     push 0
     push dword [ebp-16]
-    call BitBlt
-
-    ; SelectObject(DC, Object)                          ; Set previous drawing bitmap
-    ;push dword [ebp-12]
-    ;push dword [ebp-4]
-    ;call SelectObject
+    call [BitBlt]
 
     ; Clean up temp objects
-    ;push dword [ebp-8]                                  ; Delete buffer image
-    ;call DeleteObject   
+    push dword [ebp-8]                                  ; Delete buffer image
+    call [DeleteObject]  
     push dword [ebp-4]                                  ; Delete buffer DC
-    call DeleteDC                                       
+    call [DeleteDC]                                       
 
     push dword [ebp-16]                                 ; HDC
-    push HWND                                           ; HWND
-    call ReleaseDC
+    push dword [HWND]
+    call [ReleaseDC]
     
+    pop ebx
     leave
     ret
