@@ -246,7 +246,8 @@ GameLoop:
     mov [HDC], eax
 
     ; Clear Screen
-    push 0x00FF00FF                                     ; black
+    ; FillRectangle(x, y, width, height, color)
+    push COLOR_YELLOW                                    
     push WindowHeight
     push WindowWidth
     push 0
