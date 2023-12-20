@@ -185,6 +185,11 @@ UpdateLoop:
 ; WndProc Function
 ; 
 
+; WndProc(hwnd, message, wparam, lparam)
+; [ebp+8] hwnd
+; [ebp+12] message
+; [ebp+16] wparam
+; [ebp+20] lparam
 WndProc:
     enter 0, 0
 
@@ -218,7 +223,9 @@ WndProc:
     jmp .WndProcRet
 
     .OnKeyStroke:
-    call HandleInput
+    push dword [ebp+20]
+    call UpdateInput
+    add esp, 4
     jmp .WndProcRet
 
     .WndProcRet:
