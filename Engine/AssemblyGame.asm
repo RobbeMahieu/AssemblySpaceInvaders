@@ -11,6 +11,7 @@ cpu x64                                                 ; Limit instructions to 
 %include "windows.inc"
 %include "./Graphics.asm"
 %include "./Debug.asm"
+%include "./Input.asm"
 
 ; Constants and Data
 
@@ -188,22 +189,37 @@ WndProc:
     enter 0, 0
 
     mov eax, [ebp+12]                                   ; Get second parameter
-    cmp eax, WM_DESTROY
-    jne .NotWMDestroy                                    
 
-    ; On WM_DESTROY
-    push 0;
-    call [PostQuitMessage]
-    xor eax, eax
-    jmp .WndProcRet
+    cmp eax, WM_DESTROY                                 ; Check for WM_Destroy
+    je .OnWMDestroy                                    
 
-    .NotWMDestroy:
-    ; DefWindowProcA()
+    ; Check for keyboard input
+    cmp eax, WM_KEYDOWN
+    je .OnKeyStroke
+    cmp eax, WM_KEYUP
+    je .OnKeyStroke
+    cmp eax, WM_SYSKEYDOWN
+    je .OnKeyStroke
+    cmp eax, WM_SYSKEYUP
+    je .OnKeyStroke
+
+    ; DefWindowProcA()                                  ; Fallback
     push dword [ebp+20]
     push dword [ebp+16]
     push dword [ebp+12]
     push dword [ebp+08]
     call [DefWindowProcA]
+    jmp .WndProcRet
+
+    .OnWMDestroy:
+    push 0;
+    call [PostQuitMessage]
+    xor eax, eax
+    jmp .WndProcRet
+
+    .OnKeyStroke:
+    call HandleInput
+    jmp .WndProcRet
 
     .WndProcRet:
     leave
@@ -247,11 +263,19 @@ GameLoop:
 
     ; Clear Screen
     ; FillRectangle(x, y, width, height, color)
-    push COLOR_YELLOW                                    
+    push COLOR_BLACK                                    
     push WindowHeight
     push WindowWidth
     push 0
     push 0
+    call FillRectangle
+    add esp, 20
+
+    push COLOR_CYAN                                    
+    push 200
+    push 300
+    push 100
+    push 100
     call FillRectangle
     add esp, 20
 

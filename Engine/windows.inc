@@ -50,6 +50,10 @@ extern OutputDebugStringA
 
 %define WM_DESTROY      0x0002
 %define WM_QUIT         0x0012
+%define WM_KEYDOWN      0x0100
+%define WM_SYSKEYDOWN   0x0104
+%define WM_KEYUP        0x0101
+%define WM_SYSKEYUP     0x0105
 
 %define PM_REMOVE 1h
 
