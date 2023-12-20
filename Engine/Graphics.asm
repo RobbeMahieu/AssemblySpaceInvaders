@@ -93,3 +93,51 @@ FillRectangle:
 
     leave
     ret
+
+; DrawString(text, x, y, width, height, color)
+; [ebp+8] text
+; [ebp+12] x
+; [ebp+16] y
+; [ebp+20] width
+; [ebp+24] height
+; [ebp+28] color
+DrawString:
+    ; Local variables
+    ; [ebp-16] RECT
+    enter 16, 0
+    push ebx
+
+    ; Create rectangle
+    lea ebx, [ebp-16]                                   ; Cache rect address
+
+    mov eax, [ebp+12]
+    mov [ebx+0], eax                                    ; Fill left
+
+    add eax, [ebp+20]                                   ; Calculate right
+    mov [ebx+8], eax                                    ; Fill right
+    mov eax, [ebp+16]
+    mov [ebx+4], eax                                    ; Fill top
+    add eax, [ebp+24]                                   ; Calculate bottom
+    mov [ebx+12], eax                                   ; Fill bottom
+
+    ; SetTextColor(HDC, Color)
+    push dword [ebp+28]
+    push dword [HDC]
+    call SetTextColor
+
+    ; SetBkMode(HDC, mode)
+    push TRANSPARENT
+    push dword [HDC]
+    call SetBkMode
+
+    ; DrawText(HDC, text, length, rect, format)
+    push 0
+    push ebx
+    push -1
+    push dword [ebp+8]
+    push dword [HDC]
+    call DrawTextA
+
+    pop ebx
+    leave
+    ret

@@ -65,6 +65,7 @@ WinMain:
 
     ; Initialization
     call InitWindow
+    call InitInput
 
     cmp eax, 0                                          ; Check if window was successfully created
     jz .WinMainReturn                                   ; Failed

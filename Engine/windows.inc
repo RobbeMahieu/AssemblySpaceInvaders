@@ -26,6 +26,9 @@ extern DeleteDC
 extern SelectObject
 extern BitBlt
 extern OutputDebugStringA
+extern SetTextColor
+extern DrawTextA
+extern SetBkMode
 
 %define WNDCLASSEX_SIZE 48
 
@@ -59,5 +62,9 @@ extern OutputDebugStringA
 
 %define SRCCOPY         0x00CC0020
 %define BLACKNESS       0x00000042
+%define TRANSPARENT     1
+%define OPAQUE          2
 
 %define PS_SOLID 0
+
+%define DT_BOTTOM       0x00000008
