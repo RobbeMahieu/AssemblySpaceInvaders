@@ -37,18 +37,18 @@ LL_Create:
     ret
 
 ; LL_Delete(list)
-; [ebp-8] list
+; [ebp+8] list
 LL_Delete:
     enter 0, 0
     push ebx
+    push esi
 
-    mov ecx, [ebp-8]                                    ; Cache list base address
-
-    cmp dword [ecx + LinkedList.count], 0
+    mov esi, [ebp+8]                                    ; Cache list base address
+    cmp dword [esi + LinkedList.count], 0               ; Check if there are elements to clear
     jz .ElementsCleared
 
     ; Remove elements
-    mov eax, [ecx + LinkedList.start]                   ; Get first node address
+    mov eax, [esi + LinkedList.start]                   ; Get first node address
 
     .RemoveElement:
     mov ebx, [eax + Node.next]                          ; Cache the next address
@@ -67,11 +67,12 @@ LL_Delete:
 
     .ElementsCleared:
     ; Deallocate memory
-    push ecx
+    push esi
     push 0
     push dword [Heap]
     call HeapFree
 
+    pop esi
     pop ebx
     leave
     ret
@@ -90,15 +91,15 @@ LL_Add:
 
     ; Fill in node data
     mov ecx, [ebp-12]                                   ; Cache data base address
-    mov [eax + Node.data], ecx                          ; Store the data in the node
+    mov [eax + Node.content], ecx                          ; Store the data in the node
 
     ; Add it to the list
-    move edx, [ebp-8]                                   ; Cache list base address
+    mov edx, [ebp-8]                                    ; Cache list base address
     mov ecx, [edx + LinkedList.end]                     ; Cache ending address
     mov [edx + LinkedList.end], eax                     ; Update list ending address
-    add [edx + LinkedList.count], 1                     ; Increment count
+    add dword [edx + LinkedList.count], 1                     ; Increment count
 
-    cmp [edx + LinkedList.count]
+    cmp dword [edx + LinkedList.count], 0
     jz .Empty                                           ; Check if list is empty
 
     .NotEmpty:
