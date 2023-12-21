@@ -7,11 +7,15 @@
 %include "windows.inc"
 
 ; Constants and Data
+%define TARGET_FPS 30
+
 section .data
 PreviousTickCount dq 0
 CurrentTickCount  dq 0
 TickFrequency  dq 0
 ElapsedSec dd 0 
+CounterIncreasPerFrame dd 0
+SecConversionConst dd 1000000.0
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -26,6 +30,12 @@ InitTime:
 
     push TickFrequency                                  ; Store high performance clock frequency
     call QueryPerformanceFrequency
+
+    mov eax, [TickFrequency]                            ; Calculate counter increase per frame
+    mov edx, [TickFrequency+4]
+    mov ecx, TARGET_FPS
+    div ecx
+    mov [CounterIncreasPerFrame], eax
 
     leave
     ret
@@ -65,10 +75,7 @@ CalculateElapsedTime:
     push eax                                            ; Load the time to float register 0
     fild dword [esp]
     add esp, 4  
-    push ecx                                            ; Load divisor to float register 1
-    fild dword [esp]
-    add esp, 4
-    fdiv st0, st1                                       ; Convert time to seconds
+    fdiv dword [SecConversionConst]                     ; Convert time to µs
     fstp dword [ElapsedSec]                             ; Save the float to elapsedSec
 
     mov eax, [CurrentTickCount]                         ; Update previous value
@@ -76,5 +83,44 @@ CalculateElapsedTime:
     mov eax, [CurrentTickCount+4]
     mov [PreviousTickCount+4] , eax
 
+    leave
+    ret
+
+;
+; Calculate FPS
+;
+CalculateFPS:
+    ; Local variables
+    ; [ebp-4] Calculated FPS
+    enter 4, 0
+
+    fld1
+    fdiv dword [ElapsedSec]
+    fistp dword [ebp-4]
+    mov eax, dword [ebp-4]                              ; Store result in eax
+
+    leave
+    ret
+
+;
+; StallEOF
+;
+
+StallEOF:
+    enter 0, 0
+    push ebx
+
+    mov ebx, [CounterIncreasPerFrame]                   ; Calculate target tick count
+    add ebx, [CurrentTickCount]
+
+    .Stall:
+    push CurrentTickCount                               ; Get current tick count
+    call QueryPerformanceCounter
+
+    cmp [CurrentTickCount], ebx
+    jle .Stall
+
+    .EndStall:
+    pop ebx
     leave
     ret

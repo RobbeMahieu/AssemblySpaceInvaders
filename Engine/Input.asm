@@ -278,17 +278,29 @@ AddAction:
     ret
 
 MoveLeft:
-    enter 0, 0
+    ; Local variables
+    ; [ebp-4] Speed
+    enter 4, 0
 
-    add dword [Xpos], -5
+    mov dword [ebp-4], -50
+    fild dword [ebp-4]
+    fmul dword [ElapsedSec]
+    fadd dword [Xpos]
+    fstp dword [Xpos]
 
     leave
     ret
 
 MoveRight:
-    enter 0, 0
+    ; Local variables
+    ; [ebp-4] Speed
+    enter 4, 0
 
-    add dword [Xpos], 5
+    mov dword [ebp-4], 50
+    fild dword [ebp-4]
+    fmul dword [ElapsedSec]
+    fadd dword [Xpos]
+    fstp dword [Xpos]
 
     leave
     ret

@@ -23,7 +23,8 @@ section .data
 
 ClassName db "WindowClass", 0                           ; Window class name
 AppName db "Assembly Game", 0                           ; Window title
-Xpos dd 0                                                  ; Xpos (temp)
+Xpos dd 0                                               ; Xpos (temp)
+XposInt dd 0
 
 section .bss
 
@@ -185,7 +186,9 @@ UpdateLoop:
     JMP .PeekMessage
 
     .GameLoop:
+    call CalculateElapsedTime
     call GameLoop
+    ;call StallEOF
     JMP .PeekMessage
 
     .UpdateLoopRet:              
@@ -255,9 +258,6 @@ GameLoop:
     enter 16,0
     push ebx
 
-    ; Update ElapsedSec
-    call CalculateElapsedTime
-
     ; GetDC(HWND)
     push dword [HWND]
     call [GetDC]
@@ -298,13 +298,22 @@ GameLoop:
     ; Handle input
     call HandleInput
 
+    fld dword [Xpos]
+    fistp dword [XposInt]
+
     push COLOR_CYAN                                    
     push 200
     push 300
     push 100
-    push dword [Xpos]
+    push dword [XposInt]
     call FillRectangle
     add esp, 20
+
+    call CalculateFPS
+    push formatDecimal
+    push eax
+    call DebugPrintValue
+    add esp, 8
 
     ; BitBlt(HDC, x, y, width, height, HDC2, x1, y1, mode); Swap buffer
     push SRCCOPY
