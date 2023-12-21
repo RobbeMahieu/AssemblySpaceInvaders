@@ -32,7 +32,8 @@ DebugValue:
     push dword [ebp+8]
     push dword [ebp+12]
     push buffer
-    call wsprintfA 
+    call wsprintfA
+    add esp, 12 
 
     push 0                                              ; Style
     push caption                                        ; Caption
@@ -60,6 +61,7 @@ DebugPrintValue:
     push dword [ebp+12]
     push buffer
     call wsprintfA
+    add esp, 12
 
     ; DrawString(text, x, y, width, height, color)
     push COLOR_RED
