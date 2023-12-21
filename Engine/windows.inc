@@ -32,6 +32,8 @@ extern SetBkMode
 extern GetProcessHeap
 extern HeapAlloc
 extern HeapFree
+extern QueryPerformanceFrequency
+extern QueryPerformanceCounter
 
 %define WNDCLASSEX_SIZE 48
 

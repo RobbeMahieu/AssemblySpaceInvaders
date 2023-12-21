@@ -12,6 +12,7 @@ cpu x64                                                 ; Limit instructions to 
 %include "./Graphics.asm"
 %include "./Debug.asm"
 %include "./Input.asm"
+%include "./Time.asm"
 
 ; Constants and Data
 
@@ -68,6 +69,7 @@ WinMain:
     call GetProcessHeap
     mov [Heap], eax
 
+    call InitTime
     call InitInput
     call InitWindow
 
@@ -252,6 +254,9 @@ GameLoop:
     ; [ebp-16] Screen HDC
     enter 16,0
     push ebx
+
+    ; Update ElapsedSec
+    call CalculateElapsedTime
 
     ; GetDC(HWND)
     push dword [HWND]
