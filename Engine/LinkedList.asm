@@ -86,8 +86,8 @@ LL_Delete:
     ret
 
 ; LL_Add(list, data)
-; [ebp-8] list
-; [ebp-12] data
+; [ebp+8] list
+; [ebp+12] data
 LL_Add:
     enter 0, 0
     
@@ -98,24 +98,25 @@ LL_Add:
     call HeapAlloc                                      ; Return address in eax
 
     ; Fill in node data
-    mov ecx, [ebp-12]                                   ; Cache data base address
-    mov [eax + Node.content], ecx                          ; Store the data in the node
+    mov ecx, [ebp+12]                                   ; Cache data base address
+    mov [eax + Node.content], ecx                       ; Store the data in the node
 
     ; Add it to the list
-    mov edx, [ebp-8]                                    ; Cache list base address
+    mov edx, [ebp+8]                                    ; Cache list base address
     mov ecx, [edx + LinkedList.end]                     ; Cache ending address
+
     mov [edx + LinkedList.end], eax                     ; Update list ending address
-    add dword [edx + LinkedList.count], 1                     ; Increment count
+    add dword [edx + LinkedList.count], 1               ; Increment count
 
-    cmp dword [edx + LinkedList.count], 0
-    jz .Empty                                           ; Check if list is empty
+    cmp dword [edx + LinkedList.count], 1
+    je .Empty                                           ; Check if list is empty
 
-    .NotEmpty:
+    .NotEmpty:   
     mov [ecx + Node.next], eax                          ; Update last node address
     jmp .LL_AddRet
 
     .Empty:
-    mov [edx + LinkedList.start], eax                  ; Update list start address
+    mov [edx + LinkedList.start], eax                   ; Update list start address
     jmp .LL_AddRet
 
     .LL_AddRet:

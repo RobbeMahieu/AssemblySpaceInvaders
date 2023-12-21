@@ -29,6 +29,9 @@ extern OutputDebugStringA
 extern SetTextColor
 extern DrawTextA
 extern SetBkMode
+extern GetProcessHeap
+extern HeapAlloc
+extern HeapFree
 
 %define WNDCLASSEX_SIZE 48
 
@@ -68,3 +71,5 @@ extern SetBkMode
 %define PS_SOLID 0
 
 %define DT_BOTTOM       0x00000008
+
+%define HEAP_ZERO_MEMORY 0x00000008

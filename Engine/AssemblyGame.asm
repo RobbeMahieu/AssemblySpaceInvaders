@@ -22,12 +22,14 @@ section .data
 
 ClassName db "WindowClass", 0                           ; Window class name
 AppName db "Assembly Game", 0                           ; Window title
+Xpos dd 0                                                  ; Xpos (temp)
 
 section .bss
 
 hInstance resd 1                                        ; Instance handle
 CommandLine resd 1                                      ; Pointer to the launching cmd
 HWND resd 1                                             ; Window handle
+Heap resd 1                                             ; Heap handle
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Program start
@@ -59,13 +61,15 @@ START:
 ;
 
 WinMain:
-    ; Local variables
-    ; [ebp-4] HWND
-    enter 40, 0
+    enter 0, 0
+    push ebx
 
     ; Initialization
-    call InitWindow
+    call GetProcessHeap
+    mov [Heap], eax
+
     call InitInput
+    call InitWindow
 
     cmp eax, 0                                          ; Check if window was successfully created
     jz .WinMainReturn                                   ; Failed
@@ -73,9 +77,16 @@ WinMain:
 
     ; Update Loop
     call UpdateLoop
+    mov ebx, eax                                        ; Cache msg loop value
 
     ; Cleanup
     .WinMainReturn:
+    call InputCleanup
+
+    mov eax, ebx                                        ; Return msg loop value
+
+    pop ebx
+
     leave
     ret 
 
@@ -279,11 +290,14 @@ GameLoop:
     call FillRectangle
     add esp, 20
 
+    ; Handle input
+    call HandleInput
+
     push COLOR_CYAN                                    
     push 200
     push 300
     push 100
-    push 100
+    push dword [Xpos]
     call FillRectangle
     add esp, 20
 
