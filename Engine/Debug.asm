@@ -25,6 +25,9 @@ section .text                                           ; Code
 ; [ebp+12] format
 DebugValue:
     enter 0,0
+    push eax
+    push ecx
+    push edx
     
     push dword [ebp+8]
     push dword [ebp+12]
@@ -37,6 +40,9 @@ DebugValue:
     push 0                                              ; hWnd     
     call MessageBoxA
 
+    pop edx
+    pop ecx
+    pop eax
     leave
     ret
 
@@ -45,6 +51,9 @@ DebugValue:
 ; [ebp+12] format
 DebugPrintValue:
     enter 0, 0
+    push eax
+    push ecx
+    push edx
 
     ; Create string
     push dword [ebp+8]
@@ -62,5 +71,8 @@ DebugPrintValue:
     call DrawString
     add esp, 24
 
+    pop edx
+    pop ecx
+    pop eax
     leave
     ret
