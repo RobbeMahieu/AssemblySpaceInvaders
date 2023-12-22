@@ -26,9 +26,10 @@ PreviousInputState resb 32
 Actions resd 1
 
 struc Action
-    .keycode:   resd 1
-    .state:     resd 1
-    .callback:  resd 1
+    .keycode:       resd 1
+    .state:         resd 1
+    .callback:      resd 1
+    .callbackData:  resd 1
 endstruc
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -210,7 +211,9 @@ HandleInput:
     je .ActionTriggered
 
     .ActionTriggered:
+    push dword [esi + Action.callbackData]
     call [esi + Action.callback]
+    add esp, 4
 
     .LoadNextNode:
     mov ebx, [ebx + Node.next]
@@ -243,10 +246,11 @@ HandleInput:
     ret
 
 ;
-; UpdateInput(Keyscode, state, &callback)
-; [ebp+8] Keyscode
+; AddAction(Keycode, state, &callback, &callbackData)
+; [ebp+8] Keycode
 ; [ebp+12] Keystate
 ; [ebp+16] Callback
+; [ebp+20] CallbackData
 ;
 
 AddAction:
@@ -265,6 +269,8 @@ AddAction:
     mov [ebx + Action.state], eax                       ; Fill in state
     mov eax, [ebp+16]
     mov [ebx + Action.callback], eax                    ; Fill in callback
+    mov eax, [ebp+20]
+    mov [ebx + Action.callbackData], eax                ; Fill in callbackData
 
     ; LL_Add(&list, &data)                              ; Add it to the list
     push ebx

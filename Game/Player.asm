@@ -33,6 +33,7 @@ section .text                                           ; Code
 CreatePlayer:
     enter 0, 0
     push ebx
+    push esi
 
     push Player_size                                    ; Create player struct
     call [MemoryAlloc]
@@ -57,23 +58,29 @@ CreatePlayer:
     push ebx
     call CreateGameObject
     add esp, 16
-    mov ebx, eax                                        ; Cache gameobject address
+    mov esi, eax                                        ; Cache gameobject address
 
     ; Additional Setup
+
+    ; AddAction(key, state, callback, data)
+    push ebx
     push MoveLeft
     push dword [HOLD]
     push dword [KEY_A]
-    ;call [AddAction]
-    add esp, 12
+    call [AddAction]
+    add esp, 16
 
+    ; AddAction(key, state, callback, data)
+    push ebx
     push MoveRight
     push dword [HOLD]
     push dword [KEY_D]
-    ;call [AddAction]
-    add esp, 12
+    call [AddAction]
+    add esp, 16
 
-    mov eax, ebx                                        ; Return gameobject address
+    mov eax, esi                                        ; Return gameobject address
 
+    pop esi
     pop ebx
     leave
     ret
