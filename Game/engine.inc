@@ -42,6 +42,13 @@ extern LL_Create
 extern LL_Delete
 extern LL_Add
 
+%define LinkedList.start 0
+%define LinkedList.end 4
+%define LinkedList.count 8
+
+%define Node.content 0
+%define Node.next 4
+
 ; Time
 extern CalculateFPS
 extern GetElapsed

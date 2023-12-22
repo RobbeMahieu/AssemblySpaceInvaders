@@ -22,7 +22,7 @@ section .data
 AppName db "Space Invaders", 0                          ; Window title
 
 section .bss
-Player resd 1                                           ; Player
+Scene resd 1                                            ; List of gameobjects
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Program start
@@ -40,6 +40,10 @@ START:
     call [LoadEngine]
     add esp, 20
 
+    ; Create actions linked list
+    call [LL_Create]
+    mov dword [Scene], eax
+
     ; CreateGameObject(&init, &update, &render, &destroy)
     push PlayerDestroy
     push PlayerRender
@@ -47,12 +51,39 @@ START:
     push PlayerInit
     call CreateGameObject
     add esp, 16
-    mov dword [Player], eax                             ; Cache player address
+
+    ; Add it to the scene
+    push eax                                            
+    push dword [Scene]
+    call LL_Add
+    add esp, 8
 
     call [RunEngine]
+    push eax                                            ; Put return message on the stack
 
-    mov eax, dword [Player]
-    call dword [eax + Gameobject.destroy]
+    ; Clean up scene
+    mov ebx, [Scene]
+    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
+
+    .NextNode:
+    cmp ebx, 0
+    jz .FinishedList
+
+    ; Load node
+    mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
+    call [esi + Gameobject.destroy]                     ; Call the destroy function
+
+    .LoadNextNode:
+    mov ebx, [ebx + Node.next]
+    jmp .NextNode
+
+    .FinishedList:
+    ; Delete the scene
+    push dword [Scene]                          
+    call LL_Delete
+    add esp, 4
+
+    pop eax                                             ; Get message back from the stack
 
     call [CleanupEngine]
 
@@ -63,10 +94,23 @@ START:
 Update:
     enter 0, 0
 
+    ; Update the scene
+    mov ebx, [Scene]
+    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
 
-    mov eax, dword [Player]
-    call dword [eax + Gameobject.update]
+    .NextNode:
+    cmp ebx, 0
+    jz .FinishedList
 
+    ; Load node
+    mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
+    call [esi + Gameobject.update]                      ; Call the update function
+
+    .LoadNextNode:
+    mov ebx, [ebx + Node.next]
+    jmp .NextNode
+
+    .FinishedList:
     leave
     ret
 
@@ -77,9 +121,25 @@ Update:
 Render:
     enter 0, 0
 
-    mov eax, dword [Player]
-    call dword [eax + Gameobject.render]
+    ; Render the scene
+    mov ebx, [Scene]
+    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
 
+    .NextNode:
+    cmp ebx, 0
+    jz .FinishedList
+
+    ; Load node
+    mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
+    call [esi + Gameobject.render]                      ; Call the render function
+
+    .LoadNextNode:
+    mov ebx, [ebx + Node.next]
+    jmp .NextNode
+
+    .FinishedList:
+
+    ; Debug FPS
     call [CalculateFPS]
     push dword [formatDecimal]
     push eax

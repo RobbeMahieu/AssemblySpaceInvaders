@@ -10,8 +10,8 @@
 
 struc LinkedList
     .start resd 1
-    .count resd 1
     .end resd 1
+    .count resd 1
 endstruc
 
 struc Node
