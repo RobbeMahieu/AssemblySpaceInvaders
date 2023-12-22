@@ -65,19 +65,6 @@ InitInput:
     call LL_Create
     mov dword [Actions], eax
 
-    ; Testing
-    push MoveLeft
-    push HOLD
-    push KEY_A
-    call AddAction
-    add esp, 12
-
-    push MoveRight
-    push HOLD
-    push KEY_D
-    call AddAction
-    add esp, 12
-
     leave
     ret
 
@@ -287,33 +274,5 @@ AddAction:
     add esp, 8
 
     pop ebx
-    leave
-    ret
-
-MoveLeft:
-    ; Local variables
-    ; [ebp-4] Speed
-    enter 4, 0
-
-    mov dword [ebp-4], -50
-    fild dword [ebp-4]
-    fmul dword [ElapsedSec]
-    fadd dword [Xpos]
-    fstp dword [Xpos]
-
-    leave
-    ret
-
-MoveRight:
-    ; Local variables
-    ; [ebp-4] Speed
-    enter 4, 0
-
-    mov dword [ebp-4], 50
-    fild dword [ebp-4]
-    fmul dword [ElapsedSec]
-    fadd dword [Xpos]
-    fstp dword [Xpos]
-
     leave
     ret

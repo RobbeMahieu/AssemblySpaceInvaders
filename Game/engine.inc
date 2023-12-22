@@ -41,4 +41,4 @@ extern LL_Add
 
 ; Time
 extern CalculateFPS
-extern ElapsedSec
+extern GetElapsed

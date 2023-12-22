@@ -24,8 +24,6 @@ section .data
 AppName dd 0                                            ; Window Title Pointer
 WindowWidth dd 200                                      ; Window width constant
 WindowHeight dd 200                                     ; Window height constant
-Xpos dd 0                                               ; Xpos (temp)
-XposInt dd 0
 
 section .bss
 
@@ -34,15 +32,20 @@ CommandLine resd 1                                      ; Pointer to the launchi
 HWND resd 1                                             ; Window handle
 Heap resd 1                                             ; Heap handle
 
+GameUpdateFunction resd 1                               ; Game update function
+GameRenderFunction resd 1                               ; Game render function
+
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Program start
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; LoadEngine(&name, width, height)
+; LoadEngine(&name, width, height, &update, &render)
 ; [ebp+8] name
 ; [ebp+12] width
 ; [ebp+16] height
+; [ebp+20] update function
+; [ebp+24] render function 
 ;
 
 LoadEngine:
@@ -54,6 +57,10 @@ LoadEngine:
     mov [WindowWidth], eax
     mov eax, [ebp+16]                                   ; Set window height
     mov [WindowHeight], eax
+    mov eax, dword [ebp+20]                             ; Cache update function
+    mov [GameUpdateFunction], eax
+    mov eax, dword [ebp+24]                             ; Cache render function
+    mov [GameRenderFunction], eax
 
     push 0                                              ; Get instance handle of our app (0 = this)
     call [GetModuleHandleA]                             ; Return value in eax
@@ -303,27 +310,10 @@ GameLoop:
     call FillRectangle
     add esp, 20
 
-    ; Handle input
-    call HandleInput
-
-    ; Update game
-    fld dword [Xpos]
-    fistp dword [XposInt]
-
-    ; Render game
-    push COLOR_CYAN                                    
-    push 200
-    push 300
-    push 100
-    push dword [XposInt]
-    call FillRectangle
-    add esp, 20
-
-    call CalculateFPS
-    push formatDecimal
-    push eax
-    call DebugPrintValue
-    add esp, 8
+    
+    call HandleInput                                    ; Handle input
+    call dword [GameUpdateFunction]                     ; Update game
+    call dword [GameRenderFunction]                     ; Render game
 
     ; BitBlt(HDC, x, y, width, height, HDC2, x1, y1, mode); Swap buffer
     push SRCCOPY

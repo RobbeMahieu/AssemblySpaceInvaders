@@ -41,6 +41,17 @@ InitTime:
     ret
 
 ;
+; GetElapsed
+;
+GetElapsed:
+    enter 0, 0
+
+    mov eax, dword [ElapsedSec]
+
+    leave
+    ret
+
+;
 ; CalculateElapsedTime
 ; 
 

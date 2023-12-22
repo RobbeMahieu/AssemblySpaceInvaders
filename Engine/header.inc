@@ -69,5 +69,5 @@ export LL_Add
 ; Time
 global CalculateFPS
 export CalculateFPS
-global ElapsedSec
-export ElapsedSec
+global GetElapsed
+export GetElapsed
