@@ -17,7 +17,7 @@ WindowHeight equ 480                                    ; Window height constant
 
 section .data
 
-AppName db "Space Invaders", 0                           ; Window title
+AppName db "Space Invaders", 0                         ; Window title
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Program start
@@ -26,6 +26,11 @@ section .text                                           ; Program start
 global START
 START:
 
+    ; LoadEngine(name, width, height)
+    push WindowHeight
+    push WindowWidth
+    push AppName
     call LoadEngine
+
     call RunEngine
     call CleanupEngine

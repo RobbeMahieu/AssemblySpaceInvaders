@@ -19,12 +19,11 @@ cpu x64                                                 ; Limit instructions to 
 
 ; Constants and Data
 
-WindowWidth equ 640                                     ; Window width constant
-WindowHeight equ 480                                    ; Window height constant
-
 section .data
 
-AppName db "Test", 0
+AppName dd 0                                            ; Window Title Pointer
+WindowWidth dd 200                                      ; Window width constant
+WindowHeight dd 200                                     ; Window height constant
 Xpos dd 0                                               ; Xpos (temp)
 XposInt dd 0
 
@@ -39,8 +38,20 @@ Heap resd 1                                             ; Heap handle
 section .text                                           ; Program start
 ;-------------------------------------------------------------------------------------------------------------------
 
+
+; LoadEngine(name, width, height)
+; [ebp+8] name
+; [ebp+12] width
+; [ebp+16] height
 LoadEngine:
     enter 0, 0
+
+    mov eax, [ebp+8]                                    ; Set window title
+    mov [AppName], eax
+    mov eax, [ebp+12]                                   ; Set window width
+    mov [WindowWidth], eax
+    mov eax, [ebp+16]                                   ; Set window height
+    mov [WindowHeight], eax
 
     push 0                                              ; Get instance handle of our app (0 = this)
     call [GetModuleHandleA]                             ; Return value in eax
@@ -83,7 +94,8 @@ InitWindow:
 
     mov dword [ebx+32], 0                               ; Background color
     mov dword [ebx+36], 0                               ; App menu
-    mov dword [ebx+40], AppName                         ; Class Name
+    mov eax, dword [AppName]
+    mov dword [ebx+40], eax                             ; Class Name
 
     push IDI_APPLICATION                                ; Load default icon
     push 0
@@ -105,13 +117,13 @@ InitWindow:
     push hInstance
     push 0
     push 0
-    push WindowHeight
-    push WindowWidth
+    push dword [WindowHeight]
+    push dword [WindowWidth]
     push CW_USEDEFAULT
     push CW_USEDEFAULT
     push WS_OVERLAPPEDWINDOW + WS_VISIBLE
-    push AppName
-    push AppName
+    push dword [AppName]
+    push dword [AppName]
     push 0
     call [CreateWindowExA]                              ; HWND in eax
 
@@ -253,8 +265,8 @@ GameLoop:
     mov [ebp-4], eax                                    ; Cache Buffer HDC
 
     ; CreateCompatibleBitmap(HDC, width, height)         ; Create buffer image
-    push WindowHeight
-    push WindowWidth
+    push dword [WindowHeight]
+    push dword [WindowWidth]
     push dword [ebp-16]
     call [CreateCompatibleBitmap]                         
     mov [ebp-8], eax                                    ; Cache buffer image
@@ -272,8 +284,8 @@ GameLoop:
     ; Clear Screen
     ; FillRectangle(x, y, width, height, color)
     push COLOR_BLACK                                    
-    push WindowHeight
-    push WindowWidth
+    push dword [WindowHeight]
+    push dword [WindowWidth]
     push 0
     push 0
     call FillRectangle
@@ -304,8 +316,8 @@ GameLoop:
     push 0
     push 0
     push dword [ebp-4]
-    push WindowHeight
-    push WindowWidth
+    push dword [WindowHeight]
+    push dword [WindowWidth]
     push 0
     push 0
     push dword [ebp-16]
