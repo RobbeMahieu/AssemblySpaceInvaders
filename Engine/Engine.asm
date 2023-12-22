@@ -38,11 +38,13 @@ Heap resd 1                                             ; Heap handle
 section .text                                           ; Program start
 ;-------------------------------------------------------------------------------------------------------------------
 
-
-; LoadEngine(name, width, height)
+;
+; LoadEngine(&name, width, height)
 ; [ebp+8] name
 ; [ebp+12] width
 ; [ebp+16] height
+;
+
 LoadEngine:
     enter 0, 0
 
@@ -61,27 +63,29 @@ LoadEngine:
     mov [CommandLine], eax                              ; cache the value to CommandLine
 
     ; Initialization
-    call GetProcessHeap
+    call GetProcessHeap                                 ; Get the heap handle
     mov [Heap], eax
 
-    call InitTime
-    call InitInput
+    call InitTime                                       ; Initialize time module
+    call InitInput                                      ; Initialize input module
 
-    call InitWindow
+    call InitWindow                                     ; Create the window
     mov [HWND], eax                                     ; Move the window handle to the local variable
 
     leave
     ret 
 
 ;
-; Init Window
+; InitWindow()
+; 
+; eax => Window handle
 ;
 
 InitWindow:
-    ; Reserve local variables
+    ; Local variables
     ; [ebp-48] WNDCLASSEX
     enter 48,0  
-    push ebx                                            ; Save registers
+    push ebx
    
     ; Fill in WNDCLASSEX
     lea ebx, [ebp-48]                                   ; Load ebx with WNDCLASSEX struct address
@@ -112,7 +116,7 @@ InitWindow:
     push ebx                                            ; Register the window
     call [RegisterClassExA]                 
 
-    ; CreateWindowEx(0, ClassName, Title, Window style, x, y, width, height, parentHandle, menuHandle, hInstance, NULL)
+    ; CreateWindowEx(0, &ClassName, &Title, Window style, x, y, width, height, parentHandle, menuHandle, &hInstance, NULL)
     push 0
     push hInstance
     push 0
@@ -127,24 +131,31 @@ InitWindow:
     push 0
     call [CreateWindowExA]                              ; HWND in eax
 
+    cmp eax, 0                                          ; Is window creation successful?
+    jne .WindowSuccess                                  ; eax != 0 is success
+    call CleanupEngine                                  ; Window not correctly created
+
+    .WindowSuccess:
     pop ebx                                             ; Restore registers
     leave
     ret
 
 ;
-; RunEngine
+; RunEngine()
+;
+; eax => last message wparam
 ;
 
 RunEngine:
     ; Local variables
     ; [ebp-28] MSG
     enter 28, 0
-    push ebx                                            ; Save registers
+    push ebx
 
     lea ebx, [ebp-28]                                   ; Cache message address in ebx
 
     .PeekMessage:
-    ; PeekMessage(MSG, HWND, 0, 0, remove)
+    ; PeekMessage(&MSG, HWND, 0, 0, remove)
     push PM_REMOVE
     push 0
     push 0
@@ -159,15 +170,15 @@ RunEngine:
     cmp dword [ebx+4], WM_QUIT                          ; Message == WM_QUIT => Done
     je .UpdateLoopRet
 
-    push ebx                                            ; TranslateMessage(MSG)
+    push ebx                                            ; TranslateMessage(&MSG)
     call [TranslateMessage]
-    push ebx                                            ; DispatchMessage(MSG)
+    push ebx                                            ; DispatchMessage(&MSG)
     call [DispatchMessageA]
 
     JMP .PeekMessage
 
     .GameLoop:
-    call CalculateElapsedTime
+    call CalculateElapsedTime                           ; Set the elapsedSec for this frame
     call GameLoop
     ;call LockFramerate                                  ; Locks the framerate to the target value
     JMP .PeekMessage
@@ -195,14 +206,13 @@ CleanupEngine:
 
 
 ;
-; WndProc Function
-; 
-
 ; WndProc(hwnd, message, wparam, lparam)
 ; [ebp+8] hwnd
 ; [ebp+12] message
 ; [ebp+16] wparam
 ; [ebp+20] lparam
+;
+
 WndProc:
     enter 0, 0
 
@@ -236,7 +246,7 @@ WndProc:
     jmp .WndProcRet
 
     .OnKeyStroke:
-    push dword [ebp+20]
+    push dword [ebp+20]                                 ; UpdateInput(Keystroke)
     call UpdateInput
     add esp, 4
     jmp .WndProcRet
@@ -244,6 +254,10 @@ WndProc:
     .WndProcRet:
     leave
     ret
+
+;
+; GameLoop()
+;
 
 GameLoop:
     ; Local variables
@@ -254,17 +268,15 @@ GameLoop:
     enter 16,0
     push ebx
 
-    ; GetDC(HWND)
-    push dword [HWND]
+    push dword [HWND]                                   ; GetDC(HWND)
     call [GetDC]
     mov [ebp-16], eax                                   ; Cache HDC
 
-    ; CreateCompatibleDC(HDC)
-    push dword [ebp-16]
+    push dword [ebp-16]                                 ; CreateCompatibleDC(HDC)
     call [CreateCompatibleDC]
     mov [ebp-4], eax                                    ; Cache Buffer HDC
 
-    ; CreateCompatibleBitmap(HDC, width, height)         ; Create buffer image
+    ; CreateCompatibleBitmap(HDC, width, height)        ; Create buffer image
     push dword [WindowHeight]
     push dword [WindowWidth]
     push dword [ebp-16]
@@ -294,9 +306,11 @@ GameLoop:
     ; Handle input
     call HandleInput
 
+    ; Update game
     fld dword [Xpos]
     fistp dword [XposInt]
 
+    ; Render game
     push COLOR_CYAN                                    
     push 200
     push 300

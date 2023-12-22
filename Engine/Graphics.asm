@@ -24,12 +24,15 @@ HDC resd 1
 section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
+;
 ; FillRectangle(x, y, width, height, color)
 ; [ebp+8] x
 ; [ebp+12] y
 ; [ebp+16] width
 ; [ebp+20] height
 ; [ebp+24] color
+;
+
 FillRectangle:
     ; Local variables
     ; [ebp-4] Brush
@@ -94,13 +97,16 @@ FillRectangle:
     leave
     ret
 
-; DrawString(text, x, y, width, height, color)
+;
+; DrawString(&text, x, y, width, height, color)
 ; [ebp+8] text
 ; [ebp+12] x
 ; [ebp+16] y
 ; [ebp+20] width
 ; [ebp+24] height
 ; [ebp+28] color
+;
+
 DrawString:
     ; Local variables
     ; [ebp-16] RECT
@@ -130,7 +136,7 @@ DrawString:
     push dword [HDC]
     call SetBkMode
 
-    ; DrawText(HDC, text, length, rect, format)
+    ; DrawText(HDC, &text, length, &rect, &format)
     push 0
     push ebx
     push -1

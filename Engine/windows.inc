@@ -25,7 +25,7 @@ extern CreateCompatibleBitmap
 extern DeleteDC
 extern SelectObject
 extern BitBlt
-extern OutputDebugStringA
+extern wsprintfA
 extern SetTextColor
 extern DrawTextA
 extern SetBkMode

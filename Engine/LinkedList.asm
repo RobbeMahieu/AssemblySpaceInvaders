@@ -23,11 +23,16 @@ endstruc
 section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
-; Return address of created list in eax
+;
+; LL_Create()
+; 
+; eax => address of the created list
+;
+
 LL_Create:
     enter 0, 0
 
-    ; Allocate memory
+    ; HeapAlloc(Heap, settings, size)                   ; Allocate memory
     push LinkedList_size
     push HEAP_ZERO_MEMORY
     push dword [Heap]
@@ -36,8 +41,11 @@ LL_Create:
     leave
     ret
 
-; LL_Delete(list)
+;
+; LL_Delete(&list)
 ; [ebp+8] list
+;
+
 LL_Delete:
     enter 0, 0
     push ebx
@@ -54,13 +62,13 @@ LL_Delete:
     .RemoveElement:
     mov ebx, [edi + Node.next]                          ; Cache the next address
 
-    ; Deallocate data
+    ; HeapFree(Heap, setttings, &data)                  ; Deallocate data
     push dword [edi + Node.content]
     push 0
     push dword [Heap]
     call HeapFree
 
-    ; Deallocate data
+    ; HeapFree(Heap, setttings, &data)                  ; Deallocate node
     push edi
     push 0
     push dword [Heap]
@@ -73,7 +81,7 @@ LL_Delete:
     jmp .RemoveElement
 
     .ElementsCleared:
-    ; Deallocate memory
+    ; HeapFree(Heap, setttings, &data)                  ; Deallocate list
     push esi
     push 0
     push dword [Heap]
@@ -84,14 +92,16 @@ LL_Delete:
     pop ebx
     leave
     ret
-
-; LL_Add(list, data)
+;
+; LL_Add(&list, &data)
 ; [ebp+8] list
 ; [ebp+12] data
+;
+
 LL_Add:
     enter 0, 0
     
-    ; Create the node
+    ; HeapAlloc(heap, settings, size)                   ; Create the node
     push Node_size
     push HEAP_ZERO_MEMORY
     push dword [Heap]

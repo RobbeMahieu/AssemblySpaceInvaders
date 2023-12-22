@@ -59,7 +59,7 @@ CalculateElapsedTime:
     sub eax, esi                                        ; Subtract 64 bit number
     sbb edx, edi                                        ; edx:eax contains difference
 
-    mov ecx, 1000000                                    ; Store divisor in ecx
+    mov ecx, 1000000                                    ; Store multiplier in ecx
     mov edi, edx                                        ; Copy highest part to edi
     mul ecx                                             ; Convert lowest to µs
     mov esi, eax                                        ; Save part result
@@ -89,6 +89,9 @@ CalculateElapsedTime:
 ;
 ; Calculate FPS
 ;
+; eax => Calculated FPS
+;
+
 CalculateFPS:
     ; Local variables
     ; [ebp-4] Calculated FPS

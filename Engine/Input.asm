@@ -35,6 +35,10 @@ endstruc
 section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
+;
+; InitInput
+;
+
 InitInput:
     enter 0, 0
 
@@ -80,15 +84,17 @@ InitInput:
 InputCleanup:
     enter 0, 0
 
-    push dword [Actions]
+    push dword [Actions]                                ; LL_Delete(&list)
     call LL_Delete
     add esp, 4
 
     leave
     ret
-
+;
 ; UpdateInput(Keystroke)
 ; [ebp+8] Keystroke
+;
+
 UpdateInput:
     enter 0, 0
     push ebx
@@ -114,14 +120,14 @@ UpdateInput:
     cmp edx, 0
     jz .DoneShifting
 
-    shl ecx, 1                                       
-    shl ebx, 1 
+    shl ecx, 1                                          ; Shift state
+    shl ebx, 1                                          ; Shift mask
 
     sub edx, 1
     jmp .ShiftBits
 
     .DoneShifting:                                      ; Save the state
-    lea edx, [CurrentInputState+ eax]                   ; store address
+    lea edx, [CurrentInputState+ eax]                   ; Store address
 
     xor ebx, 0xFFFFFFFF                                 ; Invert bitmask (keep everything but the bit)
     and dword [edx], ebx                                ; Unset bit
@@ -131,6 +137,10 @@ UpdateInput:
     pop ebx
     leave
     ret
+
+;
+; HandleInput()
+;
 
 HandleInput:
     ; Local variables
@@ -245,10 +255,13 @@ HandleInput:
     leave
     ret
 
-; UpdateInput(Keyscode, state, callback)
+;
+; UpdateInput(Keyscode, state, &callback)
 ; [ebp+8] Keyscode
 ; [ebp+12] Keystate
 ; [ebp+16] Callback
+;
+
 AddAction:
     enter 0, 0
     push ebx
@@ -261,13 +274,13 @@ AddAction:
     mov ebx, eax                                          ; Cache given memory address
 
     mov eax, [ebp+8]
-    mov [ebx + Action.keycode], eax                       ; Fill in keycode
+    mov [ebx + Action.keycode], eax                     ; Fill in keycode
     mov eax, [ebp+12]
-    mov [ebx + Action.state], eax                         ; Fill in state
+    mov [ebx + Action.state], eax                       ; Fill in state
     mov eax, [ebp+16]
-    mov [ebx + Action.callback], eax                      ; Fill in callback
+    mov [ebx + Action.callback], eax                    ; Fill in callback
 
-    ; Add it to the list
+    ; LL_Add(&list, &data)                              ; Add it to the list
     push ebx
     push dword [Actions]
     call LL_Add
