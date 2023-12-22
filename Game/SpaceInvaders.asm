@@ -35,24 +35,24 @@ START:
     push WindowHeight
     push WindowWidth
     push AppName
-    call LoadEngine
+    call [LoadEngine]
     add esp, 20
 
     ; Testing
     push MoveLeft
     push dword [HOLD]
     push dword [KEY_A]
-    call AddAction
+    call [AddAction]
     add esp, 12
 
     push MoveRight
     push dword [HOLD]
     push dword [KEY_D]
-    call AddAction
+    call [AddAction]
     add esp, 12
 
-    call RunEngine
-    call CleanupEngine
+    call [RunEngine]
+    call [CleanupEngine]
 
 ;
 ; Update()
@@ -62,12 +62,7 @@ Update:
     enter 0, 0
 
     fld dword [Xpos]
-    fist dword [XposInt]
-
-    push dword [formatHex]
-    push dword [Xpos]
-    call DebugPrintValue
-    add esp, 8
+    fistp dword [XposInt]
 
     leave
     ret
@@ -84,14 +79,14 @@ Render:
     push 300
     push 100
     push dword [XposInt]
-    call FillRectangle
+    call [FillRectangle]
     add esp, 20
 
-    ;call CalculateFPS
-    ;push dword [formatDecimal]
-    ;push eax
-    ;call DebugPrintValue
-    ;add esp, 8
+    call [CalculateFPS]
+    push dword [formatDecimal]
+    push eax
+    call [DebugPrintValue]
+    add esp, 8
 
     leave
     ret
@@ -104,7 +99,7 @@ MoveLeft:
     mov dword [ebp-4], -50
     fild dword [ebp-4]
 
-    call GetElapsed
+    call [GetElapsed]
     mov [ebp-4], eax
 
     fmul dword [ebp-4]
@@ -122,7 +117,7 @@ MoveRight:
     mov dword [ebp-4], 50
     fild dword [ebp-4]
 
-    call GetElapsed
+    call [GetElapsed]
     mov [ebp-4], eax
 
     fmul dword [ebp-4]
