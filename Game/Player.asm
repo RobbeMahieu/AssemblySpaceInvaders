@@ -7,77 +7,125 @@
 %include "engine.inc"
 
 ; Constants and Data
-PlayerSpeed equ 50                                      ; Speed
-
-section .data
-Xpos dd 0.0                                             ; Xpos
-Ypos dd 100.0                                           ; Ypos
-Width dd 300                                            ; Player width
-Height dd 200                                           ; Player height
+struc Player
+    .Xpos resd 1
+    .Ypos resd 1
+    .Width resd 1
+    .Height resd 1
+    .Speed resd 1
+endstruc
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; PlayerInit()
+; CreatePlayer(x,y,width, height, speed)
+; [ebp+8] x
+; [ebp+12] y
+; [ebp+16] width
+; [ebp+20] height
+; [ebp+24] speed
+; 
+; eax => Gameobject address
 ;
 
-PlayerInit:
+CreatePlayer:
     enter 0, 0
+    push ebx
 
+    push Player_size                                    ; Create player struct
+    call [MemoryAlloc]
+    mov ebx, eax
+
+    ; Fill in fields
+    mov eax, [ebp+8]                                    
+    mov [ebx + Player.Xpos], eax                        ; Xpos
+    mov eax, [ebp+12]                                    
+    mov [ebx + Player.Ypos], eax                        ; Ypos
+    mov eax, [ebp+16]                                    
+    mov [ebx + Player.Width], eax                       ; Width
+    mov eax, [ebp+20]                                    
+    mov [ebx + Player.Height], eax                      ; Height
+    mov eax, [ebp+24]                                    
+    mov [ebx + Player.Speed], eax                       ; Speed
+
+    ; CreateGameobject(&data, &update, &render, &destroy)
+    push PlayerDestroy
+    push PlayerRender
+    push PlayerUpdate
+    push ebx
+    call CreateGameObject
+    add esp, 16
+    mov ebx, eax                                        ; Cache gameobject address
+
+    ; Additional Setup
     push MoveLeft
     push dword [HOLD]
     push dword [KEY_A]
-    call [AddAction]
+    ;call [AddAction]
     add esp, 12
 
     push MoveRight
     push dword [HOLD]
     push dword [KEY_D]
-    call [AddAction]
+    ;call [AddAction]
     add esp, 12
 
+    mov eax, ebx                                        ; Return gameobject address
+
+    pop ebx
     leave
     ret
 
 ;
-; PlayerUpdate()
+; PlayerUpdate(&object)
+; [ebp+8] object
 ;
 
 PlayerUpdate:
     enter 0, 0
+    push ebx
 
+    pop ebx
     leave
     ret
 
 ;
-; PlayerRender()
+; PlayerRender(&object)
+; [ebp+8] object
 ;
 
 PlayerRender:
     ; [ebp-4] XposInt
     ; [ebp-8] YposInt
     enter 8, 0
+    push ebx
 
-    fld dword [Xpos]
+    mov ebx, [ebp+8]                                        ; Object data in ebx
+
+    ; Convert to int
+    fld dword [ebx + Player.Xpos]
     fistp dword [ebp-4]
-    fld dword [Ypos]
+    fld dword [ebx + Player.Ypos]
     fistp dword [ebp-8]
 
+    ; FillRectangle(x, y, width, height, color)
     push dword [COLOR_CYAN]                                    
-    push dword [Height]
-    push dword [Width]
+    push dword [ebx + Player.Height]
+    push dword [ebx + Player.Width]
     push dword [ebp-8]
     push dword [ebp-4]
     call [FillRectangle]
     add esp, 20
 
+    pop ebx
     leave
     ret
 
 ;
-; PlayerDestroy()
+; PlayerDestroy(&object)
+; [ebp+8] object
 ;
 
 PlayerDestroy:
@@ -87,45 +135,54 @@ PlayerDestroy:
     ret
 
 ;
-; MoveLeft()
+; MoveLeft(&object)
+; [ebp+8] object
 ;
 
 MoveLeft:
     ; Local variables
     ; [ebp-4] Speed
     enter 4, 0
+    push ebx
 
-    mov dword [ebp-4], -PlayerSpeed
-    fild dword [ebp-4]
+    mov ebx, [ebp+8]                                        ; Object data in ebx
 
-    call [GetElapsed]
+    fild dword [ebx + Player.Speed]
+    fchs                                                    ; Invert Speed
+
+    call [GetElapsed]                                       ; Get ElapsedSec
     mov [ebp-4], eax
 
     fmul dword [ebp-4]
-    fadd dword [Xpos]
-    fstp dword [Xpos]
+    fadd dword [ebx + Player.Xpos]
+    fstp dword [ebx + Player.Xpos]
 
+    pop ebx
     leave
     ret
 
 ;
-; MoveRight()
+; MoveRight(&object)
+; [ebp+8] object
 ;
 
 MoveRight:
     ; Local variables
     ; [ebp-4] Speed
     enter 4, 0
+    push ebx
 
-    mov dword [ebp-4], PlayerSpeed
-    fild dword [ebp-4]
+    mov ebx, [ebp+8]                                        ; Object data in ebx
 
-    call [GetElapsed]
+    fild dword [ebx + Player.Speed]
+
+    call [GetElapsed]                                       ; Get ElapsedSec
     mov [ebp-4], eax
 
     fmul dword [ebp-4]
-    fadd dword [Xpos]
-    fstp dword [Xpos]
+    fadd dword [ebx + Player.Xpos]
+    fstp dword [ebx + Player.Xpos]
 
+    pop ebx
     leave
     ret

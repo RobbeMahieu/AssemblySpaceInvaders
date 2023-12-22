@@ -44,13 +44,14 @@ START:
     call [LL_Create]
     mov dword [Scene], eax
 
-    ; CreateGameObject(&init, &update, &render, &destroy)
-    push PlayerDestroy
-    push PlayerRender
-    push PlayerUpdate
-    push PlayerInit
-    call CreateGameObject
-    add esp, 16
+    ; CreatePlayer(x, y, width, height, speed)
+    push 50
+    push 200
+    push 300
+    push 0x42c80000                                     ; 100.0f
+    push 0x00000000                                     ; 0.0f
+    call CreatePlayer
+    add esp, 20
 
     ; Add it to the scene
     push eax                                            
@@ -69,9 +70,10 @@ START:
     cmp ebx, 0
     jz .FinishedList
 
-    ; Load node
-    mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
-    call [esi + Gameobject.destroy]                     ; Call the destroy function
+    ; DeleteGameobject(&object)
+    push dword [ebx + Node.content]                     ; Delete the gameobject
+    call DeleteGameObject 
+    add esp, 4                   
 
     .LoadNextNode:
     mov ebx, [ebx + Node.next]
@@ -104,7 +106,11 @@ Update:
 
     ; Load node
     mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
-    call [esi + Gameobject.update]                      ; Call the update function
+
+    ; Update(&object)
+    push dword [esi + Gameobject.objectData]
+    call [esi + Gameobject.update]
+    add esp, 4
 
     .LoadNextNode:
     mov ebx, [ebx + Node.next]
@@ -131,7 +137,11 @@ Render:
 
     ; Load node
     mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
-    call [esi + Gameobject.render]                      ; Call the render function
+
+    ; Update(&object)
+    push dword [esi + Gameobject.objectData]
+    call [esi + Gameobject.render]
+    add esp, 4
 
     .LoadNextNode:
     mov ebx, [ebx + Node.next]
