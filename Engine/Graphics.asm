@@ -7,18 +7,19 @@
 %include "windows.inc"
 
 ; Constants and Data
-section .bss
-HDC resd 1
 
 ; Predefined colors
-%define COLOR_BLACK     0x00000000
-%define COLOR_WHITE     0x00FFFFFF
-%define COLOR_RED       0x000000FF
-%define COLOR_GREEN     0x0000FF00
-%define COLOR_BLUE      0x00FF0000
-%define COLOR_CYAN      0x00FFFF00
-%define COLOR_MAGENTA   0x00FF00FF
-%define COLOR_YELLOW    0x0000FFFF
+COLOR_BLACK equ     0x00000000
+COLOR_WHITE equ     0x00FFFFFF
+COLOR_RED equ       0x000000FF
+COLOR_GREEN equ     0x0000FF00
+COLOR_BLUE equ      0x00FF0000
+COLOR_CYAN equ      0x00FFFF00
+COLOR_MAGENTA equ   0x00FF00FF
+COLOR_YELLOW equ    0x0000FFFF
+
+section .bss
+HDC resd 1
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code

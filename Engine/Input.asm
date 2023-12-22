@@ -8,17 +8,17 @@
 %include "./LinkedList.asm"
 
 ; Constants and Data
-%define PRESS   0
-%define HOLD    1
-%define RELEASE 2
+PRESS equ 0
+HOLD equ 1
+RELEASE equ 2
+
+KEY_A equ   30
+KEY_D equ   32
 
 %define IN_KEYSTROKEMASK    0x00FF0000
 %define IN_KEYSTROKESHIFT   16
 %define IN_KEYSTATEMASK     0x80000000
 %define IN_KEYSTATESHIFT    31
-
-%define KEY_A               30
-%define KEY_D               32
 
 section .bss
 CurrentInputState resb 32

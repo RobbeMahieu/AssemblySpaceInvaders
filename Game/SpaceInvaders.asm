@@ -32,5 +32,10 @@ START:
     push AppName
     call LoadEngine
 
+    push dword[formatHex]
+    push dword [COLOR_BLUE]
+    call DebugValue
+    add esp, 8
+
     call RunEngine
     call CleanupEngine
