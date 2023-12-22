@@ -9,6 +9,8 @@ cpu x64                                                 ; Limit instructions to 
 
 ; Includes
 %include "engine.inc"
+%include "./Gameobject.asm"
+%include "./Player.asm"
 
 ; Constants and Data
 
@@ -18,9 +20,9 @@ WindowHeight equ 480                                    ; Window height constant
 section .data
 
 AppName db "Space Invaders", 0                          ; Window title
-Xpos dd 0                                               ; Xpos (temp)
-XposInt dd 0
 
+section .bss
+Player resd 1                                           ; Player
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Program start
@@ -38,20 +40,20 @@ START:
     call [LoadEngine]
     add esp, 20
 
-    ; Testing
-    push MoveLeft
-    push dword [HOLD]
-    push dword [KEY_A]
-    call [AddAction]
-    add esp, 12
-
-    push MoveRight
-    push dword [HOLD]
-    push dword [KEY_D]
-    call [AddAction]
-    add esp, 12
+    ; CreateGameObject(&init, &update, &render, &destroy)
+    push PlayerDestroy
+    push PlayerRender
+    push PlayerUpdate
+    push PlayerInit
+    call CreateGameObject
+    add esp, 16
+    mov dword [Player], eax                             ; Cache player address
 
     call [RunEngine]
+
+    mov eax, dword [Player]
+    call dword [eax + Gameobject.destroy]
+
     call [CleanupEngine]
 
 ;
@@ -61,8 +63,9 @@ START:
 Update:
     enter 0, 0
 
-    fld dword [Xpos]
-    fistp dword [XposInt]
+
+    mov eax, dword [Player]
+    call dword [eax + Gameobject.update]
 
     leave
     ret
@@ -74,55 +77,14 @@ Update:
 Render:
     enter 0, 0
 
-    push dword [COLOR_CYAN]                                    
-    push 200
-    push 300
-    push 100
-    push dword [XposInt]
-    call [FillRectangle]
-    add esp, 20
+    mov eax, dword [Player]
+    call dword [eax + Gameobject.render]
 
     call [CalculateFPS]
     push dword [formatDecimal]
     push eax
     call [DebugPrintValue]
     add esp, 8
-
-    leave
-    ret
-
-MoveLeft:
-    ; Local variables
-    ; [ebp-4] Speed
-    enter 4, 0
-
-    mov dword [ebp-4], -50
-    fild dword [ebp-4]
-
-    call [GetElapsed]
-    mov [ebp-4], eax
-
-    fmul dword [ebp-4]
-    fadd dword [Xpos]
-    fstp dword [Xpos]
-
-    leave
-    ret
-
-MoveRight:
-    ; Local variables
-    ; [ebp-4] Speed
-    enter 4, 0
-
-    mov dword [ebp-4], 50
-    fild dword [ebp-4]
-
-    call [GetElapsed]
-    mov [ebp-4], eax
-
-    fmul dword [ebp-4]
-    fadd dword [Xpos]
-    fstp dword [Xpos]
 
     leave
     ret
