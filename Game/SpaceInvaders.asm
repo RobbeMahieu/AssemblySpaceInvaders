@@ -59,6 +59,21 @@ START:
     call LL_Add
     add esp, 8
 
+    ; CreatePlayer(x, y, width, height, speed)
+    push 200
+    push 50
+    push 150
+    push 0x43af0000                                     ; 350.0f
+    push 0x43480000                                     ; 200.0f
+    call CreatePlayer
+    add esp, 20
+
+    ; Add it to the scene
+    push eax                                            
+    push dword [Scene]
+    call LL_Add
+    add esp, 8
+
     call [RunEngine]
     push eax                                            ; Put return message on the stack
 
