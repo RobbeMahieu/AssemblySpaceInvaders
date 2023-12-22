@@ -32,11 +32,10 @@ section .text                                           ; Code
 LL_Create:
     enter 0, 0
 
-    ; HeapAlloc(Heap, settings, size)                   ; Allocate memory
+    ; MemoryAlloc( size)                                ; Allocate memory
     push LinkedList_size
-    push HEAP_ZERO_MEMORY
-    push dword [Heap]
-    call HeapAlloc                                      ; return address in eax
+    call MemoryAlloc
+    add esp, 4
 
     leave
     ret
@@ -62,17 +61,15 @@ LL_Delete:
     .RemoveElement:
     mov ebx, [edi + Node.next]                          ; Cache the next address
 
-    ; HeapFree(Heap, setttings, &data)                  ; Deallocate data
+    ; MemoryFree(&object)                               ; Deallocate data
     push dword [edi + Node.content]
-    push 0
-    push dword [Heap]
-    call HeapFree
+    call MemoryFree
+    add esp, 4
 
-    ; HeapFree(Heap, setttings, &data)                  ; Deallocate node
+    ; MemoryFree(&object)                               ; Deallocate node
     push edi
-    push 0
-    push dword [Heap]
-    call HeapFree
+    call MemoryFree
+    add esp, 4
 
     cmp ebx, 0                                          ; If all elements are cleared
     jz .ElementsCleared
@@ -81,11 +78,10 @@ LL_Delete:
     jmp .RemoveElement
 
     .ElementsCleared:
-    ; HeapFree(Heap, setttings, &data)                  ; Deallocate list
+    ; MemoryFree(&object)                               ; Deallocate list
     push esi
-    push 0
-    push dword [Heap]
-    call HeapFree
+    call MemoryFree
+    add esp, 4
 
     pop edi
     pop esi
@@ -101,11 +97,10 @@ LL_Delete:
 LL_Add:
     enter 0, 0
     
-    ; HeapAlloc(heap, settings, size)                   ; Create the node
+    ; MemoryAlloc(size)                                 ; Create the node
     push Node_size
-    push HEAP_ZERO_MEMORY
-    push dword [Heap]
-    call HeapAlloc                                      ; Return address in eax
+    call MemoryAlloc
+    add esp, 4
 
     ; Fill in node data
     mov ecx, [ebp+12]                                   ; Cache data base address

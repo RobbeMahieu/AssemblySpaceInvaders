@@ -2,7 +2,10 @@
 extern LoadEngine
 extern RunEngine
 extern CleanupEngine
-extern Heap ; If time, make manager for it
+
+; Memory
+extern MemoryAlloc
+extern MemoryFree
 
 ; Debug
 extern DebugValue

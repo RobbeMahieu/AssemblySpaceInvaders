@@ -12,6 +12,7 @@ cpu x64                                                 ; Limit instructions to 
 
 ; Includes
 %include "windows.inc"
+%include "./Memory.asm"
 %include "./Graphics.asm"
 %include "./Debug.asm"
 %include "./Input.asm"
@@ -30,7 +31,6 @@ section .bss
 hInstance resd 1                                        ; Instance handle
 CommandLine resd 1                                      ; Pointer to the launching cmd
 HWND resd 1                                             ; Window handle
-Heap resd 1                                             ; Heap handle
 
 GameUpdateFunction resd 1                               ; Game update function
 GameRenderFunction resd 1                               ; Game render function
@@ -70,9 +70,7 @@ LoadEngine:
     mov [CommandLine], eax                              ; cache the value to CommandLine
 
     ; Initialization
-    call GetProcessHeap                                 ; Get the heap handle
-    mov [Heap], eax
-
+    call InitMemory                                     ; Initialize memory module
     call InitTime                                       ; Initialize time module
     call InitInput                                      ; Initialize input module
 
@@ -210,7 +208,6 @@ CleanupEngine:
 
     leave
     ret
-
 
 ;
 ; WndProc(hwnd, message, wparam, lparam)

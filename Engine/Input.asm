@@ -253,12 +253,11 @@ AddAction:
     enter 0, 0
     push ebx
 
-    ; Create new action
+    ; MemoryAlloc(size)                                 ; Create new action
     push Action_size
-    push 0
-    push dword [Heap]
-    call HeapAlloc
-    mov ebx, eax                                          ; Cache given memory address
+    call MemoryAlloc
+    add esp, 4
+    mov ebx, eax                                        ; Cache given memory address
 
     mov eax, [ebp+8]
     mov [ebx + Action.keycode], eax                     ; Fill in keycode

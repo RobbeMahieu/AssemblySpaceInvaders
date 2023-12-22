@@ -5,8 +5,12 @@ global RunEngine
 export RunEngine
 global CleanupEngine
 export CleanupEngine
-global Heap ; If time, make manager for it
-export Heap
+
+; Memory
+global MemoryAlloc
+export MemoryAlloc
+global MemoryFree
+export MemoryFree
 
 ; Debug
 global DebugValue
