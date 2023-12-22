@@ -121,7 +121,7 @@ InitWindow:
     push dword [WindowWidth]
     push CW_USEDEFAULT
     push CW_USEDEFAULT
-    push WS_OVERLAPPEDWINDOW + WS_VISIBLE
+    push WS_NORESIZE + WS_VISIBLE
     push dword [AppName]
     push dword [AppName]
     push 0
