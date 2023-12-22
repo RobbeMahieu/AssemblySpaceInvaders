@@ -7,7 +7,7 @@
 %include "windows.inc"
 
 ; Constants and Data
-%define TARGET_FPS 30
+%define TARGET_FPS 60
 
 section .data
 PreviousTickCount dq 0
@@ -103,10 +103,10 @@ CalculateFPS:
     ret
 
 ;
-; StallEOF
+; LockFramerate
 ;
 
-StallEOF:
+LockFramerate:
     enter 0, 0
     push ebx
 

@@ -1,11 +1,14 @@
 ;-------------------------------------------------------------------------------------------------------------------
-; Assembly Game - (c) Robbe Mahieu
+; Assembly Engine - (c) Robbe Mahieu
 ; 
 ;-------------------------------------------------------------------------------------------------------------------
 
 ; Compiler directives and includes
 
 cpu x64                                                 ; Limit instructions to only x64 instructions
+
+; Dll definitions
+%include "./header.inc"
 
 ; Includes
 %include "windows.inc"
@@ -21,8 +24,7 @@ WindowHeight equ 480                                    ; Window height constant
 
 section .data
 
-ClassName db "WindowClass", 0                           ; Window class name
-AppName db "Assembly Game", 0                           ; Window title
+AppName db "Test", 0
 Xpos dd 0                                               ; Xpos (temp)
 XposInt dd 0
 
@@ -37,8 +39,9 @@ Heap resd 1                                             ; Heap handle
 section .text                                           ; Program start
 ;-------------------------------------------------------------------------------------------------------------------
 
-global START
-START:
+LoadEngine:
+    enter 0, 0
+
     push 0                                              ; Get instance handle of our app (0 = this)
     call [GetModuleHandleA]                             ; Return value in eax
     mov [hInstance], eax                                ; cache return value to hInstance
@@ -46,49 +49,15 @@ START:
     call [GetCommandLineA]                              ; Get command line pointer in eax
     mov [CommandLine], eax                              ; cache the value to CommandLine
 
-    ; Call WinMain(hInstance, 0, CommandLine, SW_SHOWDEFAULT)
-    push SW_SHOWDEFAULT
-    push dword [CommandLine]
-    push 0
-    push dword [hInstance]
-    call WinMain
-    add esp, 16
-
-    ; Put whatever WinMain returned on the stack and exit
-    push eax
-    call [ExitProcess]
-
-;
-; WinMain Function
-;
-
-WinMain:
-    enter 0, 0
-    push ebx
-
     ; Initialization
     call GetProcessHeap
     mov [Heap], eax
 
     call InitTime
     call InitInput
+
     call InitWindow
-
-    cmp eax, 0                                          ; Check if window was successfully created
-    jz .WinMainReturn                                   ; Failed
     mov [HWND], eax                                     ; Move the window handle to the local variable
-
-    ; Update Loop
-    call UpdateLoop
-    mov ebx, eax                                        ; Cache msg loop value
-
-    ; Cleanup
-    .WinMainReturn:
-    call InputCleanup
-
-    mov eax, ebx                                        ; Return msg loop value
-
-    pop ebx
 
     leave
     ret 
@@ -114,7 +83,7 @@ InitWindow:
 
     mov dword [ebx+32], 0                               ; Background color
     mov dword [ebx+36], 0                               ; App menu
-    mov dword [ebx+40], ClassName                       ; Class Name
+    mov dword [ebx+40], AppName                         ; Class Name
 
     push IDI_APPLICATION                                ; Load default icon
     push 0
@@ -142,7 +111,7 @@ InitWindow:
     push CW_USEDEFAULT
     push WS_OVERLAPPEDWINDOW + WS_VISIBLE
     push AppName
-    push ClassName
+    push AppName
     push 0
     call [CreateWindowExA]                              ; HWND in eax
 
@@ -151,10 +120,10 @@ InitWindow:
     ret
 
 ;
-; Update Loop
+; RunEngine
 ;
 
-UpdateLoop:
+RunEngine:
     ; Local variables
     ; [ebp-28] MSG
     enter 28, 0
@@ -188,7 +157,7 @@ UpdateLoop:
     .GameLoop:
     call CalculateElapsedTime
     call GameLoop
-    ;call StallEOF
+    ;call LockFramerate                                  ; Locks the framerate to the target value
     JMP .PeekMessage
 
     .UpdateLoopRet:              
@@ -197,6 +166,21 @@ UpdateLoop:
     pop ebx                                             ; Restore registers
     leave
     ret
+
+;
+;   Cleanup Engine Function
+;
+
+CleanupEngine:
+    enter 0, 0
+
+    push eax                                            ; Save eax on the stack
+    call InputCleanup                                   ; Clean up input memory
+    call [ExitProcess]                                  ; Stop process
+
+    leave
+    ret
+
 
 ;
 ; WndProc Function
