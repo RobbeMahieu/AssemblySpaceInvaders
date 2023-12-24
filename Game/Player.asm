@@ -153,7 +153,7 @@ PlayerUpdate:
     .LimitRightSide:
     fild dword[ebp-4] 
     fisub dword [ebx + Player.Width]
-    fstp dword [ebx + Player.Xpos]                       ; Xpos = WindowWidth - playerWidth
+    fstp dword [ebx + Player.Xpos]                      ; Xpos = WindowWidth - playerWidth
 
     .UpdateRet:
     pop ebx

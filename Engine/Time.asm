@@ -7,7 +7,7 @@
 %include "windows.inc"
 
 ; Constants and Data
-%define TARGET_FPS 60
+%define TARGET_FPS 69
 
 section .data
 PreviousTickCount dq 0

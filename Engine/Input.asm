@@ -20,6 +20,7 @@ KEY_SPACE equ   57
 %define IN_KEYSTROKESHIFT   16
 %define IN_KEYSTATEMASK     0x80000000
 %define IN_KEYSTATESHIFT    31
+%define IN_REPEATCOUNTMASK  0x0000FFFF
 
 section .bss
 CurrentInputState resb 32
@@ -89,6 +90,12 @@ UpdateInput:
     push ebx
     push edi
 
+    ; Get repeat count
+    mov eax, IN_REPEATCOUNTMASK
+    and eax, [ebp+8]
+    cmp eax, 1                                          ; Repeat more than once? Skip message
+    jg .UpdateInputRet
+
     ; Get keystroke in eax
     mov eax, IN_KEYSTROKEMASK
     and eax, [ebp+8]
@@ -116,12 +123,13 @@ UpdateInput:
     jmp .ShiftBits
 
     .DoneShifting:                                      ; Save the state
-    lea edx, [CurrentInputState+ eax]                   ; Store address
+    lea edx, [CurrentInputState + eax]                  ; Store address
 
     xor ebx, 0xFFFFFFFF                                 ; Invert bitmask (keep everything but the bit)
     and dword [edx], ebx                                ; Unset bit
     or dword [edx], ecx                                 ; Set it to the new state
 
+    .UpdateInputRet:
     pop edi
     pop ebx
     leave

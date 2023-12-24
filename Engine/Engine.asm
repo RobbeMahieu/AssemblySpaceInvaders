@@ -186,7 +186,7 @@ RunEngine:
     .GameLoop:
     call CalculateElapsedTime                           ; Set the elapsedSec for this frame
     call GameLoop
-    ;call LockFramerate                                  ; Locks the framerate to the target value
+    call LockFramerate                                  ; Locks the framerate to the target value
     JMP .PeekMessage
 
     .UpdateLoopRet:              
