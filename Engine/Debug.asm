@@ -70,11 +70,15 @@ DebugPrintValue:
     call wsprintfA
     add esp, 12
 
+    mov eax, dword [WindowHeight]                       ; Calculate y position
+    sub eax, 45                                         ; Bottom ScreenOffset
+
+
     ; DrawString(&text, x, y, width, height, color)
     push COLOR_RED
     push 60
     push 480
-    push 420
+    push eax
     push 5
     push buffer
     call DrawString

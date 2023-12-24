@@ -7,6 +7,12 @@
 %include "engine.inc"
 
 ; Constants and Data
+
+PlayerWidth equ 50
+PlayerHeight equ 20
+PlayerSpeed equ 200
+
+
 struc Player
     .Xpos resd 1
     .Ypos resd 1
@@ -20,12 +26,7 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreatePlayer(x,y,width, height, speed)
-; [ebp+8] x
-; [ebp+12] y
-; [ebp+16] width
-; [ebp+20] height
-; [ebp+24] speed
+; CreatePlayer()
 ; 
 ; eax => Gameobject address
 ;
@@ -39,17 +40,22 @@ CreatePlayer:
     call [MemoryAlloc]
     mov ebx, eax
 
-    ; Fill in fields
-    mov eax, [ebp+8]                                    
-    mov [ebx + Player.Xpos], eax                        ; Xpos
-    mov eax, [ebp+12]                                    
-    mov [ebx + Player.Ypos], eax                        ; Ypos
-    mov eax, [ebp+16]                                    
-    mov [ebx + Player.Width], eax                       ; Width
-    mov eax, [ebp+20]                                    
-    mov [ebx + Player.Height], eax                      ; Height
-    mov eax, [ebp+24]                                    
-    mov [ebx + Player.Speed], eax                       ; Speed
+    ; Fill in fields                     
+    mov dword [ebx + Player.Width], PlayerWidth         ; Width                                  
+    mov dword [ebx + Player.Height], PlayerHeight       ; Height
+    mov dword [ebx + Player.Speed], PlayerSpeed         ; Speed
+
+    mov dword [ebx + Player.Xpos], WindowWidth          ; Calculate Xpos
+    sub dword [ebx + Player.Xpos], PlayerWidth          
+    shr dword [ebx + Player.Xpos], 1                    ; divide by 2
+    fild dword [ebx + Player.Xpos]                      ; Convert to float
+    fstp dword [ebx + Player.Xpos]                      ; Xpos                               
+
+    mov dword [ebx + Player.Ypos], WindowHeight         ; Calculate Ypos
+    sub dword [ebx + Player.Ypos], PlayerHeight          
+    sub dword [ebx + Player.Ypos], 50                   ; Offset (Also include top menu bar)
+    fild dword [ebx + Player.Ypos]                      ; Convert to float
+    fstp dword [ebx + Player.Ypos]                      ; Ypos                              
 
     ; CreateGameobject(&data, &update, &render, &destroy)
     push PlayerDestroy
@@ -118,7 +124,7 @@ PlayerRender:
     fistp dword [ebp-8]
 
     ; FillRectangle(x, y, width, height, color)
-    push dword [COLOR_CYAN]                                    
+    push dword [COLOR_GREEN]                                    
     push dword [ebx + Player.Height]
     push dword [ebx + Player.Width]
     push dword [ebp-8]

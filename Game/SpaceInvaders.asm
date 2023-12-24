@@ -14,8 +14,8 @@ cpu x64                                                 ; Limit instructions to 
 
 ; Constants and Data
 
-WindowWidth equ 640                                     ; Window width constant
-WindowHeight equ 480                                    ; Window height constant
+WindowWidth equ 480                                     ; Window width constant
+WindowHeight equ 640                                    ; Window height constant
 
 section .data
 
@@ -44,29 +44,8 @@ START:
     call [LL_Create]
     mov dword [Scene], eax
 
-    ; CreatePlayer(x, y, width, height, speed)
-    push 50
-    push 200
-    push 300
-    push 0x42c80000                                     ; 100.0f
-    push 0x00000000                                     ; 0.0f
+    ; CreatePlayer()
     call CreatePlayer
-    add esp, 20
-
-    ; Add it to the scene
-    push eax                                            
-    push dword [Scene]
-    call LL_Add
-    add esp, 8
-
-    ; CreatePlayer(x, y, width, height, speed)
-    push 200
-    push 50
-    push 150
-    push 0x43af0000                                     ; 350.0f
-    push 0x43480000                                     ; 200.0f
-    call CreatePlayer
-    add esp, 20
 
     ; Add it to the scene
     push eax                                            
