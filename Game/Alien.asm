@@ -10,7 +10,7 @@
 
 AlienWidth equ 30
 AlienHeight equ 25
-AlienMoveDownCount equ 10
+AlienMoveDownCount equ 9
 AlienSpeed equ 50
 
 AlienOffset equ 15
@@ -28,7 +28,7 @@ struc Alien
 endstruc
 
 section .data
-AlienJumpTime dd 0x3f800000                             ; 1.0f
+AlienJumpTime dd 0x3f000000                             ; 0.5f
 AlienJump dd 5
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -71,6 +71,7 @@ CreateAlien:
 
     mov eax, AlienMoveDownCount                         ; Start at half (aliens start in the middle)
     shr eax, 1
+    inc eax                                             
     mov dword [ebx + Alien.MoveDownCounter], eax        ; MoveDownCounter
 
     ; CreateGameobject(&data, &update, &render, &destroy)

@@ -128,6 +128,34 @@ PlayerUpdate:
     fadd dword [ebp-4]                                  ; Add to the timer
     fstp dword [ebx + Player.AccuBulletDelay]           ; Store the result
 
+    ; Limit player range
+    fld dword [ebx + Player.Xpos]                       ; Load Xpos in float stack
+    ftst                                                ; Xpos < 0 ?
+    ffreep st0                                          ; Clear float stack
+    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
+    fwait
+    sahf                                                ; Transfer ax codes to status register
+    jae .CheckRightSide                                 ; I can finally compare now
+
+    .LimitLeftSide:
+    mov dword [ebx + Player.Xpos], 0                    ; Xpos = 0
+
+    .CheckRightSide: 
+    fld dword [ebx + Player.Xpos]                       ; Load Xpos in float stack        
+    mov dword [ebp-4], WindowWidth             
+    fiadd dword [ebx + Player.Width]                    ; St0 = Xpos + width
+    ficomp dword[ebp-4]                                 ; St0 > windowWidth ?
+    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
+    fwait
+    sahf                                                ; Transfer ax codes to status register
+    jbe .UpdateRet                                      ; I can finally compare now
+
+    .LimitRightSide:
+    fild dword[ebp-4] 
+    fisub dword [ebx + Player.Width]
+    fstp dword [ebx + Player.Xpos]                       ; Xpos = WindowWidth - playerWidth
+
+    .UpdateRet:
     pop ebx
     leave
     ret
