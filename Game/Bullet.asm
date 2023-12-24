@@ -22,7 +22,7 @@ struc Bullet
 endstruc
 
 section .data
-BulletLifetime dd 5.0
+BulletLifetime dd 1.0
 
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -51,7 +51,8 @@ CreateBullet:
     ; Fill in fields                     
     mov dword [ebx + Bullet.Width], BulletWidth         ; Width                                  
     mov dword [ebx + Bullet.Height], BulletHeight       ; Height
-    mov dword [ebx + Bullet.Lifetime], BulletLifetime   ; Lifetime
+    mov eax, dword [BulletLifetime]
+    mov dword [ebx + Bullet.Lifetime], eax              ; Lifetime
     mov eax, [ebp+16]
     mov dword [ebx + Bullet.Speed], eax                 ; Speed
     mov eax, [ebp+20]
@@ -103,8 +104,8 @@ BulletUpdate:
     fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
     fwait
     sahf                                                ; Transfer ax codes to status register
-    ja .Despawn                                        ; I can finally compare now
-    jbe .Move
+    jbe .Despawn                                         ; I can finally compare now
+    ja .Move
 
     .Despawn:
     jmp .UpdateRet
