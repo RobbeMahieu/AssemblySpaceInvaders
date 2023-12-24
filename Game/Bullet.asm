@@ -12,6 +12,7 @@ BulletWidth equ 7
 BulletHeight equ 30
 
 struc Bullet
+    .Gameobject resd 1
     .Xpos resd 1
     .Ypos resd 1
     .Width resd 1
@@ -22,7 +23,7 @@ struc Bullet
 endstruc
 
 section .data
-BulletLifetime dd 1.0
+BulletLifetime dd 3.0
 
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -72,6 +73,8 @@ CreateBullet:
     call CreateGameObject
     add esp, 16
 
+    mov dword [ebx + Bullet.Gameobject], eax            ; Store reference to the owning gameobject 
+
     pop esi
     pop ebx
     leave
@@ -104,10 +107,14 @@ BulletUpdate:
     fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
     fwait
     sahf                                                ; Transfer ax codes to status register
-    jbe .Despawn                                         ; I can finally compare now
+    jbe .Despawn                                        ; I can finally compare now
     ja .Move
 
     .Despawn:
+    ; DeleteGameObject(&object)
+    push dword [ebx + Bullet.Gameobject]
+    call DeleteGameObject
+    add esp, 4
     jmp .UpdateRet
 
     .Move:

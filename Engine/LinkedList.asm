@@ -127,3 +127,72 @@ LL_Add:
     .LL_AddRet:
     leave
     ret
+
+;
+; LL_Remove(&list, &object)
+; [ebp+8] list
+; [ebp+12] object
+;
+
+LL_Remove:
+    enter 0, 0
+    push ebx
+    push esi
+    push edi
+
+    ; Find object in list
+    mov edi, [ebp+8]                                    ; Cache list base address
+    mov ebx, [edi + LinkedList.start]                   ; ebx contains base address of node
+    mov esi, 0                                          ; esi contains previous node address
+
+    .NextNode:
+    cmp ebx, 0
+    jz .Done                                            ; Element not in list
+
+    ; Find node
+    mov eax, [ebx + Node.content]                       ; Cache node object
+    cmp eax, [ebp+12]
+    je .FoundObject
+
+    mov esi, ebx                                        ; Update previous node
+    mov ebx, [ebx + Node.next]                          ; Cache next address
+    jmp .NextNode
+
+    .FoundObject:
+    mov eax, [ebx + Node.next]                          ; Put next node address in eax
+    dec dword [edi + LinkedList.count]                  ; Decrease count
+
+    cmp esi, 0                                          ; Is it the first node?
+    jne .NotFirst
+
+    .First:
+    mov [edi + LinkedList.start], eax                   ; Update list start address 
+    jmp .Continue   
+
+    .NotFirst:
+    mov [esi + Node.next], eax                          ; Update previous node address
+
+    .Continue:
+    cmp ebx, [edi + LinkedList.end]                     ; Is it the last node ?
+    jne .NotEnd
+
+    .End:
+    mov [edi + LinkedList.end], esi                     ; Set previous node as end
+
+    .NotEnd:
+    ; MemoryFree(&object)                               ; Deallocate object
+    push dword [ebx + Node.content]
+    call MemoryFree
+    add esp, 4
+
+    ; MemoryFree(&object)                               ; Deallocate node
+    push ebx
+    call MemoryFree
+    add esp, 4
+
+    .Done:
+    pop edi
+    pop esi
+    pop ebx
+    leave
+    ret

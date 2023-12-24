@@ -42,6 +42,7 @@ extern AddAction
 extern LL_Create
 extern LL_Delete
 extern LL_Add
+extern LL_Remove
 
 %define LinkedList.start 0
 %define LinkedList.end 4

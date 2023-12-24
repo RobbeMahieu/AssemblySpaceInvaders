@@ -71,6 +71,8 @@ global LL_Delete
 export LL_Delete
 global LL_Add
 export LL_Add
+global LL_Remove
+export LL_Remove
 
 ; Time
 global CalculateFPS

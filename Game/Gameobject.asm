@@ -75,17 +75,18 @@ DeleteGameObject:
     ; Destroy(&object)                                  ; Call the destroy function              
     push dword [ebx + Gameobject.objectData]
     call [ebx + Gameobject.destroy]
-    add esp, 4               
+    add esp, 4 
 
     ; MemoryFree(&object)                               ; Free the data
     push dword [ebx + Gameobject.objectData]
     call [MemoryFree]
     add esp, 4
 
-    ; MemoryFree(&object)                               ; Free the gameobject
+    ; LL_Remove(&list, &object)                         ; Remove it from the scene
     push ebx
-    call [MemoryFree]
-    add esp, 4
+    push dword [Scene]
+    call [LL_Remove]
+    add esp, 8
 
     pop ebx
     leave
