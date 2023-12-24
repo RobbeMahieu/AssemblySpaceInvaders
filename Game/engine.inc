@@ -34,6 +34,7 @@ extern RELEASE
 
 extern KEY_A
 extern KEY_D
+extern KEY_SPACE
 
 extern AddAction
 

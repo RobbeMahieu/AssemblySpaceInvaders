@@ -12,8 +12,9 @@ PRESS equ 0
 HOLD equ 1
 RELEASE equ 2
 
-KEY_A equ   30
-KEY_D equ   32
+KEY_A equ       30
+KEY_D equ       32
+KEY_SPACE equ   57
 
 %define IN_KEYSTROKEMASK    0x00FF0000
 %define IN_KEYSTROKESHIFT   16

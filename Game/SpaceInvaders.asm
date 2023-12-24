@@ -10,6 +10,7 @@ cpu x64                                                 ; Limit instructions to 
 ; Includes
 %include "engine.inc"
 %include "./Gameobject.asm"
+%include "./Bullet.asm"
 %include "./Player.asm"
 %include "./Alien.asm"
 
@@ -53,6 +54,7 @@ START:
     push 200
     push 200
     call CreateAlien
+    add esp, 12
 
     call [RunEngine]
     push eax                                            ; Put return message on the stack
@@ -65,14 +67,16 @@ START:
     cmp ebx, 0
     jz .FinishedList
 
+    ; Load node data
+    mov esi, dword [ebx + Node.content]                 ; esi contains base address of gameobject
+    mov ebx, [ebx + Node.next]                          ; Cache next address
+
     ; DeleteGameobject(&object)
-    push dword [ebx + Node.content]                     ; Delete the gameobject
+    push esi                                            ; Delete the gameobject
     call DeleteGameObject 
     add esp, 4                   
 
-    .LoadNextNode:
-    mov ebx, [ebx + Node.next]
-    jmp .NextNode
+    jmp .NextNode                                       ; Loop through all nodes
 
     .FinishedList:
     ; Delete the scene
@@ -101,15 +105,14 @@ Update:
 
     ; Load node
     mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
+    mov ebx, [ebx + Node.next]                          ; Cache next address
 
     ; Update(&object)
     push dword [esi + Gameobject.objectData]
     call [esi + Gameobject.update]
     add esp, 4
 
-    .LoadNextNode:
-    mov ebx, [ebx + Node.next]
-    jmp .NextNode
+    jmp .NextNode                                       ; Loop through all nodes
 
     .FinishedList:
     leave
@@ -132,15 +135,14 @@ Render:
 
     ; Load node
     mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
+    mov ebx, [ebx + Node.next]                          ; Cache next address
 
     ; Update(&object)
     push dword [esi + Gameobject.objectData]
     call [esi + Gameobject.render]
     add esp, 4
 
-    .LoadNextNode:
-    mov ebx, [ebx + Node.next]
-    jmp .NextNode
+    jmp .NextNode                                       ; Loop through all nodes
 
     .FinishedList:
 

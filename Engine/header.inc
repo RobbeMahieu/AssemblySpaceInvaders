@@ -58,6 +58,8 @@ global KEY_A
 export KEY_A
 global KEY_D
 export KEY_D
+global KEY_SPACE
+export KEY_SPACE
 
 global AddAction
 export AddAction

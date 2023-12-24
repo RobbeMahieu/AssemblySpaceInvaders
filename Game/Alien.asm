@@ -77,9 +77,6 @@ CreateAlien:
     push ebx
     call CreateGameObject
     add esp, 16
-    mov esi, eax                                        ; Cache gameobject address
-
-    mov eax, esi                                        ; Return gameobject address
 
     pop esi
     pop ebx
@@ -105,12 +102,7 @@ AlienUpdate:
 
     fadd dword [ebp-4]                                  ; Add to the timer
     fstp dword [ebx + Alien.JumpTimer]                  ; Store the result
-
-    push dword [formatHex]
-    push dword [ebx + Alien.JumpTimer]
-    call DebugPrintValue
-    add esp, 8 
-
+    
     ; Check jump condition
     fld dword [AlienJumpTime]                           ; Put jumptime in float stack
     fcomp dword [ebx + Alien.JumpTimer]                 ; JumpTime < Alien jumptimer?

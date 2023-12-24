@@ -11,6 +11,7 @@
 PlayerWidth equ 50
 PlayerHeight equ 20
 PlayerSpeed equ 200
+BulletSpeed equ -200
 
 struc Player
     .Xpos resd 1
@@ -67,7 +68,7 @@ CreatePlayer:
 
     ; Additional Setup
 
-    ; AddAction(key, state, callback, data)
+    ; AddAction(key, state, callback, data)             ; Move left
     push ebx
     push MoveLeft
     push dword [HOLD]
@@ -75,11 +76,19 @@ CreatePlayer:
     call [AddAction]
     add esp, 16
 
-    ; AddAction(key, state, callback, data)
-    push ebx
+    ; AddAction(key, state, callback, data)             ; Move right
+    push ebx        
     push MoveRight
     push dword [HOLD]
     push dword [KEY_D]
+    call [AddAction]
+    add esp, 16
+
+    ; AddAction(key, state, callback, data)             ; Shoot
+    push ebx
+    push Shoot
+    push dword [PRESS]
+    push dword [KEY_SPACE]
     call [AddAction]
     add esp, 16
 
@@ -98,6 +107,8 @@ CreatePlayer:
 PlayerUpdate:
     enter 0, 0
     push ebx
+
+    mov ebx, [ebp+8]
 
     pop ebx
     leave
@@ -194,6 +205,39 @@ MoveRight:
     fmul dword [ebp-4]
     fadd dword [ebx + Player.Xpos]
     fstp dword [ebx + Player.Xpos]
+
+    pop ebx
+    leave
+    ret
+
+;
+; Shoot(&object)
+; [ebp+8] object
+;
+
+Shoot:
+    ; Local variables
+    ; [ebp-4] temp float address
+    enter 4, 0
+    push ebx
+
+    mov ebx, [ebp+8]
+
+    ; Calculate xpos
+    mov eax, dword [ebx + Player.Width]                 ; Calculate Xpos
+    shr eax, 1                                          ; divide by 2
+    mov [ebp-4], eax                                         
+    fild dword [ebp-4]                                  ; Convert to float
+    fadd dword [ebx + Player.Xpos]    
+    fstp dword [ebp-4]                                  ; Bullet Xpos    
+
+    ; CreateBullet(x, y, speed, color)
+    push dword [COLOR_GREEN]
+    push BulletSpeed
+    push dword [ebx + Player.Ypos]
+    push dword [ebp-4]
+    call CreateBullet
+    add esp, 16
 
     pop ebx
     leave
