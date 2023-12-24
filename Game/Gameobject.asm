@@ -49,6 +49,12 @@ CreateGameObject:
     mov eax, [ebp+20]
     mov [ebx + Gameobject.destroy], eax                 ; Fill in destroy function
 
+    ; Add it to the scene
+    push ebx                                            
+    push dword [Scene]
+    call LL_Add
+    add esp, 8
+
     mov eax, ebx                                        ; Put address as return value
 
     pop ebx
