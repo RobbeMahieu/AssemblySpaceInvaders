@@ -158,6 +158,7 @@ RunEngine:
     push ebx
 
     lea ebx, [ebp-28]                                   ; Cache message address in ebx
+    call CalculateElapsedTime                           ; Set the elapsedSec for this frame
 
     .PeekMessage:
     ; PeekMessage(&MSG, HWND, 0, 0, remove)
