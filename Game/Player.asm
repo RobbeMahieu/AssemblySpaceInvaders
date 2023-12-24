@@ -44,6 +44,7 @@ CreatePlayer:
 
     push Player_size                                    ; Create player struct
     call [MemoryAlloc]
+    add esp, 4
     mov ebx, eax
 
     ; Fill in fields                     

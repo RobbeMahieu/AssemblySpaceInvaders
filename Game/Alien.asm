@@ -8,10 +8,14 @@
 
 ; Constants and Data
 
-AlienWidth equ 50
-AlienHeight equ 40
+AlienWidth equ 30
+AlienHeight equ 25
 AlienMoveDownCount equ 10
-AlienRowHeight equ 50
+AlienSpeed equ 50
+
+AlienOffset equ 15
+AlienRows equ 5
+AlienColumns equ 11
 
 struc Alien
     .Xpos resd 1
@@ -25,17 +29,16 @@ endstruc
 
 section .data
 AlienJumpTime dd 0x3f800000                             ; 1.0f
-AlienJump dd 10
+AlienJump dd 5
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreateAlien(x, y, speed)
+; CreateAlien(x, y)
 ; [ebp+8] x
 ; [ebp+12] y
-; [ebp+16] speed
 ; 
 ; eax => Gameobject address
 ;
@@ -47,14 +50,14 @@ CreateAlien:
 
     push Alien_size                                     ; Create Alien struct
     call [MemoryAlloc]
+    add esp, 4
     mov ebx, eax
 
     ; Fill in fields                     
     mov dword [ebx + Alien.Width], AlienWidth           ; Width                                  
     mov dword [ebx + Alien.Height], AlienHeight         ; Height
     mov dword [ebx + Alien.JumpTimer], 0                ; JumpTimer
-    mov eax, [ebp+16]
-    mov dword [ebx + Alien.Speed], eax                  ; Speed
+    mov dword [ebx + Alien.Speed], AlienSpeed           ; Speed
 
     mov eax, [ebp+8]                                    ; Xpos 
     mov dword [ebx + Alien.Xpos], eax
@@ -119,12 +122,12 @@ AlienUpdate:
     ; Check if alien has to move down a row
     add dword [ebx + Alien.MoveDownCounter], 1          ; Increase MoveDownCounter
     cmp dword [ebx + Alien.MoveDownCounter], AlienMoveDownCount
-    jl .NoRowDown
+    jle .NoRowDown
 
     .RowDown:
     mov dword [ebx + Alien.MoveDownCounter], 0          ; Reset counter
 
-    mov dword [ebp-4], AlienRowHeight                   ; Update Ypos
+    mov dword [ebp-4], AlienOffset                      ; Update Ypos
     fild dword [ebp-4]
     fadd dword [ebx + Alien.Ypos]
     fstp dword [ebx + Alien.Ypos]
@@ -186,3 +189,65 @@ AlienDestroy:
     ret
 
 
+;
+; LayOutAlienGrid()
+;
+
+LayOutAlienGrid:
+    ; Local variables
+    ; [ebp-4] x offset
+    ; [ebp-8] y offset
+    ; [ebp-12] row
+    ; [ebp-16] col
+    ; [ebp-20] xpos
+    ; [ebp-24] ypos
+    enter 24, 0
+    push ebx
+    push esi
+
+    ; Calculate starting X
+    mov dword [ebp-4], AlienOffset                          ; Offset for one alien
+    add dword [ebp-4], AlienWidth                           ; 1 space = alien + offset
+    mov eax, AlienColumns                                   ; Total width of alien grid = cols * space
+    mul dword [ebp-4]
+    sub eax, AlienOffset                                    ; This is one offset too much (last one doesn't need it)
+    mov ebx, WindowWidth                                    ; Substract this from the total width
+    sub ebx, eax
+    shr ebx, 1                                              ; And divide the leftover space by two => starting x
+
+    ; Calculate starting Y
+    mov dword [ebp-8], AlienOffset                          ; Offset for one alien
+    add dword [ebp-8], AlienHeight                          ; 1 space = alien + offset
+    mov esi, 50
+
+    ; Loop to create the grid
+    mov dword [ebp-12], 0                                   ; Reset row count
+    mov dword [ebp-24], esi                                 ; Reset y pos
+    .NewRow:
+
+    mov dword [ebp-16], 0                                   ; Reset col count
+    mov dword [ebp-20], ebx                                 ; Reset x pos
+    .NewCol:
+
+    ; CreateAlien(x, y)
+    push dword [ebp-24]
+    push dword [ebp-20]
+    call CreateAlien
+    add esp, 8
+
+    mov eax, [ebp-4]                                        ; Increase x pos
+    add [ebp-20], eax
+    inc dword [ebp-16]                      
+    cmp dword [ebp-16], AlienColumns
+    jne .NewCol
+
+    mov eax, [ebp-8]                                        ; Increase y pos
+    add [ebp-24], eax
+    inc dword [ebp-12]                      
+    cmp dword [ebp-12], AlienRows
+    jne .NewRow
+
+    pop esi
+    pop ebx
+    leave
+    ret

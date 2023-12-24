@@ -8,8 +8,8 @@
 
 ; Constants and Data
 
-BulletWidth equ 7
-BulletHeight equ 30
+BulletWidth equ 4
+BulletHeight equ 15
 
 struc Bullet
     .Gameobject resd 1
@@ -47,6 +47,7 @@ CreateBullet:
 
     push Bullet_size                                    ; Create Bullet struct
     call [MemoryAlloc]
+    add esp, 4
     mov ebx, eax
 
     ; Fill in fields                     

@@ -49,12 +49,8 @@ START:
     ; CreatePlayer()
     call CreatePlayer
 
-    ; CreateAlien(x, y, speed)
-    push 50                                             ; Alien Speed
-    push 200
-    push 200
-    call CreateAlien
-    add esp, 12
+    ; LayOutAlienGrid()
+    call LayOutAlienGrid
 
     call [RunEngine]
     push eax                                            ; Put return message on the stack
