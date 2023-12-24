@@ -12,7 +12,6 @@ PlayerWidth equ 50
 PlayerHeight equ 20
 PlayerSpeed equ 200
 
-
 struc Player
     .Xpos resd 1
     .Ypos resd 1

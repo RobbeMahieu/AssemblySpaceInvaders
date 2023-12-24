@@ -11,10 +11,11 @@ cpu x64                                                 ; Limit instructions to 
 %include "engine.inc"
 %include "./Gameobject.asm"
 %include "./Player.asm"
+%include "./Alien.asm"
 
 ; Constants and Data
 
-WindowWidth equ 480                                     ; Window width constant
+WindowWidth equ 560                                     ; Window width constant
 WindowHeight equ 640                                    ; Window height constant
 
 section .data
@@ -47,11 +48,11 @@ START:
     ; CreatePlayer()
     call CreatePlayer
 
-    ; Add it to the scene
-    push eax                                            
-    push dword [Scene]
-    call LL_Add
-    add esp, 8
+    ; CreateAlien(x, y, speed)
+    push 50                                             ; Alien Speed
+    push 200
+    push 200
+    call CreateAlien
 
     call [RunEngine]
     push eax                                            ; Put return message on the stack
@@ -147,7 +148,7 @@ Render:
     call [CalculateFPS]
     push dword [formatDecimal]
     push eax
-    call [DebugPrintValue]
+    ;call [DebugPrintValue]
     add esp, 8
 
     leave
