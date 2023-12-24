@@ -10,8 +10,8 @@
 
 PlayerWidth equ 50
 PlayerHeight equ 20
-PlayerSpeed equ 200
-BulletSpeed equ -200
+PlayerStartSpeed equ 200
+BulletStartBulletSpeed equ -200
 
 struc Player
     .Xpos resd 1
@@ -19,7 +19,13 @@ struc Player
     .Width resd 1
     .Height resd 1
     .Speed resd 1
+    .BulletSpeed resd 1
+    .AccuBulletDelay resd 1
 endstruc
+
+section .data
+
+BulletDelay dd 0.5
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -43,7 +49,9 @@ CreatePlayer:
     ; Fill in fields                     
     mov dword [ebx + Player.Width], PlayerWidth         ; Width                                  
     mov dword [ebx + Player.Height], PlayerHeight       ; Height
-    mov dword [ebx + Player.Speed], PlayerSpeed         ; Speed
+    mov dword [ebx + Player.Speed], PlayerStartSpeed    ; Speed
+    mov dword [ebx + Player.BulletSpeed], BulletStartBulletSpeed    ; Bullet speed
+    mov dword [ebx + Player.AccuBulletDelay], 0         ; Accumulated bullet delay
 
     mov dword [ebx + Player.Xpos], WindowWidth          ; Calculate Xpos
     sub dword [ebx + Player.Xpos], PlayerWidth          
@@ -105,10 +113,19 @@ CreatePlayer:
 ;
 
 PlayerUpdate:
-    enter 0, 0
+    ; Local variables
+    ; [ebp-4] temp float storage
+    enter 4, 0
     push ebx
 
     mov ebx, [ebp+8]
+
+    ; Add elapsedSec to bulletDelay
+    fld dword [ebx + Player.AccuBulletDelay]            ; Load jump timer in float stack
+    call [GetElapsed]                                   ; Get ElapsedSec
+    mov [ebp-4], eax
+    fadd dword [ebp-4]                                  ; Add to the timer
+    fstp dword [ebx + Player.AccuBulletDelay]           ; Store the result
 
     pop ebx
     leave
@@ -223,6 +240,17 @@ Shoot:
 
     mov ebx, [ebp+8]
 
+    ; Check it delay has passed
+    fld dword [ebx + Player.AccuBulletDelay]            ; Load accumulated time
+    fcomp dword [BulletDelay]                           ; AccuBulletDelay > BulletDelay ?
+    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
+    fwait
+    sahf                                                ; Transfer ax codes to status register
+    jbe .ShootRet                                       ; I can finally compare now
+
+    .CanShoot:
+    mov dword [ebx + Player.AccuBulletDelay], 0         ; Reset Delay
+
     ; Calculate xpos
     mov eax, dword [ebx + Player.Width]                 ; Calculate Xpos
     shr eax, 1                                          ; divide by 2
@@ -233,12 +261,13 @@ Shoot:
 
     ; CreateBullet(x, y, speed, color)
     push dword [COLOR_GREEN]
-    push BulletSpeed
+    push dword [ebx + Player.BulletSpeed]
     push dword [ebx + Player.Ypos]
     push dword [ebp-4]
     call CreateBullet
     add esp, 16
 
+    .ShootRet:
     pop ebx
     leave
     ret
