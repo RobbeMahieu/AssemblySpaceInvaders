@@ -64,7 +64,7 @@ CreateHitbox:
     push dword [ebp+28]
     push dword [ebp+24]
     push ebx
-    call SetHitboxBounds
+    call SetHitboxCallbacks
     add esp, 16
 
     ; RegisterHitbox(&hitbox)                           ; Add it to the physics objects
@@ -87,15 +87,10 @@ DeleteHitbox:
     enter 0, 0
 
     ; UnregisterHitbox(&hitbox)                        ; Remove it from the physics objects
-    push ebx
+    push dword [ebp+8]
     call UnregisterHitbox
     add esp, 4
-
-    ; MemoryFree(&object)                              ; Deallocate hitbox
-    push dword [ebp+8]
-    call MemoryFree
-    add esp, 4
-
+    
     leave
     ret
 

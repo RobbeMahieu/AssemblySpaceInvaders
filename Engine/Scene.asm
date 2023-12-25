@@ -45,11 +45,11 @@ DeleteScene:
     jz .FinishedList
 
     ; Load node data
-    mov esi, dword [ebx + Node.content]                 ; esi contains base address of gameobject
+    mov eax, dword [ebx + Node.content]                 ; esi contains base address of gameobject
     mov ebx, [ebx + Node.next]                          ; Cache next address
 
     ; DeleteGameobject(&object)
-    push esi                                            ; Delete the gameobject
+    push eax                                            ; Delete the gameobject
     call DeleteGameObject 
     add esp, 4                   
 
@@ -119,12 +119,12 @@ UpdateScene:
     jz .FinishedList
 
     ; Load node
-    mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
+    mov eax, dword [ebx + Node.content]                 ; esi contains base address of data
     mov ebx, [ebx + Node.next]                          ; Cache next address
 
     ; Update(&object)
-    push dword [esi + Gameobject.objectData]
-    call [esi + Gameobject.update]
+    push dword [eax + Gameobject.objectData]
+    call [eax + Gameobject.update]
     add esp, 4
 
     jmp .NextNode                                       ; Loop through all nodes
@@ -152,12 +152,12 @@ RenderScene:
     jz .FinishedList
 
     ; Load node
-    mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
+    mov eax, dword [ebx + Node.content]                 ; esi contains base address of data
     mov ebx, [ebx + Node.next]                          ; Cache next address
 
     ; Render(&object)
-    push dword [esi + Gameobject.objectData]
-    call [esi + Gameobject.render]
+    push dword [eax + Gameobject.objectData]
+    call [eax + Gameobject.render]
     add esp, 4
 
     jmp .NextNode                                       ; Loop through all nodes

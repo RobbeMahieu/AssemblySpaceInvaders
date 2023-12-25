@@ -178,14 +178,23 @@ PlayerUpdate:
     fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
     fwait
     sahf                                                ; Transfer ax codes to status register
-    jbe .UpdateRet                                      ; I can finally compare now
+    jbe .DoneLimit                                      ; I can finally compare now
 
     .LimitRightSide:
     fild dword[ebp-4] 
     fisub dword [ebx + Player.Width]
     fstp dword [ebx + Player.Xpos]                      ; Xpos = WindowWidth - playerWidth
 
-    .UpdateRet:
+    .DoneLimit:
+    ; SetHitboxBounds(&hitbox, x, y, width, height)     ; Update HitboxPosition
+    push dword [ebx + Player.Height]
+    push dword [ebx + Player.Width]
+    push dword [ebx + Player.Ypos]
+    push dword [ebx + Player.Xpos]
+    push dword [ebx + Player.Hitbox]
+    call SetHitboxBounds
+    add esp, 20
+
     pop ebx
     leave
     ret

@@ -86,7 +86,7 @@ CreateBullet:
     ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
     push 0
     push 0
-    push 0
+    push TestFunction
     push dword [ebx + Bullet.Height]
     push dword [ebx + Bullet.Width]
     push dword [ebx + Bullet.Ypos]
@@ -148,6 +148,15 @@ BulletUpdate:
     fadd dword [ebx + Bullet.Ypos]
     fstp dword [ebx + Bullet.Ypos]
 
+    ; SetHitboxBounds(&hitbox, x, y, width, height)         ; Update HitboxPosition
+    push dword [ebx + Bullet.Height]
+    push dword [ebx + Bullet.Width]
+    push dword [ebx + Bullet.Ypos]
+    push dword [ebx + Bullet.Xpos]
+    push dword [ebx + Bullet.Hitbox]
+    call SetHitboxBounds
+    add esp, 20
+
     .UpdateRet:
     pop ebx
     leave
@@ -206,3 +215,13 @@ BulletDestroy:
     ret
 
 
+TestFunction:
+    enter 0, 0
+
+    push dword [formatDecimal]
+    push 20
+    ;call DebugValue
+    add esp, 8
+
+    leave
+    ret

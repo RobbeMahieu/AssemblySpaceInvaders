@@ -160,7 +160,7 @@ LL_Remove:
 
     .FoundObject:
     mov eax, [ebx + Node.next]                          ; Put next node address in eax
-    dec dword [edi + LinkedList.count]                  ; Decrease count
+    sub dword [edi + LinkedList.count], 1               ; Decrease count
 
     cmp esi, 0                                          ; Is it the first node?
     jne .NotFirst

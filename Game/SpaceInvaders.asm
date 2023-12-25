@@ -90,7 +90,7 @@ Render:
     call [CalculateFPS]
     push dword [formatDecimal]
     push eax
-    call [DebugPrintValue]
+    ;call [DebugPrintValue]
     add esp, 8
 
     leave
