@@ -9,7 +9,6 @@ cpu x64                                                 ; Limit instructions to 
 
 ; Includes
 %include "engine.inc"
-%include "./Gameobject.asm"
 %include "./Bullet.asm"
 %include "./Player.asm"
 %include "./Alien.asm"
@@ -42,46 +41,24 @@ START:
     call [LoadEngine]
     add esp, 20
 
-    ; Create actions linked list
-    call [LL_Create]
+    ; Create game scene
+    call [CreateScene]
     mov dword [Scene], eax
 
-    ; CreatePlayer()
-    call CreatePlayer
-
-    ; LayOutAlienGrid()
-    call LayOutAlienGrid
-
-    call [RunEngine]
-    push eax                                            ; Put return message on the stack
-
-    ; Clean up scene
-    mov ebx, [Scene]
-    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
-
-    .NextNode:
-    cmp ebx, 0
-    jz .FinishedList
-
-    ; Load node data
-    mov esi, dword [ebx + Node.content]                 ; esi contains base address of gameobject
-    mov ebx, [ebx + Node.next]                          ; Cache next address
-
-    ; DeleteGameobject(&object)
-    push esi                                            ; Delete the gameobject
-    call DeleteGameObject 
-    add esp, 4                   
-
-    jmp .NextNode                                       ; Loop through all nodes
-
-    .FinishedList:
-    ; Delete the scene
-    push dword [Scene]                          
-    call LL_Delete
+    ; Create game scene
+    push dword [Scene]                                  ; Put game scene on the stack
+    call CreatePlayer                                   ; CreatePlayer()   
+    call LayOutAlienGrid                                ; LayOutAlienGrid()
     add esp, 4
 
-    pop eax                                             ; Get message back from the stack
+    call [RunEngine]
+    push eax                                            ; Store message code
 
+    push dword [Scene]                                  ; Clean up scene
+    call DeleteScene
+    add esp, 4
+
+    pop eax                                             ; Restore message code
     call [CleanupEngine]
 
 ;
@@ -91,26 +68,10 @@ START:
 Update:
     enter 0, 0
 
-    ; Update the scene
-    mov ebx, [Scene]
-    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
-
-    .NextNode:
-    cmp ebx, 0
-    jz .FinishedList
-
-    ; Load node
-    mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
-    mov ebx, [ebx + Node.next]                          ; Cache next address
-
-    ; Update(&object)
-    push dword [esi + Gameobject.objectData]
-    call [esi + Gameobject.update]
+    push dword [Scene]                                  ; Update scene
+    call UpdateScene
     add esp, 4
 
-    jmp .NextNode                                       ; Loop through all nodes
-
-    .FinishedList:
     leave
     ret
 
@@ -121,26 +82,9 @@ Update:
 Render:
     enter 0, 0
 
-    ; Render the scene
-    mov ebx, [Scene]
-    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
-
-    .NextNode:
-    cmp ebx, 0
-    jz .FinishedList
-
-    ; Load node
-    mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
-    mov ebx, [ebx + Node.next]                          ; Cache next address
-
-    ; Update(&object)
-    push dword [esi + Gameobject.objectData]
-    call [esi + Gameobject.render]
+    push dword [Scene]                                  ; Render scene
+    call RenderScene
     add esp, 4
-
-    jmp .NextNode                                       ; Loop through all nodes
-
-    .FinishedList:
 
     ; Debug FPS
     call [CalculateFPS]

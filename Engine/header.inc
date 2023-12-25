@@ -92,3 +92,18 @@ global SetHitboxBounds
 export SetHitboxBounds
 global SetHitboxCallbacks
 export SetHitboxCallbacks
+
+; Scene
+global CreateScene
+export CreateScene
+global DeleteScene
+export DeleteScene
+global UpdateScene
+export UpdateScene
+global RenderScene
+export RenderScene
+
+global CreateGameObject
+export CreateGameObject
+global DeleteGameObject
+export DeleteGameObject

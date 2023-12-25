@@ -69,3 +69,18 @@ extern SetHitboxCallbacks
 %define Hitbox.OnHit 4
 %define Hitbox.OnHitting 5
 %define Hitbox.OnHitEnd 6
+
+; Scene
+extern CreateScene
+extern DeleteScene
+extern UpdateScene
+extern RenderScene
+
+extern CreateGameObject
+extern DeleteGameObject
+
+%define Gameobject.scene 0
+%define Gameobject.objectData 1
+%define Gameobject.update 2
+%define Gameobject.render 3
+%define Gameobject.destroy 4

@@ -14,6 +14,9 @@ PlayerStartSpeed equ 200
 BulletStartBulletSpeed equ -200
 
 struc Player
+    ; Owner
+    .Gameobject resd 1
+
     ; Bounds
     .Xpos resd 1
     .Ypos resd 1
@@ -44,7 +47,8 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreatePlayer()
+; CreatePlayer(&scene)
+; [ebp+8] scene
 ; 
 ; eax => Gameobject address
 ;
@@ -52,7 +56,6 @@ section .text                                           ; Code
 CreatePlayer:
     enter 0, 0
     push ebx
-    push esi
 
     push Player_size                                    ; Create player struct
     call [MemoryAlloc]
@@ -78,14 +81,15 @@ CreatePlayer:
     fild dword [ebx + Player.Ypos]                      ; Convert to float
     fstp dword [ebx + Player.Ypos]                      ; Ypos                              
 
-    ; CreateGameobject(&data, &update, &render, &destroy)
+    ; CreateGameobject(&scene, &data, &update, &render, &destroy)
     push PlayerDestroy
     push PlayerRender
     push PlayerUpdate
     push ebx
+    push dword [ebp+8]
     call CreateGameObject
-    add esp, 16
-    mov esi, eax                                        ; Cache gameobject address
+    add esp, 20
+    mov dword [ebx + Player.Gameobject], eax            ; Cache gameobject address
 
     ; Additional Setup
 
@@ -128,9 +132,8 @@ CreatePlayer:
     add esp, 16
     mov dword [ebx + Player.ShootAction], eax           ; Store the action address
 
-    mov eax, esi                                        ; Return gameobject address
+    mov eax, dword [ebx + Player.Gameobject]            ; Return gameobject address
 
-    pop esi
     pop ebx
     leave
     ret
@@ -339,13 +342,17 @@ Shoot:
     fadd dword [ebx + Player.Xpos]    
     fstp dword [ebp-4]                                  ; Bullet Xpos    
 
-    ; CreateBullet(x, y, speed, color)
+    mov eax, [ebx + Player.Gameobject]
+    mov eax, [ebx + Gameobject.scene]
+
+    ; CreateBullet(&scene, x, y, speed, color)
     push dword [COLOR_GREEN]
     push dword [ebx + Player.BulletSpeed]
     push dword [ebx + Player.Ypos]
     push dword [ebp-4]
+    push dword [eax]
     call CreateBullet
-    add esp, 16
+    add esp, 20
 
     .ShootRet:
     pop ebx

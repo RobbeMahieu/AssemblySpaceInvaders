@@ -4,11 +4,12 @@
 ;-------------------------------------------------------------------------------------------------------------------
 
 ; Includes
-%include "engine.inc"
+%include "windows.inc"
 
 ; Constants and Data
 
 struc Gameobject
+    .scene: resd 1
     .objectData: resd 1
     .update: resd 1
     .render: resd 1
@@ -20,11 +21,12 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreateGameObject(&data, &update, &render, &destroy)
-; [ebp+8] data
-; [ebp+12] update
-; [ebp+16] render
-; [ebp+20] destroy
+; CreateGameObject(&scene, &data, &update, &render, &destroy)
+; [ebp+8] scene
+; [ebp+12] data
+; [ebp+16] update
+; [ebp+20] render
+; [ebp+24] destroy
 ;
 ; eax => Return address
 ;
@@ -35,24 +37,26 @@ CreateGameObject:
 
     ; MemoryAlloc(size)                                 ; Get memory block
     push Gameobject_size
-    call [MemoryAlloc]
+    call MemoryAlloc
     add esp, 4
     mov ebx, eax                                        ; Cache the address in ebx
 
     ; Fill in fields
-    mov eax, [ebp+8]                                    
+    mov eax, [ebp+8]
+    mov [ebx + Gameobject.scene], eax                   ; Link scene to gameobject
+    mov eax, [ebp+12]                                    
     mov [ebx + Gameobject.objectData], eax              ; Link data to gameobject
-    mov eax, [ebp+12]
-    mov [ebx + Gameobject.update], eax                  ; Fill in update function
     mov eax, [ebp+16]
-    mov [ebx + Gameobject.render], eax                  ; Fill in render function
+    mov [ebx + Gameobject.update], eax                  ; Fill in update function
     mov eax, [ebp+20]
+    mov [ebx + Gameobject.render], eax                  ; Fill in render function
+    mov eax, [ebp+24]
     mov [ebx + Gameobject.destroy], eax                 ; Fill in destroy function
 
-    ; Add it to the scene
+    ; AddGameObjectToScene(&scene, &gameobject)         ; Add it to the scene
     push ebx                                            
-    push dword [Scene]
-    call LL_Add
+    push dword [ebp+8]
+    call AddGameObjectToScene
     add esp, 8
 
     mov eax, ebx                                        ; Put address as return value
@@ -79,13 +83,13 @@ DeleteGameObject:
 
     ; MemoryFree(&object)                               ; Free the data
     push dword [ebx + Gameobject.objectData]
-    call [MemoryFree]
+    call MemoryFree
     add esp, 4
 
-    ; LL_Remove(&list, &object)                         ; Remove it from the scene
+    ; RemoveGameObjectFromScene(&scene, &gameobject)    ; Remove it from the scene
     push ebx
-    push dword [Scene]
-    call [LL_Remove]
+    push dword [ebx + Gameobject.scene]
+    call RemoveGameObjectFromScene
     add esp, 8
 
     pop ebx

@@ -12,11 +12,17 @@ BulletWidth equ 4
 BulletHeight equ 15
 
 struc Bullet
+    ; Owner
     .Gameobject resd 1
+
+    ; Bounds
     .Xpos resd 1
     .Ypos resd 1
     .Width resd 1
     .Height resd 1
+    .Hitbox resd 1
+
+    ; Properties
     .Speed resd 1
     .Lifetime resd 1
     .Color resd 1
@@ -31,11 +37,12 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreateBullet(x, y, speed, color)
-; [ebp+8] x
-; [ebp+12] y
-; [ebp+16] speed
-; [ebp+20] color
+; CreateBullet(&scene, x, y, speed, color)
+; [ebp+8] scene
+; [ebp+12] x
+; [ebp+16] y
+; [ebp+20] speed
+; [ebp+24] color
 ; 
 ; eax => Gameobject address
 ;
@@ -43,7 +50,6 @@ section .text                                           ; Code
 CreateBullet:
     enter 0, 0
     push ebx
-    push esi
 
     push Bullet_size                                    ; Create Bullet struct
     call [MemoryAlloc]
@@ -55,28 +61,42 @@ CreateBullet:
     mov dword [ebx + Bullet.Height], BulletHeight       ; Height
     mov eax, dword [BulletLifetime]
     mov dword [ebx + Bullet.Lifetime], eax              ; Lifetime
-    mov eax, [ebp+16]
-    mov dword [ebx + Bullet.Speed], eax                 ; Speed
     mov eax, [ebp+20]
+    mov dword [ebx + Bullet.Speed], eax                 ; Speed
+    mov eax, [ebp+24]
     mov dword [ebx + Bullet.Color], eax                 ; Speed
 
-    mov eax, [ebp+8]                                    ; Xpos 
+    mov eax, [ebp+12]                                   ; Xpos 
     mov dword [ebx + Bullet.Xpos], eax                               
 
-    mov eax, [ebp+12]                                   ; Ypos 
+    mov eax, [ebp+16]                                   ; Ypos 
     mov dword [ebx + Bullet.Ypos], eax                              
 
-    ; CreateGameobject(&data, &update, &render, &destroy)
+    ; CreateGameobject(&scene, &data, &update, &render, &destroy)
     push BulletDestroy
     push BulletRender
     push BulletUpdate
     push ebx
+    push dword [ebp+8]
     call CreateGameObject
-    add esp, 16
+    add esp, 20
 
-    mov dword [ebx + Bullet.Gameobject], eax            ; Store reference to the owning gameobject 
+    mov dword [ebx + Bullet.Gameobject], eax            ; Store reference to the owning gameobject
 
-    pop esi
+    ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
+    push 0
+    push 0
+    push 0
+    push dword [ebx + Bullet.Height]
+    push dword [ebx + Bullet.Width]
+    push dword [ebx + Bullet.Ypos]
+    push dword [ebx + Bullet.Xpos]
+    call CreateHitbox
+    add esp, 28
+    mov dword [ebx + Bullet.Hitbox], eax                ; Store the hitbox address
+
+    mov eax, [ebx + Bullet.Gameobject]                  ; Return gameobject address
+
     pop ebx
     leave
     ret
@@ -172,7 +192,16 @@ BulletRender:
 
 BulletDestroy:
     enter 0, 0
+    push ebx
 
+    mov ebx, [ebp+8]
+
+    ; DeleteHitbox(&hitbox)
+    push dword [ebx + Bullet.Hitbox]
+    call DeleteHitbox
+    add esp, 4
+
+    pop ebx
     leave
     ret
 

@@ -36,9 +36,10 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreateAlien(x, y)
-; [ebp+8] x
-; [ebp+12] y
+; CreateAlien(&scene, x, y)
+; [ebp+8] scene
+; [ebp+12] x
+; [ebp+16] y
 ; 
 ; eax => Gameobject address
 ;
@@ -59,12 +60,12 @@ CreateAlien:
     mov dword [ebx + Alien.JumpTimer], 0                ; JumpTimer
     mov dword [ebx + Alien.Speed], AlienSpeed           ; Speed
 
-    mov eax, [ebp+8]                                    ; Xpos 
+    mov eax, [ebp+12]                                   ; Xpos 
     mov dword [ebx + Alien.Xpos], eax
     fild dword [ebx + Alien.Xpos]                       ; Convert to float
     fstp dword [ebx + Alien.Xpos]                                  
 
-    mov eax, [ebp+12]                                   ; Ypos 
+    mov eax, [ebp+16]                                   ; Ypos 
     mov dword [ebx + Alien.Ypos], eax
     fild dword [ebx + Alien.Ypos]                       ; Convert to float
     fstp dword [ebx + Alien.Ypos]                              
@@ -74,13 +75,14 @@ CreateAlien:
     inc eax                                             
     mov dword [ebx + Alien.MoveDownCounter], eax        ; MoveDownCounter
 
-    ; CreateGameobject(&data, &update, &render, &destroy)
+    ; CreateGameobject(&render, &data, &update, &render, &destroy)
     push AlienDestroy
     push AlienRender
     push AlienUpdate
     push ebx
+    push dword [ebp+8]
     call CreateGameObject
-    add esp, 16
+    add esp, 20
 
     pop esi
     pop ebx
@@ -191,7 +193,8 @@ AlienDestroy:
 
 
 ;
-; LayOutAlienGrid()
+; LayOutAlienGrid(&scene)
+; [ebp+8] scene
 ;
 
 LayOutAlienGrid:
@@ -230,11 +233,12 @@ LayOutAlienGrid:
     mov dword [ebp-20], ebx                                 ; Reset x pos
     .NewCol:
 
-    ; CreateAlien(x, y)
+    ; CreateAlien(&scene, x, y)
     push dword [ebp-24]
     push dword [ebp-20]
+    push dword [ebp+8]
     call CreateAlien
-    add esp, 8
+    add esp, 12
 
     mov eax, [ebp-4]                                        ; Increase x pos
     add [ebp-20], eax

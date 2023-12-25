@@ -20,6 +20,8 @@ cpu x64                                                 ; Limit instructions to 
 %include "./Physics.asm"
 %include "./Hitbox.asm"
 %include "./Time.asm"
+%include "./Gameobject.asm"
+%include "./Scene.asm"
 
 ; Constants and Data
 
