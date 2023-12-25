@@ -1,3 +1,6 @@
+%ifndef WINDOWS_INC
+%define WINDOWS_INC
+
 extern GetModuleHandleA
 extern GetCommandLineA
 extern ExitProcess
@@ -74,3 +77,7 @@ extern QueryPerformanceCounter
 %define PS_SOLID 0
 
 %define DT_BOTTOM       0x00000008
+
+
+; Include guard
+%endif  

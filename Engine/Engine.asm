@@ -13,9 +13,11 @@ cpu x64                                                 ; Limit instructions to 
 ; Includes
 %include "windows.inc"
 %include "./Memory.asm"
+%include "./LinkedList.asm"
 %include "./Graphics.asm"
 %include "./Debug.asm"
 %include "./Input.asm"
+%include "./Physics.asm"
 %include "./Time.asm"
 
 ; Constants and Data
@@ -73,6 +75,7 @@ LoadEngine:
     call InitMemory                                     ; Initialize memory module
     call InitTime                                       ; Initialize time module
     call InitInput                                      ; Initialize input module
+    call InitPhysics                                    ; Initialize physics module
 
     call InitWindow                                     ; Create the window
     mov [HWND], eax                                     ; Move the window handle to the local variable
@@ -186,7 +189,7 @@ RunEngine:
     .GameLoop:
     call CalculateElapsedTime                           ; Set the elapsedSec for this frame
     call GameLoop
-    call LockFramerate                                  ; Locks the framerate to the target value
+    ;call LockFramerate                                  ; Locks the framerate to the target value
     JMP .PeekMessage
 
     .UpdateLoopRet:              
@@ -204,7 +207,11 @@ CleanupEngine:
     enter 0, 0
 
     push eax                                            ; Save eax on the stack
-    call InputCleanup                                   ; Clean up input memory
+
+    call CleanupInput                                   ; Clean up input memory
+    call CleanupPhysics                                 ; Clean up physics memory
+
+    pop eax
     call [ExitProcess]                                  ; Stop process
 
     leave
@@ -310,6 +317,7 @@ GameLoop:
 
     
     call HandleInput                                    ; Handle input
+    call HandlePhysics                                  ; Handle physics
     call dword [GameUpdateFunction]                     ; Update game
     call dword [GameRenderFunction]                     ; Render game
 

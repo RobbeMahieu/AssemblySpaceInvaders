@@ -5,7 +5,6 @@
 
 ; Includes
 %include "windows.inc"
-%include "./LinkedList.asm"
 
 ; Constants and Data
 PRESS equ 0
@@ -39,7 +38,7 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; InitInput
+; InitInput()
 ;
 
 InitInput:
@@ -71,7 +70,11 @@ InitInput:
     leave
     ret
 
-InputCleanup:
+;
+; CleanupInput()
+;
+
+CleanupInput:
     enter 0, 0
 
     push dword [Actions]                                ; LL_Delete(&list)
