@@ -37,6 +37,7 @@ extern KEY_D
 extern KEY_SPACE
 
 extern AddAction
+extern RemoveAction
 
 ; Linked List
 extern LL_Create

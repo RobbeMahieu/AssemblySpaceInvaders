@@ -293,3 +293,24 @@ AddAction:
     pop ebx
     leave
     ret
+
+;
+; RemoveAction(&action)
+; [ebp+8] action
+;
+
+RemoveAction:
+    enter 0, 0
+    push ebx
+
+    mov ebx, [ebp+8]
+
+    ; LL_Delete(&list, &data)                           ; Add it to the list
+    push ebx
+    push dword [Actions]
+    call LL_Delete
+    add esp, 8
+
+    pop ebx
+    leave
+    ret

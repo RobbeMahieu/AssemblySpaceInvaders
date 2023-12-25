@@ -63,6 +63,9 @@ export KEY_SPACE
 
 global AddAction
 export AddAction
+global RemoveAction
+export RemoveAction
+
 
 ; Linked List
 global LL_Create

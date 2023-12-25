@@ -14,14 +14,25 @@ PlayerStartSpeed equ 200
 BulletStartBulletSpeed equ -200
 
 struc Player
+    ; Bounds
     .Xpos resd 1
     .Ypos resd 1
     .Width resd 1
     .Height resd 1
+    .Hitbox resd 1
+
+    ; Speed
     .Speed resd 1
+
+    ; Bullet
     .BulletSpeed resd 1
     .AccuBulletDelay resd 1
-    .Hitbox resd 1
+
+    ; Actions
+    .MoveLeftAction resd 1
+    .MoveRightAction resd 1
+    .ShootAction resd 1
+
 endstruc
 
 section .data
@@ -97,6 +108,7 @@ CreatePlayer:
     push dword [KEY_A]
     call [AddAction]
     add esp, 16
+    mov dword [ebx + Player.MoveLeftAction], eax        ; Store the action address
 
     ; AddAction(key, state, callback, data)             ; Move right
     push ebx        
@@ -105,6 +117,7 @@ CreatePlayer:
     push dword [KEY_D]
     call [AddAction]
     add esp, 16
+    mov dword [ebx + Player.MoveRightAction], eax       ; Store the action address
 
     ; AddAction(key, state, callback, data)             ; Shoot
     push ebx
@@ -113,6 +126,7 @@ CreatePlayer:
     push dword [KEY_SPACE]
     call [AddAction]
     add esp, 16
+    mov dword [ebx + Player.ShootAction], eax           ; Store the action address
 
     mov eax, esi                                        ; Return gameobject address
 
@@ -212,7 +226,31 @@ PlayerRender:
 
 PlayerDestroy:
     enter 0, 0
+    push ebx
 
+    mov ebx, [ebp+8]
+
+    ; DeleteHitbox(&hitbox)
+    push dword [ebx + Player.Hitbox]
+    call DeleteHitbox
+    add esp, 4
+
+    ; RemoveAction(&hitbox)                                 ; Delete move left action
+    push dword [ebx + Player.MoveLeftAction]
+    call RemoveAction
+    add esp, 4
+
+    ; RemoveAction(&hitbox)                                 ; Delete move right action
+    push dword [ebx + Player.MoveRightAction]
+    call RemoveAction
+    add esp, 4
+
+    ; RemoveAction(&hitbox)                                 ; Delete shoor action
+    push dword [ebx + Player.ShootAction]
+    call RemoveAction
+    add esp, 4
+
+    pop ebx
     leave
     ret
 
