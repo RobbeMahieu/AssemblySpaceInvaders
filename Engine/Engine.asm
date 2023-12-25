@@ -18,6 +18,7 @@ cpu x64                                                 ; Limit instructions to 
 %include "./Debug.asm"
 %include "./Input.asm"
 %include "./Physics.asm"
+%include "./Hitbox.asm"
 %include "./Time.asm"
 
 ; Constants and Data

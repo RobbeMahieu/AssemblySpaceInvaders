@@ -54,3 +54,17 @@ extern LL_Remove
 ; Time
 extern CalculateFPS
 extern GetElapsed
+
+; Physics
+extern CreateHitbox
+extern DeleteHitbox
+extern SetHitboxBounds
+extern SetHitboxCallbacks
+
+%define Hitbox.Xpos 0
+%define Hitbox.Ypos 1
+%define Hitbox.Width 2
+%define Hitbox.Height 3
+%define Hitbox.OnHit 4
+%define Hitbox.OnHitting 5
+%define Hitbox.OnHitEnd 6

@@ -21,6 +21,7 @@ struc Player
     .Speed resd 1
     .BulletSpeed resd 1
     .AccuBulletDelay resd 1
+    .Hitbox resd 1
 endstruc
 
 section .data
@@ -76,6 +77,18 @@ CreatePlayer:
     mov esi, eax                                        ; Cache gameobject address
 
     ; Additional Setup
+
+    ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
+    push 0
+    push 0
+    push 0
+    push dword [ebx + Player.Height]
+    push dword [ebx + Player.Width]
+    push dword [ebx + Player.Ypos]
+    push dword [ebx + Player.Xpos]
+    call CreateHitbox
+    add esp, 28
+    mov dword [ebx + Player.Hitbox], eax                ; Store the hitbox address
 
     ; AddAction(key, state, callback, data)             ; Move left
     push ebx

@@ -79,3 +79,13 @@ global CalculateFPS
 export CalculateFPS
 global GetElapsed
 export GetElapsed
+
+; Physics
+global CreateHitbox
+export CreateHitbox
+global DeleteHitbox
+export DeleteHitbox
+global SetHitboxBounds
+export SetHitboxBounds
+global SetHitboxCallbacks
+export SetHitboxCallbacks
