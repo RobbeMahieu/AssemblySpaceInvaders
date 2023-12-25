@@ -206,15 +206,17 @@ RunEngine:
 
 CleanupEngine:
     enter 0, 0
+    push ebx
 
-    push eax                                            ; Save eax on the stack
+    mov ebx, eax                                        ; Save exit code in ebx
 
     call CleanupInput                                   ; Clean up input memory
     call CleanupPhysics                                 ; Clean up physics memory
 
-    pop eax
+    push ebx
     call [ExitProcess]                                  ; Stop process
 
+    pop ebx
     leave
     ret
 
