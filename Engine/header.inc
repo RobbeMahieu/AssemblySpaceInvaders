@@ -17,6 +17,8 @@ global DebugValue
 export DebugValue
 global DebugPrintValue
 export DebugPrintValue
+global EnableDebug
+export EnableDebug
 
 global formatDecimal
 export formatDecimal

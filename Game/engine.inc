@@ -10,6 +10,7 @@ extern MemoryFree
 ; Debug
 extern DebugValue
 extern DebugPrintValue
+extern EnableDebug
 
 extern formatDecimal
 extern formatHex
