@@ -187,7 +187,7 @@ RectCollision:
     ; OnHit( &hitbox, &other)
     push esi
     push ebx
-    call [ebp + Hitbox.OnHit]
+    call [ebx + Hitbox.OnHit]
     add esp, 8
 
     .OnHitOther:
