@@ -253,5 +253,12 @@ TestFunction:
     call BulletDespawn
     add esp, 4
 
+    mov eax, [ebp+12]   
+
+    ; BulletDespawn(&bullet)
+    push dword [eax + Hitbox.Owner] 
+    call BulletDespawn
+    add esp, 4
+
     leave
     ret

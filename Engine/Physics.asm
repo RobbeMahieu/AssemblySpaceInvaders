@@ -119,11 +119,6 @@ HandlePhysics:
     jmp .NextOther                                       ; Loop through all nodes
 
     .FinishedList: 
-    mov ebx, [PhysicsObjects]
-    push formatDecimal
-    push dword [ebx + LinkedList.count] 
-    call DebugPrintValue
-    add esp, 8
 
     pop edi
     pop esi   

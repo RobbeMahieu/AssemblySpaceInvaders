@@ -11,7 +11,7 @@
 AlienWidth equ 30
 AlienHeight equ 25
 AlienMoveDownCount equ 9
-AlienSpeed equ 50
+AlienJump equ 5
 
 AlienOffset equ 15
 AlienRows equ 5
@@ -31,14 +31,13 @@ struc Alien
     .Hitbox resd 1
 
     ; Properties
-    .Speed resd 1
+    .Jump resd 1
     .JumpTimer resd 1
     .MoveDownCounter resd 1
 endstruc
 
 section .data
 AlienJumpTime dd 0x3f000000                             ; 0.5f
-AlienJump dd 5
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -66,8 +65,8 @@ CreateAlien:
     ; Fill in fields                     
     mov dword [ebx + Alien.Width], AlienWidth           ; Width                                  
     mov dword [ebx + Alien.Height], AlienHeight         ; Height
+    mov dword [ebx + Alien.Jump], AlienJump             ; Jump distance
     mov dword [ebx + Alien.JumpTimer], 0                ; JumpTimer
-    mov dword [ebx + Alien.Speed], AlienSpeed           ; Speed
 
     mov eax, [ebp+12]                                   ; Xpos 
     mov dword [ebx + Alien.Xpos], eax
@@ -92,7 +91,7 @@ CreateAlien:
     push dword [ebp+8]
     call CreateGameObject
     add esp, 20
-    mov dword [ebx + Alien.Gameobject], eax            ; Cache gameobject address
+    mov dword [ebx + Alien.Gameobject], eax             ; Cache gameobject address
 
     ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
     push HL_BULLET
@@ -104,10 +103,11 @@ CreateAlien:
     push dword [ebx + Alien.Xpos]
     call CreateHitbox
     add esp, 28
-    mov dword [ebx + Alien.Hitbox], eax                ; Store the hitbox address
+    mov dword [ebx + Alien.Hitbox], eax                 ; Store the hitbox address
+    mov dword [eax + Hitbox.Owner], ebx                 ; Set reference to owner in hitbox
 
 
-    mov eax, dword [ebx + Alien.Gameobject]            ; Return gameobject address
+    mov eax, dword [ebx + Alien.Gameobject]             ; Return gameobject address
 
     pop esi
     pop ebx
@@ -154,20 +154,20 @@ AlienUpdate:
 
     .RowDown:
     mov dword [ebx + Alien.MoveDownCounter], 0          ; Reset counter
+    neg dword [ebx + Alien.Jump]                        ; Invert Jump
 
     mov dword [ebp-4], AlienOffset                      ; Update Ypos
     fild dword [ebp-4]
     fadd dword [ebx + Alien.Ypos]
     fstp dword [ebx + Alien.Ypos]
-    
-    neg dword [AlienJump]                               ; Invert Jump
-    jmp .UpdateRet
+    jmp .UpdateHitbox
 
     .NoRowDown:       
-    fild dword [AlienJump]                              ; Update Xpos
+    fild dword [ebx + Alien.Jump]                       ; Update Xpos
     fadd dword [ebx + Alien.Xpos]
     fstp dword [ebx + Alien.Xpos]
 
+    .UpdateHitbox:
     ; SetHitboxBounds(&hitbox, x, y, width, height)     ; Update HitboxPosition
     push dword [ebx + Alien.Height]
     push dword [ebx + Alien.Width]
@@ -226,7 +226,7 @@ AlienDestroy:
     mov ebx, [ebp+8]
 
     ; DeleteHitbox(&hitbox)
-    push dword [ebx + Player.Hitbox]
+    push dword [ebx + Alien.Hitbox]
     call DeleteHitbox
     add esp, 4
 
