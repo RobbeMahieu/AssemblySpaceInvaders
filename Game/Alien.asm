@@ -17,8 +17,6 @@ AlienOffset equ 15
 AlienRows equ 5
 AlienColumns equ 11
 
-%define HL_ALIEN C_HITLAYER_3
-
 struc Alien
     ; Owner
     .Gameobject resd 1

@@ -13,8 +13,6 @@ PlayerHeight equ 20
 PlayerStartSpeed equ 200
 BulletStartBulletSpeed equ -200
 
-%define HL_PLAYER C_HITLAYER_1
-
 struc Player
     ; Owner
     .Gameobject resd 1
@@ -42,7 +40,7 @@ endstruc
 
 section .data
 
-BulletDelay dd 0.5
+BulletDelay dd 0.75
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code

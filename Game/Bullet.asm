@@ -11,8 +11,6 @@
 BulletWidth equ 4
 BulletHeight equ 15
 
-%define HL_BULLET C_HITLAYER_2
-
 struc Bullet
     ; Owner
     .Gameobject resd 1
@@ -86,7 +84,7 @@ CreateBullet:
     mov dword [ebx + Bullet.Gameobject], eax            ; Store reference to the owning gameobject
 
     ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
-    push C_HITLAYER_3
+    push HL_ALIEN
     push HL_BULLET
     push TestFunction
     push dword [ebx + Bullet.Height]

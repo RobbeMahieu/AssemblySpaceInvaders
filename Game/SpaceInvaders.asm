@@ -9,6 +9,11 @@ cpu x64                                                 ; Limit instructions to 
 
 ; Includes
 %include "engine.inc"
+
+%define HL_PLAYER C_HITLAYER_1
+%define HL_BULLET C_HITLAYER_2
+%define HL_ALIEN C_HITLAYER_3
+
 %include "./Bullet.asm"
 %include "./Player.asm"
 %include "./Alien.asm"
