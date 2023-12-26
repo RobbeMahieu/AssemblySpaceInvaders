@@ -259,5 +259,7 @@ OnBulletHit:
     call DeleteGameObject
     add esp, 4
 
+    call CheckAliensLeft
+
     leave
     ret
