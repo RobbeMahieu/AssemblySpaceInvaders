@@ -30,7 +30,7 @@ InitializeGame:
     push dword [GameScene]                              ; Put game scene on the stack
     call CreatePlayer                                   ; CreatePlayer()   
     call CreateEarth                                    ; CreateEarth()   
-    call LayOutAlienGrid                                ; LayOutAlienGrid()
+    call CreateAlienManager                             ; CreateAlienManager()
     add esp, 4
 
     mov eax, dword [GameScene]                          ; Set current scene as the active one

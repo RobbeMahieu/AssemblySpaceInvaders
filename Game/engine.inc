@@ -44,6 +44,7 @@ extern LL_Create
 extern LL_Delete
 extern LL_Add
 extern LL_Remove
+extern LL_ForEach
 
 %define LinkedList.start 0
 %define LinkedList.end 4
@@ -62,13 +63,13 @@ extern DeleteHitbox
 extern SetHitboxBounds
 
 %define Hitbox.Owner 0
-%define Hitbox.Xpos 1
-%define Hitbox.Ypos 2
-%define Hitbox.Width 3
-%define Hitbox.Height 4
-%define Hitbox.OnHit 5
-%define Hitbox.Layer 6
-%define Hitbox.HitLayers 7
+%define Hitbox.Xpos 4
+%define Hitbox.Ypos 8
+%define Hitbox.Width 12
+%define Hitbox.Height 16
+%define Hitbox.OnHit 20
+%define Hitbox.Layer 24
+%define Hitbox.HitLayers 28
 
 %define C_HITLAYER_1    0x00000001
 %define C_HITLAYER_2    0x00000002
@@ -89,7 +90,7 @@ extern CreateGameObject
 extern DeleteGameObject
 
 %define Gameobject.scene 0
-%define Gameobject.objectData 1
-%define Gameobject.update 2
-%define Gameobject.render 3
-%define Gameobject.destroy 4
+%define Gameobject.objectData 4
+%define Gameobject.update 8
+%define Gameobject.render 12
+%define Gameobject.destroy 16

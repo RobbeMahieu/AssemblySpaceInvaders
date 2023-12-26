@@ -196,3 +196,37 @@ LL_Remove:
     pop ebx
     leave
     ret
+
+;
+; LL_ForEach(&list, &callback)
+; [ebp+8] list
+; [ebp+12] callback
+;
+
+LL_ForEach:
+    enter 0, 0
+    push ebx
+
+    mov ebx, [ebp+8]
+    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
+
+    .NextNode:
+    cmp ebx, 0
+    jz .FinishedList
+
+    ; Load node data
+    mov eax, dword [ebx + Node.content]                 ; eax contains base address of content
+    mov ebx, [ebx + Node.next]                          ; Cache next address
+
+    ; callback(&object)
+    push eax
+    call dword [ebp+12] 
+    add esp, 4                   
+
+    jmp .NextNode                                       ; Loop through all nodes
+
+    .FinishedList:
+
+    pop ebx
+    leave
+    ret

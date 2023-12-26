@@ -8,15 +8,6 @@
 
 ; Constants and Data
 
-AlienWidth equ 30
-AlienHeight equ 25
-AlienMoveDownCount equ 9
-AlienJump equ 5
-
-AlienOffset equ 15
-AlienRows equ 5
-AlienColumns equ 11
-
 struc Alien
     ; Owner
     .Gameobject resd 1
@@ -27,15 +18,7 @@ struc Alien
     .Width resd 1
     .Height resd 1
     .Hitbox resd 1
-
-    ; Properties
-    .Jump resd 1
-    .JumpTimer resd 1
-    .MoveDownCounter resd 1
 endstruc
-
-section .data
-AlienJumpTime dd 0x3f000000                             ; 0.5f
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -63,25 +46,18 @@ CreateAlien:
     ; Fill in fields                     
     mov dword [ebx + Alien.Width], AlienWidth           ; Width                                  
     mov dword [ebx + Alien.Height], AlienHeight         ; Height
-    mov dword [ebx + Alien.Jump], AlienJump             ; Jump distance
-    mov dword [ebx + Alien.JumpTimer], 0                ; JumpTimer
 
     mov eax, [ebp+12]                                   ; Xpos 
     mov dword [ebx + Alien.Xpos], eax
     fild dword [ebx + Alien.Xpos]                       ; Convert to float
-    fstp dword [ebx + Alien.Xpos]                                  
+    fstp dword [ebx + Alien.Xpos]                                
 
     mov eax, [ebp+16]                                   ; Ypos 
     mov dword [ebx + Alien.Ypos], eax
     fild dword [ebx + Alien.Ypos]                       ; Convert to float
     fstp dword [ebx + Alien.Ypos]                              
 
-    mov eax, AlienMoveDownCount                         ; Start at half (aliens start in the middle)
-    shr eax, 1
-    inc eax                                             
-    mov dword [ebx + Alien.MoveDownCounter], eax        ; MoveDownCounter
-
-    ; CreateGameobject(&render, &data, &update, &render, &destroy)
+    ; CreateGameobject(&scene, &data, &update, &render, &destroy)
     push AlienDestroy
     push AlienRender
     push AlienUpdate
@@ -104,6 +80,11 @@ CreateAlien:
     mov dword [ebx + Alien.Hitbox], eax                 ; Store the hitbox address
     mov dword [eax + Hitbox.Owner], ebx                 ; Set reference to owner in hitbox
 
+    ; LL_Add(&scene, &object)
+    push ebx
+    push dword [AlienList]
+    call [LL_Add]
+    add esp, 8
 
     mov eax, dword [ebx + Alien.Gameobject]             ; Return gameobject address
 
@@ -118,65 +99,7 @@ CreateAlien:
 ;
 
 AlienUpdate:
-    ; [ebp-4] float stack temporary
-    enter 4, 0
-    push ebx
-
-    mov ebx, [ebp+8]                                    ; Cache object in ebx
-
-    ; Sub elapsedSec to jumpTimer
-    fld dword [ebx + Alien.JumpTimer]                   ; Load jump timer in float stack
-    call [GetElapsed]                                   ; Get ElapsedSec
-    mov [ebp-4], eax
-
-    fadd dword [ebp-4]                                  ; Add to the timer
-    fstp dword [ebx + Alien.JumpTimer]                  ; Store the result
-    
-    ; Check jump condition
-    fld dword [AlienJumpTime]                           ; Put jumptime in float stack
-    fcomp dword [ebx + Alien.JumpTimer]                 ; JumpTime < Alien jumptimer?
-    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
-    fwait
-    sahf                                                ; Transfer ax codes to status register
-    ja .UpdateRet                                       ; I can finally compare now
-
-    .Jump:
-    fld dword [AlienJumpTime]                           ; Reset JumpTimer
-    fsub dword [ebx + Alien.JumpTimer]
-    fstp dword [ebx + Alien.JumpTimer] 
-
-    ; Check if alien has to move down a row
-    add dword [ebx + Alien.MoveDownCounter], 1          ; Increase MoveDownCounter
-    cmp dword [ebx + Alien.MoveDownCounter], AlienMoveDownCount
-    jle .NoRowDown
-
-    .RowDown:
-    mov dword [ebx + Alien.MoveDownCounter], 0          ; Reset counter
-    neg dword [ebx + Alien.Jump]                        ; Invert Jump
-
-    mov dword [ebp-4], AlienOffset                      ; Update Ypos
-    fild dword [ebp-4]
-    fadd dword [ebx + Alien.Ypos]
-    fstp dword [ebx + Alien.Ypos]
-    jmp .UpdateHitbox
-
-    .NoRowDown:       
-    fild dword [ebx + Alien.Jump]                       ; Update Xpos
-    fadd dword [ebx + Alien.Xpos]
-    fstp dword [ebx + Alien.Xpos]
-
-    .UpdateHitbox:
-    ; SetHitboxBounds(&hitbox, x, y, width, height)     ; Update HitboxPosition
-    push dword [ebx + Alien.Height]
-    push dword [ebx + Alien.Width]
-    push dword [ebx + Alien.Ypos]
-    push dword [ebx + Alien.Xpos]
-    push dword [ebx + Alien.Hitbox]
-    call SetHitboxBounds
-    add esp, 20
-
-    .UpdateRet:
-    pop ebx
+    enter 0, 0
     leave
     ret
 
@@ -228,72 +151,77 @@ AlienDestroy:
     call DeleteHitbox
     add esp, 4
 
+    ; LL_Remove(&scene, &object)
+    push ebx
+    push dword [AlienList]
+    call [LL_Remove]
+    add esp, 8
+
     pop ebx
     leave
     ret
 
-
 ;
-; LayOutAlienGrid(&scene)
-; [ebp+8] scene
+; AlienJump(&object)
+; [ebp+8] object
 ;
 
-LayOutAlienGrid:
-    ; Local variables
-    ; [ebp-4] x offset
-    ; [ebp-8] y offset
-    ; [ebp-12] row
-    ; [ebp-16] col
-    ; [ebp-20] xpos
-    ; [ebp-24] ypos
-    enter 24, 0
+AlienJump:
+    enter 0, 0
     push ebx
-    push esi
 
-    ; Calculate starting X
-    mov dword [ebp-4], AlienOffset                          ; Offset for one alien
-    add dword [ebp-4], AlienWidth                           ; 1 space = alien + offset
-    mov eax, AlienColumns                                   ; Total width of alien grid = cols * space
-    mul dword [ebp-4]
-    sub eax, AlienOffset                                    ; This is one offset too much (last one doesn't need it)
-    mov ebx, WindowWidth                                    ; Substract this from the total width
-    sub ebx, eax
-    shr ebx, 1                                              ; And divide the leftover space by two => starting x
+    mov ebx, [ebp+8]
 
-    ; Calculate starting Y
-    mov dword [ebp-8], AlienOffset                          ; Offset for one alien
-    add dword [ebp-8], AlienHeight                          ; 1 space = alien + offset
-    mov esi, 50
+    fild dword [AlienJumpDistance]                       ; Update Xpos
+    fadd dword [ebx + Alien.Xpos]
+    fstp dword [ebx + Alien.Xpos]
 
-    ; Loop to create the grid
-    mov dword [ebp-12], 0                                   ; Reset row count
-    mov dword [ebp-24], esi                                 ; Reset y pos
-    .NewRow:
+    pop ebx
+    leave
+    ret
 
-    mov dword [ebp-16], 0                                   ; Reset col count
-    mov dword [ebp-20], ebx                                 ; Reset x pos
-    .NewCol:
+;
+; AlienMoveDown(&object)
+; [ebp+8] object
+;
 
-    ; CreateAlien(&scene, x, y)
-    push dword [ebp-24]
-    push dword [ebp-20]
-    push dword [ebp+8]
-    call CreateAlien
-    add esp, 12
+AlienMoveDown:
+    ; Local variables
+    ; [ebp-4] temp float storage
+    enter 4, 0
+    push ebx
 
-    mov eax, [ebp-4]                                        ; Increase x pos
-    add [ebp-20], eax
-    inc dword [ebp-16]                      
-    cmp dword [ebp-16], AlienColumns
-    jne .NewCol
+    mov ebx, [ebp+8]
 
-    mov eax, [ebp-8]                                        ; Increase y pos
-    add [ebp-24], eax
-    inc dword [ebp-12]                      
-    cmp dword [ebp-12], AlienRows
-    jne .NewRow
+    mov dword [ebp-4], AlienOffset                      ; Update Ypos
+    fild dword [ebp-4]
+    fadd dword [ebx + Alien.Ypos]
+    fstp dword [ebx + Alien.Ypos]
 
-    pop esi
+    pop ebx
+    leave
+    ret
+
+;
+; AlienUpdateHitbox(&object)
+; [ebp+8] object
+;
+
+AlienUpdateHitbox:
+    enter 0, 0
+    push ebx
+
+    mov ebx, [ebp+8]
+
+    ; SetHitboxBounds(&hitbox, x, y, width, height)     ; Update HitboxPosition
+    push dword [ebx + Alien.Height]
+    push dword [ebx + Alien.Width]
+    push dword [ebx + Alien.Ypos]
+    push dword [ebx + Alien.Xpos]
+    push dword [ebx + Alien.Hitbox]
+    call SetHitboxBounds
+    add esp, 20
+
     pop ebx
     leave
     ret

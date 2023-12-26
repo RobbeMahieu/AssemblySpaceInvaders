@@ -134,7 +134,7 @@ OnEarthReached:
     enter 0, 0
    
     push dword [formatDecimal]
-    push 20
+    push -20
     call DebugValue
     add esp, 8
 
