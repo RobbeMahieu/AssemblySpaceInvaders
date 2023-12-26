@@ -90,8 +90,6 @@ global DeleteHitbox
 export DeleteHitbox
 global SetHitboxBounds
 export SetHitboxBounds
-global SetHitboxCallbacks
-export SetHitboxCallbacks
 
 ; Scene
 global CreateScene

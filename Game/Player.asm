@@ -13,6 +13,8 @@ PlayerHeight equ 20
 PlayerStartSpeed equ 200
 BulletStartBulletSpeed equ -200
 
+%define HL_PLAYER C_HITLAYER_1
+
 struc Player
     ; Owner
     .Gameobject resd 1
@@ -95,7 +97,7 @@ CreatePlayer:
 
     ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
     push 0
-    push 0
+    push HL_PLAYER
     push 0
     push dword [ebx + Player.Height]
     push dword [ebx + Player.Width]

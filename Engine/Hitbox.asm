@@ -9,6 +9,9 @@
 ; Constants and Data
 
 struc Hitbox
+    ; Owner
+    .Owner:         resd 1
+
     ; Bounds
     .Xpos:          resd 1
     .Ypos:          resd 1
@@ -17,10 +20,8 @@ struc Hitbox
 
     ; Callbacks
     .OnHit:         resd 1
-    .OnHitting:     resd 1
-    .OnHitEnd:      resd 1
-
-    ; Layers
+    .Layer:         resd 1
+    .HitLayers:     resd 1
 endstruc
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -28,14 +29,14 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)
+; CreateHitbox(x, y, width, height, &onHit, layer, hitLayers)
 ; [ebp+8] x
 ; [ebp+12] y
 ; [ebp+16] width
 ; [ebp+20] height
 ; [ebp+24] onHit
-; [ebp+28] onHitting
-; [ebp+32] onHitEnd
+; [ebp+28] layer
+; [ebp+32] hitlayers
 ;
 ; eax => return hitbox address
 ;
@@ -59,13 +60,13 @@ CreateHitbox:
     call SetHitboxBounds
     add esp, 20
 
-    ; SetHitboxCallbacks(&hitbox, &onHit, &onHitting, &onHitEnd)   ; Fill in the callbacks
-    push dword [ebp+32]
-    push dword [ebp+28]
-    push dword [ebp+24]
-    push ebx
-    call SetHitboxCallbacks
-    add esp, 16
+    ; Fill in other fields
+    mov edx, [ebp+24]                                   ; onHit
+    mov [eax + Hitbox.OnHit], edx
+    mov edx, [ebp+28]                                   ; layer
+    mov [eax + Hitbox.Layer], edx
+    mov edx, [ebp+32]                                   ; hitLayers
+    mov [eax + Hitbox.HitLayers], edx
 
     ; RegisterHitbox(&hitbox)                           ; Add it to the physics objects
     push ebx
@@ -117,30 +118,6 @@ SetHitboxBounds:
     mov [eax + Hitbox.Width], edx
     mov edx, [ebp+24]                                   ; Height
     mov [eax + Hitbox.Height], edx
-
-    leave
-    ret
-
-;
-; SetHitboxCallbacks(&hitbox, &onHit, &onHitting, &onHitEnd)
-; [ebp+8] hitbox
-; [ebp+12] onHit
-; [ebp+16] onHitting
-; [ebp+20] onHitEnd
-;
-
-SetHitboxCallbacks:
-    enter 0, 0
-
-    mov eax, [ebp+8]                                    ; Cache hitbox in eax
-
-    ; Update the fields
-    mov edx, [ebp+12]                                   ; onHit
-    mov [eax + Hitbox.OnHit], edx
-    mov edx, [ebp+16]                                   ; onHitting
-    mov [eax + Hitbox.OnHitting], edx
-    mov edx, [ebp+20]                                   ; onHitEnd
-    mov [eax + Hitbox.OnHitEnd], edx
 
     leave
     ret

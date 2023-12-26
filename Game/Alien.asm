@@ -17,11 +17,20 @@ AlienOffset equ 15
 AlienRows equ 5
 AlienColumns equ 11
 
+%define HL_ALIEN C_HITLAYER_3
+
 struc Alien
+    ; Owner
+    .Gameobject resd 1
+
+    ; Bounds
     .Xpos resd 1
     .Ypos resd 1
     .Width resd 1
     .Height resd 1
+    .Hitbox resd 1
+
+    ; Properties
     .Speed resd 1
     .JumpTimer resd 1
     .MoveDownCounter resd 1
@@ -83,6 +92,22 @@ CreateAlien:
     push dword [ebp+8]
     call CreateGameObject
     add esp, 20
+    mov dword [ebx + Alien.Gameobject], eax            ; Cache gameobject address
+
+    ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
+    push HL_BULLET
+    push HL_ALIEN
+    push 0
+    push dword [ebx + Alien.Height]
+    push dword [ebx + Alien.Width]
+    push dword [ebx + Alien.Ypos]
+    push dword [ebx + Alien.Xpos]
+    call CreateHitbox
+    add esp, 28
+    mov dword [ebx + Alien.Hitbox], eax                ; Store the hitbox address
+
+
+    mov eax, dword [ebx + Alien.Gameobject]            ; Return gameobject address
 
     pop esi
     pop ebx
@@ -143,6 +168,15 @@ AlienUpdate:
     fadd dword [ebx + Alien.Xpos]
     fstp dword [ebx + Alien.Xpos]
 
+    ; SetHitboxBounds(&hitbox, x, y, width, height)     ; Update HitboxPosition
+    push dword [ebx + Alien.Height]
+    push dword [ebx + Alien.Width]
+    push dword [ebx + Alien.Ypos]
+    push dword [ebx + Alien.Xpos]
+    push dword [ebx + Alien.Hitbox]
+    call SetHitboxBounds
+    add esp, 20
+
     .UpdateRet:
     pop ebx
     leave
@@ -187,7 +221,16 @@ AlienRender:
 
 AlienDestroy:
     enter 0, 0
+    push ebx
 
+    mov ebx, [ebp+8]
+
+    ; DeleteHitbox(&hitbox)
+    push dword [ebx + Player.Hitbox]
+    call DeleteHitbox
+    add esp, 4
+
+    pop ebx
     leave
     ret
 

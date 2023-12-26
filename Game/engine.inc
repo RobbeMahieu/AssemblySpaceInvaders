@@ -60,15 +60,24 @@ extern GetElapsed
 extern CreateHitbox
 extern DeleteHitbox
 extern SetHitboxBounds
-extern SetHitboxCallbacks
 
-%define Hitbox.Xpos 0
-%define Hitbox.Ypos 1
-%define Hitbox.Width 2
-%define Hitbox.Height 3
-%define Hitbox.OnHit 4
-%define Hitbox.OnHitting 5
-%define Hitbox.OnHitEnd 6
+%define Hitbox.Owner 0
+%define Hitbox.Xpos 1
+%define Hitbox.Ypos 2
+%define Hitbox.Width 3
+%define Hitbox.Height 4
+%define Hitbox.OnHit 5
+%define Hitbox.Layer 6
+%define Hitbox.HitLayers 7
+
+%define C_HITLAYER_1    0x00000001
+%define C_HITLAYER_2    0x00000002
+%define C_HITLAYER_3    0x00000004
+%define C_HITLAYER_4    0x00000008
+%define C_HITLAYER_5    0x00000010
+%define C_HITLAYER_6    0x00000020
+%define C_HITLAYER_7    0x00000040
+%define C_HITLAYER_8    0x00000080
 
 ; Scene
 extern CreateScene
