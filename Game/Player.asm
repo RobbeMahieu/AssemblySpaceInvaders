@@ -95,7 +95,7 @@ CreatePlayer:
 
     ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
     push 0
-    push HL_PLAYER
+    push HL_FRIENDLY
     push 0
     push dword [ebx + Player.Height]
     push dword [ebx + Player.Width]
@@ -104,6 +104,7 @@ CreatePlayer:
     call CreateHitbox
     add esp, 28
     mov dword [ebx + Player.Hitbox], eax                ; Store the hitbox address
+    mov dword [eax + Hitbox.Owner], ebx                 ; Store owner in hitbox
 
     ; AddAction(key, state, callback, data)             ; Move left
     push ebx

@@ -83,10 +83,10 @@ CreateBullet:
 
     mov dword [ebx + Bullet.Gameobject], eax            ; Store reference to the owning gameobject
 
-    ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
-    push HL_ALIEN
-    push HL_BULLET
-    push TestFunction
+    ; CreateHitbox(x, y, width, height, &onHit, layer, hitLayers)  ; Add a hitbox
+    push HL_ENEMY
+    push HL_FRIENDLY
+    push OnBulletHit
     push dword [ebx + Bullet.Height]
     push dword [ebx + Bullet.Width]
     push dword [ebx + Bullet.Ypos]
@@ -241,7 +241,7 @@ BulletDespawn:
 ; [ebp+12] hitboxOther
 ;
 
-TestFunction:
+OnBulletHit:
     enter 0, 0
 
     mov eax, [ebp+8]   

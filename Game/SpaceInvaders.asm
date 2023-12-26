@@ -10,13 +10,13 @@ cpu x64                                                 ; Limit instructions to 
 ; Includes
 %include "engine.inc"
 
-%define HL_PLAYER C_HITLAYER_1
-%define HL_BULLET C_HITLAYER_2
-%define HL_ALIEN C_HITLAYER_3
+%define HL_FRIENDLY C_HITLAYER_1
+%define HL_ENEMY C_HITLAYER_2
 
 %include "./Bullet.asm"
 %include "./Player.asm"
 %include "./Alien.asm"
+%include "./Earth.asm"
 
 ; Constants and Data
 
@@ -53,6 +53,7 @@ START:
     ; Create game scene
     push dword [Scene]                                  ; Put game scene on the stack
     call CreatePlayer                                   ; CreatePlayer()   
+    call CreateEarth                                    ; CreateEarth()   
     call LayOutAlienGrid                                ; LayOutAlienGrid()
     add esp, 4
 

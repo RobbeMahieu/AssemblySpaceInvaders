@@ -91,9 +91,9 @@ CreateAlien:
     add esp, 20
     mov dword [ebx + Alien.Gameobject], eax             ; Cache gameobject address
 
-    ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
-    push HL_BULLET
-    push HL_ALIEN
+    ; CreateHitbox(x, y, width, height, &onHit, layer, hitLayers)  ; Add a hitbox
+    push HL_FRIENDLY
+    push HL_ENEMY
     push 0
     push dword [ebx + Alien.Height]
     push dword [ebx + Alien.Width]
@@ -263,7 +263,7 @@ LayOutAlienGrid:
     ; Calculate starting Y
     mov dword [ebp-8], AlienOffset                          ; Offset for one alien
     add dword [ebp-8], AlienHeight                          ; 1 space = alien + offset
-    mov esi, 50
+    mov esi, 350
 
     ; Loop to create the grid
     mov dword [ebp-12], 0                                   ; Reset row count
