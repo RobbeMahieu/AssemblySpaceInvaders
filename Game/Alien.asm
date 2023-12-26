@@ -157,6 +157,8 @@ AlienDestroy:
     call [LL_Remove]
     add esp, 8
 
+    call CheckAliensLeft
+
     pop ebx
     leave
     ret

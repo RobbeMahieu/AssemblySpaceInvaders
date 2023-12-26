@@ -227,3 +227,24 @@ LayOutAlienGrid:
     pop ebx
     leave
     ret
+
+;
+; CheckAliensLeft
+;
+
+CheckAliensLeft:
+    enter 0, 0
+
+    mov eax, [AlienList]
+    cmp dword [eax + LinkedList.count], 0
+    jne .StillAliens
+
+    .AllAliensDied:
+    push dword [formatDecimal]
+    push 20
+    call DebugValue
+    add esp, 8
+
+    .StillAliens:
+    leave
+    ret
