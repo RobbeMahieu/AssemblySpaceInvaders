@@ -94,3 +94,10 @@ extern DeleteGameObject
 %define Gameobject.update 8
 %define Gameobject.render 12
 %define Gameobject.destroy 16
+
+; Textbox
+extern CreateTextbox
+extern DestroyTextbox
+extern SetTextboxBounds
+extern SetTextboxText
+extern TextboxRender

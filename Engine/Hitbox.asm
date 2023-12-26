@@ -62,11 +62,11 @@ CreateHitbox:
 
     ; Fill in other fields
     mov edx, [ebp+24]                                   ; onHit
-    mov [eax + Hitbox.OnHit], edx
+    mov [ebx + Hitbox.OnHit], edx
     mov edx, [ebp+28]                                   ; layer
-    mov [eax + Hitbox.Layer], edx
+    mov [ebx + Hitbox.Layer], edx
     mov edx, [ebp+32]                                   ; hitLayers
-    mov [eax + Hitbox.HitLayers], edx
+    mov [ebx + Hitbox.HitLayers], edx
 
     ; RegisterHitbox(&hitbox)                           ; Add it to the physics objects
     push ebx

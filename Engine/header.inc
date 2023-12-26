@@ -107,3 +107,15 @@ global CreateGameObject
 export CreateGameObject
 global DeleteGameObject
 export DeleteGameObject
+
+; Textbox
+global CreateTextbox
+export CreateTextbox
+global DestroyTextbox
+export DestroyTextbox
+global SetTextboxBounds
+export SetTextboxBounds
+global SetTextboxText
+export SetTextboxText
+global TextboxRender
+export TextboxRender

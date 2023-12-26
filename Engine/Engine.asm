@@ -22,6 +22,7 @@ cpu x64                                                 ; Limit instructions to 
 %include "./Time.asm"
 %include "./Gameobject.asm"
 %include "./Scene.asm"
+%include "./Textbox.asm"
 
 ; Constants and Data
 

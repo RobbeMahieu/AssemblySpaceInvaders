@@ -6,9 +6,7 @@
 ; Includes
 %include "engine.inc"
 
-
 section .bss
-GameScene resd 1
 ActiveScene resd 1
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -22,18 +20,7 @@ section .text                                           ; Program start
 InitializeGame:
     enter 0, 0
 
-    ; Create game scene
-    call [CreateScene]
-    mov dword [GameScene], eax
-
-    ; Create game scene
-    push dword [GameScene]                              ; Put game scene on the stack
-    call CreatePlayer                                   ; CreatePlayer()   
-    call CreateEarth                                    ; CreateEarth()   
-    call CreateAlienManager                             ; CreateAlienManager()
-    add esp, 4
-
-    mov eax, dword [GameScene]                          ; Set current scene as the active one
+    call CreateMenuScene
     mov dword [ActiveScene], eax
 
     leave
@@ -81,9 +68,59 @@ CleanupGame:
     enter 0, 0
 
     ; Clean up all scenes
-    push dword [GameScene]                                  
+    push dword [ActiveScene]                                  
     call DeleteScene
     add esp, 4
 
+    leave
+    ret
+
+;
+; CreateGameScene()
+;
+; eax => gamescene address
+;
+
+CreateGameScene:
+    enter 0, 0
+    push ebx
+
+    ; Create game scene
+    call [CreateScene]
+    mov ebx, eax
+
+    ; Create game scene
+    push ebx                                            ; Put scene on the stack
+    call CreatePlayer                                   ; CreatePlayer()   
+    call CreateEarth                                    ; CreateEarth()   
+    call CreateAlienManager                             ; CreateAlienManager()
+    add esp, 4
+
+    mov eax, ebx                                        ; Put scene address as return
+
+    pop ebx
+    leave
+    ret
+
+;
+; CreateMenuScene
+;
+
+CreateMenuScene:
+    enter 0, 0
+    push ebx
+
+    ; Create menu scene
+    call [CreateScene]
+    mov ebx, eax
+
+    ; Create menu scene
+    push ebx                                            ; Put scene on the stack
+    call CreatePlayer                                   ; CreatePlayer()   
+    add esp, 4
+
+    mov eax, ebx                                        ; Put scene address as return
+
+    pop ebx
     leave
     ret
