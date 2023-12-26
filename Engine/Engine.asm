@@ -320,7 +320,6 @@ GameLoop:
     push 0
     call FillRectangle
     add esp, 20
-
     
     call HandleInput                                    ; Handle input
     call HandlePhysics                                  ; Handle physics

@@ -161,6 +161,7 @@ HandleInput:
 
     ; Load node
     mov esi, dword [ebx + Node.content]                 ; esi contains base address of data
+    mov ebx, dword [ebx + Node.next]                    ; ebx contains the next address
     mov eax, dword[esi + Action.keycode]                ; eax contains keycode
 
     ; Manipulate state in correct position
@@ -200,26 +201,26 @@ HandleInput:
 
     .Press:
     cmp dword [ebp-4], 1                                ; Pressed this state
-    jne .LoadNextNode
+    jne .NextNode
 
     cmp dword [ebp-8], 0                                ; Pressed previous state
-    jne .LoadNextNode
+    jne .NextNode
     je .ActionTriggered
 
     .Hold:
     cmp dword [ebp-4], 1                                ; Pressed this state
-    jne .LoadNextNode
+    jne .NextNode
 
     cmp dword [ebp-8], 1                                ; Pressed previous state
-    jne .LoadNextNode
+    jne .NextNode
     je .ActionTriggered
 
     .Release:
     cmp dword [ebp-4], 0                                ; Pressed this state
-    jne .LoadNextNode
+    jne .NextNode
 
     cmp dword [ebp-8], 1                                ; Pressed previous state
-    jne .LoadNextNode
+    jne .NextNode
     je .ActionTriggered
 
     .ActionTriggered:
@@ -227,9 +228,7 @@ HandleInput:
     call [esi + Action.callback]
     add esp, 4
 
-    .LoadNextNode:
-    mov ebx, [ebx + Node.next]
-
+    .NextNode:
     jmp .NextNode
 
     .FinishedList:
