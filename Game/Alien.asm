@@ -263,7 +263,7 @@ LayOutAlienGrid:
     ; Calculate starting Y
     mov dword [ebp-8], AlienOffset                          ; Offset for one alien
     add dword [ebp-8], AlienHeight                          ; 1 space = alien + offset
-    mov esi, 350
+    mov esi, 50
 
     ; Loop to create the grid
     mov dword [ebp-12], 0                                   ; Reset row count
