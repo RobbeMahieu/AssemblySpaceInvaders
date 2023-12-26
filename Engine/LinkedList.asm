@@ -51,33 +51,30 @@ LL_Delete:
     push esi
     push edi
 
-    mov esi, [ebp+8]                                    ; Cache list base address
-    cmp dword [esi + LinkedList.count], 0               ; Check if there are elements to clear
-    jz .ElementsCleared
+    mov ebx, [ebp+8]
+    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
 
-    ; Remove elements
-    mov edi, [esi + LinkedList.start]                   ; Get first node address
+    .NextNode:
+    cmp ebx, 0
+    jz .FinishedList
 
-    .RemoveElement:
-    mov ebx, [edi + Node.next]                          ; Cache the next address
+    ; Load node data
+    mov eax, ebx                                        ; eax contains base address of node
+    mov ebx, [ebx + Node.next]                          ; Cache next address
 
     ; MemoryFree(&object)                               ; Deallocate data
-    push dword [edi + Node.content]
+    push dword [ebx + Node.content]
     call MemoryFree
     add esp, 4
 
     ; MemoryFree(&object)                               ; Deallocate node
-    push edi
+    push ebx
     call MemoryFree
-    add esp, 4
+    add esp, 4                 
 
-    cmp ebx, 0                                          ; If all elements are cleared
-    jz .ElementsCleared
+    jmp .NextNode                                       ; Loop through all nodes
 
-    mov edi, ebx                                        ; Cache the next node
-    jmp .RemoveElement
-
-    .ElementsCleared:
+    .FinishedList:
     ; MemoryFree(&object)                               ; Deallocate list
     push esi
     call MemoryFree

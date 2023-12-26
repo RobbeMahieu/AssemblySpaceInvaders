@@ -20,19 +20,16 @@ struc Menu
     .Select     resd 1
 endstruc
 
-section .data
-
-Title db "SPACE INVADERS!", 0
-Message db "Press SPACE to start", 0
-
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 
 ;
-; CreateMenu(&scene)
+; CreateMenu(&scene, &title, &message)
 ; [ebp+8] scene
+; [ebp+12] title
+; [ebp+16] message
 ; 
 ; eax => Gameobject address
 ;
@@ -64,7 +61,7 @@ CreateMenu:
     push WindowWidth
     push 200
     push 200
-    push Title
+    push dword [ebp+12]
     call CreateTextbox
     add esp, 24
     mov [ebx + Menu.Title], eax                         ; Cache the title textbox 
@@ -75,7 +72,7 @@ CreateMenu:
     push WindowWidth
     push 300
     push 200
-    push Message
+    push dword [ebp+16]
     call CreateTextbox
     add esp, 24
     mov [ebx + Menu.Message], eax                       ; Cache the message textbox 
@@ -141,6 +138,11 @@ MenuDestroy:
 
     ; DestroyTextbox(&textbox)
     push dword [ebx + Menu.Title]
+    call DestroyTextbox
+    add esp, 4
+
+    ; DestroyTextbox(&textbox)
+    push dword [ebx + Menu.Message]
     call DestroyTextbox
     add esp, 4
 

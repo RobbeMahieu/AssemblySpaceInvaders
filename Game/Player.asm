@@ -258,7 +258,7 @@ PlayerDestroy:
     call RemoveAction
     add esp, 4
 
-    ; RemoveAction(&hitbox)                                 ; Delete shoor action
+    ; RemoveAction(&hitbox)                                 ; Delete shoot action
     push dword [ebx + Player.ShootAction]
     call RemoveAction
     add esp, 4

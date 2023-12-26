@@ -133,10 +133,9 @@ EarthDestroy:
 OnEarthReached:
     enter 0, 0
    
-    push dword [formatDecimal]
-    push -20
-    call DebugValue
-    add esp, 8
+    push LOSE_SCENE
+    call SwapScene
+    add esp, 4
 
     leave
     ret

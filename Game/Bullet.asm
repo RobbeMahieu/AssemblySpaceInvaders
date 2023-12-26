@@ -251,11 +251,12 @@ OnBulletHit:
     call BulletDespawn
     add esp, 4
 
-    mov eax, [ebp+12]   
+    mov eax, [ebp+12]
+    mov eax, [eax + Hitbox.Owner]   
 
-    ; BulletDespawn(&bullet)
-    push dword [eax + Hitbox.Owner] 
-    call BulletDespawn
+    ; DeleteGameObject(&other)
+    push dword [eax + Bullet.Gameobject] 
+    call DeleteGameObject
     add esp, 4
 
     leave

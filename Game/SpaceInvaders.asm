@@ -44,7 +44,7 @@ START:
     push WindowWidth
     push AppName
     call [LoadEngine]
-    add esp, 20
+    add esp,  20
 
     call InitializeGame
 

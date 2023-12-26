@@ -240,10 +240,9 @@ CheckAliensLeft:
     jne .StillAliens
 
     .AllAliensDied:
-    push dword [formatDecimal]
-    push 20
-    call DebugValue
-    add esp, 8
+    push WIN_SCENE
+    call SwapScene
+    add esp, 4
 
     .StillAliens:
     leave

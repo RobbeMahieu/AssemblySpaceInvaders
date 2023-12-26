@@ -80,7 +80,6 @@ LoadEngine:
     call InitTime                                       ; Initialize time module
     call InitInput                                      ; Initialize input module
     call InitPhysics                                    ; Initialize physics module
-
     call InitWindow                                     ; Create the window
     mov [HWND], eax                                     ; Move the window handle to the local variable
 
