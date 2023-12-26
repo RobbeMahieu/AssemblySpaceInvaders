@@ -201,26 +201,26 @@ HandleInput:
 
     .Press:
     cmp dword [ebp-4], 1                                ; Pressed this state
-    jne .NextNode
+    jne .Continue
 
     cmp dword [ebp-8], 0                                ; Pressed previous state
-    jne .NextNode
+    jne .Continue
     je .ActionTriggered
 
     .Hold:
     cmp dword [ebp-4], 1                                ; Pressed this state
-    jne .NextNode
+    jne .Continue
 
     cmp dword [ebp-8], 1                                ; Pressed previous state
-    jne .NextNode
+    jne .Continue
     je .ActionTriggered
 
     .Release:
     cmp dword [ebp-4], 0                                ; Pressed this state
-    jne .NextNode
+    jne .Continue
 
     cmp dword [ebp-8], 1                                ; Pressed previous state
-    jne .NextNode
+    jne .Continue
     je .ActionTriggered
 
     .ActionTriggered:
@@ -228,7 +228,7 @@ HandleInput:
     call [esi + Action.callback]
     add esp, 4
 
-    .NextNode:
+    .Continue:
     jmp .NextNode
 
     .FinishedList:
