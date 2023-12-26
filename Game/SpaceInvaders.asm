@@ -13,12 +13,13 @@ cpu x64                                                 ; Limit instructions to 
 %define HL_FRIENDLY C_HITLAYER_1
 %define HL_ENEMY C_HITLAYER_2
 
+%include "./GameManager.asm"
 %include "./Bullet.asm"
 %include "./Player.asm"
 %include "./AlienManager.asm"
 %include "./Alien.asm"
 %include "./Earth.asm"
-%include "./GameManager.asm"
+%include "./Menu.asm"
 
 ; Constants and Data
 

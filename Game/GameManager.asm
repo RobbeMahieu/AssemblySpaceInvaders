@@ -6,8 +6,13 @@
 ; Includes
 %include "engine.inc"
 
-section .bss
-ActiveScene resd 1
+; Constants and data
+
+MENU_SCENE equ 0
+GAME_SCENE equ 1
+
+section .data
+ActiveScene dd 0
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Program start
@@ -20,8 +25,9 @@ section .text                                           ; Program start
 InitializeGame:
     enter 0, 0
 
-    call CreateMenuScene
-    mov dword [ActiveScene], eax
+    push MENU_SCENE
+    call SwapScene
+    add esp, 4
 
     leave
     ret
@@ -116,11 +122,51 @@ CreateMenuScene:
 
     ; Create menu scene
     push ebx                                            ; Put scene on the stack
-    call CreatePlayer                                   ; CreatePlayer()   
+    call CreateMenu                                     ; CreateMenu()   
     add esp, 4
 
     mov eax, ebx                                        ; Put scene address as return
 
     pop ebx
+    leave
+    ret
+
+;
+; SwapScene(sceneIndex)
+; [ebp+8] index
+;
+
+SwapScene:
+    enter 0, 0
+
+    cmp dword [ActiveScene], 0                          ; Only deallocate scene if it exists
+    je .MemoryReleased
+
+    ; DeleteScene(&scene)                               ; Clear the current scene
+    push dword [ActiveScene]
+    call DeleteScene
+    add esp, 4
+
+    .MemoryReleased:
+    lea edx, .SceneSwitch                               ; edx contains jump address
+    shl dword[ebp+8], 1                                 ; Instructions are 2 bytes long, so double the offset
+    add edx, dword[ebp+8]                               ; Calculate correct address
+    jmp edx
+
+    .SceneSwitch:                                       ; Jump table
+    jmp .Menu
+    jmp .Game
+
+    .Menu:                                              ; Load Menu scene
+    call CreateMenuScene           
+    mov dword [ActiveScene], eax         
+    jmp .SwitchEnd
+
+    .Game:                                              ; Load Game scene
+    call CreateGameScene
+    mov dword [ActiveScene], eax
+    jmp .SwitchEnd
+
+    .SwitchEnd:
     leave
     ret

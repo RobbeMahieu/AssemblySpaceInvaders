@@ -290,6 +290,8 @@ AddAction:
     call LL_Add
     add esp, 8
 
+    mov eax, ebx
+
     pop ebx
     leave
     ret
@@ -303,12 +305,12 @@ RemoveAction:
     enter 0, 0
     push ebx
 
-    mov ebx, [ebp+8]
+    mov ebx, [ebp+8]    
 
-    ; LL_Delete(&list, &data)                           ; Add it to the list
+    ; LL_Remove(&list, &object)                         ; Remove it from the list
     push ebx
     push dword [Actions]
-    call LL_Delete
+    call LL_Remove
     add esp, 8
 
     pop ebx

@@ -161,7 +161,7 @@ MenuOnSelect:
     enter 0, 0
 
     push GAME_SCENE
-    ;call SwapScene
+    call SwapScene
     add esp, 4
 
     leave
