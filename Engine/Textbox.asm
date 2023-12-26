@@ -34,7 +34,7 @@ section .text                                           ; Code
 ; [ebp+16] y
 ; [ebp+20] width
 ; [ebp+24] height
-; [ebp+24] color
+; [ebp+28] color
 ;
 ; eax => return Textbox address
 ;
@@ -61,7 +61,7 @@ CreateTextbox:
     ; Fill in other fields
     mov edx, [ebp+8]                                    ; Text
     mov [ebx + Textbox.TextString], edx
-    mov edx, [ebp+24]                                   ; Color
+    mov edx, [ebp+28]                                   ; Color
     mov [ebx + Textbox.Color], edx
 
     mov eax, ebx                                        ; Store address back in eax
@@ -134,28 +134,20 @@ SetTextboxText:
 ;
 
 TextboxRender:
-    ; [ebp-4] XposInt
-    ; [ebp-8] YposInt
-    enter 8, 0
+    enter 0, 0
     push ebx
 
     mov ebx, [ebp+8]                                        ; Object data in ebx
-
-    ; Convert to int
-    fld dword [ebx + Textbox.Xpos]
-    fistp dword [ebp-4]
-    fld dword [ebx + Textbox.Ypos]
-    fistp dword [ebp-8]
 
     ; DrawString(&text, x, y, width, height, color)
     push dword [ebx + Textbox.Color]                                    
     push dword [ebx + Textbox.Height]
     push dword [ebx + Textbox.Width]
-    push dword [ebp-8]
-    push dword [ebp-4]
+    push dword [ebx + Textbox.Ypos]
+    push dword [ebx + Textbox.Xpos]
     push dword [ebx + Textbox.TextString]
     call DrawString
-    add esp, 20
+    add esp, 24
 
     pop ebx
     leave
