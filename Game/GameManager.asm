@@ -15,6 +15,8 @@ LOSE_SCENE equ 3
 
 section .data
 ActiveScene dd 0
+NewScene dd 0
+SceneIndex dd 0
 
 MenuTitle db "SPACE INVADERS!", 0
 MenuMessage db "Press SPACE to start...", 0
@@ -34,9 +36,8 @@ section .text                                           ; Program start
 InitializeGame:
     enter 0, 0
 
-    push MENU_SCENE
-    call SwapScene
-    add esp, 4
+    mov dword [NewScene], MENU_SCENE
+    call LoadScene
 
     leave
     ret
@@ -52,6 +53,13 @@ UpdateGame:
     call UpdateScene
     add esp, 4
 
+    cmp dword [NewScene], 1                             ; Check if scene needs to change
+    jne .Done
+
+    call LoadScene                                      ; Load new scene
+    mov dword [NewScene], 0                             ; Set bool to false
+
+    .Done:
     leave
     ret
 
@@ -200,6 +208,20 @@ CreateLoseScene:
 SwapScene:
     enter 0, 0
 
+    mov dword [NewScene], 1                             ; Set bool true
+    mov eax, [ebp+8]
+    mov dword [SceneIndex], eax                         ; Save new scene index
+
+    leave
+    ret
+
+;
+; LoadScene()
+;
+
+LoadScene:
+    enter 0, 0
+
     cmp dword [ActiveScene], 0                          ; Only deallocate scene if it exists
     je .MemoryReleased
 
@@ -210,8 +232,8 @@ SwapScene:
 
     .MemoryReleased:
     lea edx, .SceneSwitch                               ; edx contains jump address
-    shl dword[ebp+8], 1                                 ; Instructions are 2 bytes long, so double the offset
-    add edx, dword[ebp+8]                               ; Calculate correct address
+    shl dword[SceneIndex], 1                            ; Instructions are 2 bytes long, so double the offset
+    add edx, dword[SceneIndex]                          ; Calculate correct address
     jmp edx
 
     .SceneSwitch:                                       ; Jump table
