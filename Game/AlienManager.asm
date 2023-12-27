@@ -8,11 +8,11 @@
 
 ; Constants and Data
 
-AlienWidth equ 30
-AlienHeight equ 25
+AlienWidth equ 36
+AlienHeight equ 24
 AlienMoveDownCount equ 9
 
-AlienOffset equ 15
+AlienOffset equ 10
 AlienRows equ 5
 AlienColumns equ 11
 
@@ -27,6 +27,9 @@ AlienJumpTimer dd 0                                     ; 0.0f
 AlienJumpDistance dd 5
 AlienMoveDownCounter dd 0
 AlienList dd 0                                          ; All aliens currently alive
+
+Alien1SpritePath db "Resources\Sprites\alien1.bmp", 0
+Alien1Sprite dd 0
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -62,6 +65,12 @@ CreateAlienManager:
     push dword [ebp+8]
     call CreateGameObject
     add esp, 20
+
+    ; Load sprites
+    push Alien1SpritePath
+    call LoadImage
+    add esp, 4
+    mov dword [Alien1Sprite], eax
 
     ; Create alien list
     call LL_Create
@@ -160,6 +169,12 @@ AlienManagerRender:
 
 AlienManagerDestroy:
     enter 0, 0
+
+    ; Delete sprites
+    push dword [Alien1Sprite]
+    call DeleteImage
+    add esp, 4
+
     leave
     ret
 
@@ -204,12 +219,13 @@ LayOutAlienGrid:
     mov dword [ebp-20], ebx                                 ; Reset x pos
     .NewCol:
 
-    ; CreateAlien(&scene, x, y)
+    ; CreateAlien(&scene, x, y, &sprite)
+    push dword [Alien1Sprite]
     push dword [ebp-24]
     push dword [ebp-20]
     push dword [ebp+8]
     call CreateAlien
-    add esp, 12
+    add esp, 16
 
     mov eax, [ebp-4]                                        ; Increase x pos
     add [ebp-20], eax

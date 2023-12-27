@@ -23,8 +23,8 @@ cpu x64                                                 ; Limit instructions to 
 
 ; Constants and Data
 
-WindowWidth equ 560                                     ; Window width constant
-WindowHeight equ 640                                    ; Window height constant
+WindowWidth equ 651                                     ; Window width constant
+WindowHeight equ 744                                    ; Window height constant
 
 section .data
 

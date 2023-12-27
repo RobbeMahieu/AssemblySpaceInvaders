@@ -44,7 +44,7 @@ endstruc
 section .data
 
 BulletDelay dd 0.75
-PlayerImage db "Resources\Sprites\player.bmp"
+PlayerImage db "Resources\Sprites\player.bmp", 0
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -137,7 +137,7 @@ CreatePlayer:
     add esp, 16
     mov dword [ebx + Player.ShootAction], eax           ; Store the action address
 
-    ; LoadSprite(&path)
+    ; LoadImage(&path)
     push PlayerImage
     call LoadImage
     add esp, 4
@@ -237,15 +237,6 @@ PlayerRender:
     push dword [ebx + Player.Sprite]
     call DrawImage
     add esp, 20
-
-    ; FillRectangle(x, y, width, height, color)
-    ;push dword [COLOR_GREEN]                                    
-    ;push dword [ebx + Player.Height]
-    ;push dword [ebx + Player.Width]
-    ;push dword [ebp-8]
-    ;push dword [ebp-4]
-    ;call [FillRectangle]
-    ;add esp, 20
 
     pop ebx
     leave

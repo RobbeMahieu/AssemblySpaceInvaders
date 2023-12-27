@@ -12,6 +12,9 @@ struc Alien
     ; Owner
     .Gameobject resd 1
 
+    ; Image
+    .Sprite     resd 1
+
     ; Bounds
     .Xpos resd 1
     .Ypos resd 1
@@ -25,10 +28,11 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreateAlien(&scene, x, y)
+; CreateAlien(&scene, x, y, &sprite)
 ; [ebp+8] scene
 ; [ebp+12] x
 ; [ebp+16] y
+; [ebp+20] sprite
 ; 
 ; eax => Gameobject address
 ;
@@ -46,6 +50,8 @@ CreateAlien:
     ; Fill in fields                     
     mov dword [ebx + Alien.Width], AlienWidth           ; Width                                  
     mov dword [ebx + Alien.Height], AlienHeight         ; Height
+    mov eax, [ebp+20]                                   ; Sprite
+    mov dword [ebx + Alien.Sprite], eax            
 
     mov eax, [ebp+12]                                   ; Xpos 
     mov dword [ebx + Alien.Xpos], eax
@@ -122,13 +128,13 @@ AlienRender:
     fld dword [ebx + Alien.Ypos]
     fistp dword [ebp-8]
 
-    ; FillRectangle(x, y, width, height, color)
-    push dword [COLOR_WHITE]                                    
+    ; DrawImage(&image, x, y, width, height)
     push dword [ebx + Alien.Height]
     push dword [ebx + Alien.Width]
     push dword [ebp-8]
     push dword [ebp-4]
-    call [FillRectangle]
+    push dword [ebx + Alien.Sprite]
+    call DrawImage
     add esp, 20
 
     pop ebx
