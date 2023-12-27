@@ -14,7 +14,7 @@ formatHex db "0x%08x", 0                                ; Format string hex
 DebugEnabled dd 1                                       ; If debugs will show
 
 section .bss
-buffer resb 50                                          ; Max 50 characters
+buffer resb 20                                          ; Max 20 characters
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code

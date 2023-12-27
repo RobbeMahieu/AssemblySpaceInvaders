@@ -202,19 +202,19 @@ RunEngine:
 ;
 
 CleanupEngine:
-    enter 0, 0
-    push ebx
+    ; Local variables
+    ; [ebp-4] exit code
+    enter 4, 0
 
-    mov ebx, eax                                        ; Save exit code in ebx
+    mov [ebp-4], eax                                    ; Save exit code in ebx
 
     call CleanupInput                                   ; Clean up input memory
     call CleanupPhysics                                 ; Clean up physics memory
     call CleanupMemory                                  ; Clean up hep (check if everything is released)
 
-    push ebx
+    push dword [ebp-4]
     call [ExitProcess]                                  ; Stop process
 
-    pop ebx
     leave
     ret
 

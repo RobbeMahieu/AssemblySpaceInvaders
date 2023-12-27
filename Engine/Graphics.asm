@@ -157,7 +157,7 @@ DrawString:
     push 0
     push 0
     push 0
-    push 0
+    push 400                                            ; Normal fontweight
     push 0
     push 0
     push 0

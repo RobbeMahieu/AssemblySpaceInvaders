@@ -183,8 +183,8 @@ HandleInput:
     jmp .ShiftBits
 
     .DoneShifting:
-    and edi, 1
-    and ecx, 1
+    and edi, 0x00000001                                 ; Mask only first bit
+    and ecx, 0x00000001                                 ; Mask only first bit
     mov [ebp-4], edi                                    ; Track current state
     mov [ebp-8], ecx                                    ; Track previous state
 
