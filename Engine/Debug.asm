@@ -11,7 +11,7 @@ section .data
 caption db "Debug", 0
 formatDecimal db "%d", 0                                ; Format string decimal
 formatHex db "0x%08x", 0                                ; Format string hex
-DebugEnabled dd 0                                       ; If debugs will show
+DebugEnabled dd 1                                       ; If debugs will show
 
 section .bss
 buffer resb 50                                          ; Max 50 characters
@@ -104,6 +104,34 @@ DebugPrintValue:
     push buffer
     call DrawString
     add esp, 24
+
+    .Done:
+    pop edx                                             ; Reset register states
+    pop ecx
+    pop eax
+    leave
+    ret
+
+;
+; DebugString(&string)
+; [ebp+8] string
+;
+
+DebugString:
+    enter 0,0
+    push eax                                            ; Debug functions cannot change registers, so store them
+    push ecx
+    push edx
+
+    cmp dword [DebugEnabled], 0
+    je .Done
+
+    ; MessageBoxA(hWnd, &message, &caption, style)
+    push 0
+    push caption
+    push dword [ebp+8]
+    push 0 
+    call MessageBoxA
 
     .Done:
     pop edx                                             ; Reset register states

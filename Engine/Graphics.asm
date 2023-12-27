@@ -200,6 +200,7 @@ DrawString:
 
 LoadImage:
     enter 0, 0
+    push ebx
 
     ; LoadImageA(hInstance, &name, type, width, height, options)
     push LR_LOADFROMFILE
@@ -210,6 +211,7 @@ LoadImage:
     push 0
     call LoadImageA
 
+    pop ebx
     leave
     ret
 
@@ -257,8 +259,8 @@ DrawImage:
     push dword [ebp-4]
     push dword [ebp+24]
     push dword [ebp+20]
-    push dword [ebp+16]
-    push dword [ebp+12]
+    push 0
+    push 0
     push dword [HDC]
     call [BitBlt]
 

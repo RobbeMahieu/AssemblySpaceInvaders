@@ -9,6 +9,7 @@ extern MemoryFree
 
 ; Debug
 extern DebugValue
+extern DebugString
 extern DebugPrintValue
 extern EnableDebug
 
@@ -33,6 +34,9 @@ extern TEXT_JUSTIFY_CENTER
 
 extern FillRectangle
 extern DrawString
+extern LoadImage
+extern DrawImage
+extern DeleteImage
 
 ; Input
 extern PRESS

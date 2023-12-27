@@ -2,7 +2,6 @@
 %define WINDOWS_INC
 
 extern GetModuleHandleA
-extern GetCommandLineA
 extern ExitProcess
 extern LoadIconA
 extern LoadCursorA
@@ -86,6 +85,8 @@ extern QueryPerformanceCounter
 
 %define IMAGE_BITMAP    0x00000000
 %define LR_LOADFROMFILE 0x00000010
+
+%define MAX_PATH        260
 
 ; Include guard
 %endif  

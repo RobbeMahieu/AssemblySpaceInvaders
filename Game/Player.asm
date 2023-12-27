@@ -8,14 +8,17 @@
 
 ; Constants and Data
 
-PlayerWidth equ 50
-PlayerHeight equ 20
+PlayerWidth equ 39
+PlayerHeight equ 24
 PlayerStartSpeed equ 200
 BulletStartBulletSpeed equ -200
 
 struc Player
     ; Owner
     .Gameobject resd 1
+
+    ; Image
+    .Sprite resd 1
 
     ; Bounds
     .Xpos resd 1
@@ -41,6 +44,7 @@ endstruc
 section .data
 
 BulletDelay dd 0.75
+PlayerImage db "Resources\Sprites\player.bmp"
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -133,6 +137,12 @@ CreatePlayer:
     add esp, 16
     mov dword [ebx + Player.ShootAction], eax           ; Store the action address
 
+    ; LoadSprite(&path)
+    push PlayerImage
+    call LoadImage
+    add esp, 4
+    mov dword [ebx + Player.Sprite], eax
+
     mov eax, dword [ebx + Player.Gameobject]            ; Return gameobject address
 
     pop ebx
@@ -219,14 +229,23 @@ PlayerRender:
     fld dword [ebx + Player.Ypos]
     fistp dword [ebp-8]
 
-    ; FillRectangle(x, y, width, height, color)
-    push dword [COLOR_GREEN]                                    
+    ; DrawImage(&image, x, y, width, height)
     push dword [ebx + Player.Height]
     push dword [ebx + Player.Width]
     push dword [ebp-8]
     push dword [ebp-4]
-    call [FillRectangle]
+    push dword [ebx + Player.Sprite]
+    call DrawImage
     add esp, 20
+
+    ; FillRectangle(x, y, width, height, color)
+    ;push dword [COLOR_GREEN]                                    
+    ;push dword [ebx + Player.Height]
+    ;push dword [ebx + Player.Width]
+    ;push dword [ebp-8]
+    ;push dword [ebp-4]
+    ;call [FillRectangle]
+    ;add esp, 20
 
     pop ebx
     leave
@@ -261,6 +280,11 @@ PlayerDestroy:
     ; RemoveAction(&hitbox)                                 ; Delete shoot action
     push dword [ebx + Player.ShootAction]
     call RemoveAction
+    add esp, 4
+
+    ; DeleteImage(&path)
+    push dword [ebx + Player.Sprite]
+    call DeleteImage
     add esp, 4
 
     pop ebx

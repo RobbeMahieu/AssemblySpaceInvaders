@@ -17,6 +17,8 @@ global DebugValue
 export DebugValue
 global DebugPrintValue
 export DebugPrintValue
+global DebugString
+export DebugString
 global EnableDebug
 export EnableDebug
 
@@ -58,6 +60,13 @@ global FillRectangle
 export FillRectangle
 global DrawString
 export DrawString
+
+global LoadImage
+export LoadImage
+global DrawImage
+export DrawImage
+global DeleteImage
+export DeleteImage
 
 ; Input
 global PRESS

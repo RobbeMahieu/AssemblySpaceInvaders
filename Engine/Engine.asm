@@ -35,7 +35,6 @@ WindowHeight dd 200                                     ; Window height constant
 section .bss
 
 hInstance resd 1                                        ; Instance handle
-CommandLine resd 1                                      ; Pointer to the launching cmd
 HWND resd 1                                             ; Window handle
 
 GameUpdateFunction resd 1                               ; Game update function
@@ -71,9 +70,6 @@ LoadEngine:
     push 0                                              ; Get instance handle of our app (0 = this)
     call [GetModuleHandleA]                             ; Return value in eax
     mov [hInstance], eax                                ; cache return value to hInstance
-
-    call [GetCommandLineA]                              ; Get command line pointer in eax
-    mov [CommandLine], eax                              ; cache the value to CommandLine
 
     ; Initialization
     call InitMemory                                     ; Initialize memory module
