@@ -76,8 +76,11 @@ extern QueryPerformanceCounter
 
 %define PS_SOLID 0
 
+%define DT_LEFT         0x00000000
+%define DT_TOP          0x00000000       
+%define DT_CENTER       0x00000001
+%define DT_RIGHT        0x00000002
 %define DT_BOTTOM       0x00000008
-
 
 ; Include guard
 %endif  

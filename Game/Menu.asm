@@ -55,26 +55,30 @@ CreateMenu:
 
     ; Additional Setup
 
-    ; CreateTextbox(&text,x, y, width, height, color)   ; Title
+    ; CreateTextbox(&text,x, y, width, height, color, size, justification)   ; Title
+    push dword [TEXT_JUSTIFY_CENTER]
+    push 0
     push dword [COLOR_WHITE]
     push WindowHeight
     push WindowWidth
     push 200
-    push 200
+    push 0
     push dword [ebp+12]
     call CreateTextbox
-    add esp, 24
+    add esp, 32
     mov [ebx + Menu.Title], eax                         ; Cache the title textbox 
 
-    ; CreateTextbox(&text,x, y, width, height, color)   ; Message
+    ; CreateTextbox(&text,x, y, width, height, color, size, justification)   ; Message
+    push dword [TEXT_JUSTIFY_CENTER]
+    push 0
     push dword [COLOR_WHITE]
     push WindowHeight
     push WindowWidth
-    push 300
-    push 200
+    push 250
+    push 0
     push dword [ebp+16]
     call CreateTextbox
-    add esp, 24
+    add esp, 32
     mov [ebx + Menu.Message], eax                       ; Cache the message textbox 
 
     ; AddAction(key, state, callback, data)             ; Shoot

@@ -43,6 +43,17 @@ export COLOR_MAGENTA
 global COLOR_YELLOW
 export COLOR_YELLOW
 
+global TEXT_JUSTIFY_LEFT
+export TEXT_JUSTIFY_LEFT
+global TEXT_JUSTIFY_RIGHT
+export TEXT_JUSTIFY_RIGHT
+global TEXT_JUSTIFY_TOP
+export TEXT_JUSTIFY_TOP
+global TEXT_JUSTIFY_BOTTOM
+export TEXT_JUSTIFY_BOTTOM
+global TEXT_JUSTIFY_CENTER
+export TEXT_JUSTIFY_CENTER
+
 global FillRectangle
 export FillRectangle
 global DrawString

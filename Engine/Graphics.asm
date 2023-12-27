@@ -18,6 +18,12 @@ COLOR_CYAN equ      0x00FFFF00
 COLOR_MAGENTA equ   0x00FF00FF
 COLOR_YELLOW equ    0x0000FFFF
 
+TEXT_JUSTIFY_LEFT equ   DT_LEFT
+TEXT_JUSTIFY_RIGHT equ  DT_RIGHT
+TEXT_JUSTIFY_TOP equ    DT_TOP
+TEXT_JUSTIFY_BOTTOM equ DT_BOTTOM
+TEXT_JUSTIFY_CENTER equ DT_CENTER
+
 section .bss
 HDC resd 1
 
@@ -99,13 +105,15 @@ FillRectangle:
     ret
 
 ;
-; DrawString(&text, x, y, width, height, color)
+; DrawString(&text, x, y, width, height, color, size, justification)
 ; [ebp+8] text
 ; [ebp+12] x
 ; [ebp+16] y
 ; [ebp+20] width
 ; [ebp+24] height
 ; [ebp+28] color
+; [ebp+32] size
+; [ebp+36] justification
 ;
 
 DrawString:
@@ -138,7 +146,7 @@ DrawString:
     call SetBkMode
 
     ; DrawText(HDC, &text, length, &rect, &format)
-    push 0
+    push dword [ebp+36]
     push ebx
     push -1
     push dword [ebp+8]

@@ -21,6 +21,8 @@ struc Textbox
     ; Properties
     .TextString:    resd 1
     .Color:         resd 1
+    .Size:          resd 1
+    .Justification: resd 1
 endstruc
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -28,13 +30,15 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreateTextbox(&text,x, y, width, height, color)
+; CreateTextbox(&text,x, y, width, height, color, size, justification)
 ; [ebp+8] text
 ; [ebp+12] x
 ; [ebp+16] y
 ; [ebp+20] width
 ; [ebp+24] height
 ; [ebp+28] color
+; [ebp+32] size
+; [ebp+36] justification
 ;
 ; eax => return Textbox address
 ;
@@ -63,6 +67,10 @@ CreateTextbox:
     mov [ebx + Textbox.TextString], edx
     mov edx, [ebp+28]                                   ; Color
     mov [ebx + Textbox.Color], edx
+    mov edx, [ebp+32]                                   ; Size
+    mov [ebx + Textbox.Size], edx
+    mov edx, [ebp+36]                                   ; Justification
+    mov [ebx + Textbox.Justification], edx
 
     mov eax, ebx                                        ; Store address back in eax
 
@@ -139,7 +147,9 @@ TextboxRender:
 
     mov ebx, [ebp+8]                                        ; Object data in ebx
 
-    ; DrawString(&text, x, y, width, height, color)
+    ; DrawString(&text, x, y, width, height, color, size, justification)
+    push dword [ebx + Textbox.Justification]
+    push dword [ebx + Textbox.Size]
     push dword [ebx + Textbox.Color]                                    
     push dword [ebx + Textbox.Height]
     push dword [ebx + Textbox.Width]
@@ -147,7 +157,7 @@ TextboxRender:
     push dword [ebx + Textbox.Xpos]
     push dword [ebx + Textbox.TextString]
     call DrawString
-    add esp, 24
+    add esp, 32
 
     pop ebx
     leave

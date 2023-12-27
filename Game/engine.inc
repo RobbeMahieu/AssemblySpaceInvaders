@@ -25,6 +25,12 @@ extern COLOR_CYAN
 extern COLOR_MAGENTA
 extern COLOR_YELLOW
 
+extern TEXT_JUSTIFY_LEFT
+extern TEXT_JUSTIFY_RIGHT
+extern TEXT_JUSTIFY_TOP
+extern TEXT_JUSTIFY_BOTTOM
+extern TEXT_JUSTIFY_CENTER
+
 extern FillRectangle
 extern DrawString
 
