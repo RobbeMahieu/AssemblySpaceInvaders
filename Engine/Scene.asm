@@ -75,11 +75,12 @@ AddGameObjectToScene:
 RemoveGameObjectFromScene:
     enter 0, 0
 
-    ; LL_Remove(&list, &object)
+    ; LL_Remove(&scene, &object, destroyObject)
+    push 1
     push dword [ebp+12]
     push dword [ebp+8]
     call LL_Remove
-    add esp, 8
+    add esp, 12
 
     leave
     ret

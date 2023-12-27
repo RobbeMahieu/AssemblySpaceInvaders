@@ -197,6 +197,35 @@ AlienManagerDestroy:
     call DeleteImage
     add esp, 4
 
+
+    ; LL_ForEach(&list, &callback)                      ; Delete leftover aliens
+    push DeleteAlienFromManager
+    push dword [AlienList]
+    call LL_ForEach
+    add esp, 8 
+
+    push dword [AlienList]
+    call LL_Delete
+    add esp, 4
+
+    leave
+    ret
+
+;
+; DeleteAlienFromManager(&alien)
+; [ebp+8] alien
+;
+
+DeleteAlienFromManager:
+    enter 0, 0
+
+    ; LL_Remove(&scene, &object, destroyObject)
+    push 0
+    push dword [ebp+8]
+    push dword [AlienList]
+    call LL_Remove
+    add esp, 12
+
     leave
     ret
 

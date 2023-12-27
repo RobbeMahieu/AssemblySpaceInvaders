@@ -157,11 +157,12 @@ AlienDestroy:
     call DeleteHitbox
     add esp, 4
 
-    ; LL_Remove(&scene, &object)
+    ; LL_Remove(&scene, &object, destroyObject)
+    push 0
     push ebx
     push dword [AlienList]
     call [LL_Remove]
-    add esp, 8
+    add esp, 12
 
     pop ebx
     leave

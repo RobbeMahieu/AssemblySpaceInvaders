@@ -124,9 +124,10 @@ LL_Add:
     ret
 
 ;
-; LL_Remove(&list, &object)
+; LL_Remove(&list, &object, destroyObject)
 ; [ebp+8] list
 ; [ebp+12] object
+; [ebp+16] destroyObject
 ;
 
 LL_Remove:
@@ -175,11 +176,15 @@ LL_Remove:
     mov [edi + LinkedList.end], esi                     ; Set previous node as end
 
     .NotEnd:
+    cmp dword [ebp+16], 1
+    jne .DestroyNode
+
     ; MemoryFree(&object)                               ; Deallocate object
     push dword [ebx + Node.content]
     call MemoryFree
     add esp, 4
 
+    .DestroyNode:
     ; MemoryFree(&object)                               ; Deallocate node
     push ebx
     call MemoryFree

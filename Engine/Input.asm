@@ -306,11 +306,12 @@ RemoveAction:
 
     mov ebx, [ebp+8]    
 
-    ; LL_Remove(&list, &object)                         ; Remove it from the list
+    ; LL_Remove(&scene, &object, destroyObject)         ; Remove it from the list
+    push 1
     push ebx
     push dword [Actions]
     call LL_Remove
-    add esp, 8
+    add esp, 12
 
     pop ebx
     leave

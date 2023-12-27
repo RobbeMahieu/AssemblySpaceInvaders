@@ -69,11 +69,12 @@ RegisterHitbox:
 UnregisterHitbox:
     enter 0, 0
 
-    ; LL_Remove(&list, &data)
+    ; LL_Remove(&scene, &object, destroyObject)
+    push 1
     push dword [ebp+8]
     push dword [PhysicsObjects]
     call LL_Remove
-    add esp, 8
+    add esp, 12
 
     leave
     ret
