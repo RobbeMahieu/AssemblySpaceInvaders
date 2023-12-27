@@ -32,6 +32,7 @@ extern wsprintfA
 extern SetTextColor
 extern CreateFontA
 extern DrawTextA
+extern LoadImageA
 extern SetBkMode
 extern GetProcessHeap
 extern HeapAlloc
@@ -82,6 +83,9 @@ extern QueryPerformanceCounter
 %define DT_CENTER       0x00000001
 %define DT_RIGHT        0x00000002
 %define DT_BOTTOM       0x00000008
+
+%define IMAGE_BITMAP    0x00000000
+%define LR_LOADFROMFILE 0x00000010
 
 ; Include guard
 %endif  

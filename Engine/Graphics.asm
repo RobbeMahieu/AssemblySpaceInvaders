@@ -147,7 +147,7 @@ DrawString:
     push dword [HDC]
     call SetBkMode
 
-    ; Set font size
+    ; CreateFontA(height, width, escapement, orientation, weight, italic, underline, strikeout, charset, outPrecision, clipPrecision, quality, pitch, &name) ; Set font size
     push 0
     push 0
     push 0
@@ -188,5 +188,82 @@ DrawString:
     call [DeleteObject]  
 
     pop ebx
+    leave
+    ret
+
+;
+; LoadImage(&path)
+; [ebp+8] path
+;
+; eax => image handle
+;
+
+LoadImage:
+    enter 0, 0
+
+    ; LoadImageA(hInstance, &name, type, width, height, options)
+    push LR_LOADFROMFILE
+    push 0
+    push 0
+    push IMAGE_BITMAP
+    push dword [ebp+8]
+    push 0
+    call LoadImageA
+
+    leave
+    ret
+
+;
+; DeleteImage(&image)
+; [ebp+8] image
+; 
+
+DeleteImage:
+    enter 0, 0
+
+    push dword [ebp+8]
+    call [DeleteObject] 
+
+    leave
+    ret
+
+;
+; DrawImage(&image, x, y, width, height)
+; [ebp+8] image
+; [ebp+12] x
+; [ebp+16] y
+; [ebp+20] width
+; [ebp+24] height
+;
+
+DrawImage:
+    ; Local variables
+    ; [ebp-4] bitmap HDC
+    enter 4, 0
+
+    push dword [ebp-16]                                 ; CreateCompatibleDC(HDC)
+    call [CreateCompatibleDC]
+    mov [ebp-4], eax                                    ; Cache Buffer HDC
+
+    ; SelectObject(DC, Object)                          ; Load bitmap to HDC
+    push dword [ebp+8]
+    push dword [ebp-4]
+    call [SelectObject]
+
+    ; BitBlt(HDC, x, y, width, height, HDC2, x1, y1, mode); Swap buffer
+    push SRCCOPY
+    push 0
+    push 0
+    push dword [ebp-4]
+    push dword [ebp+24]
+    push dword [ebp+20]
+    push dword [ebp+16]
+    push dword [ebp+12]
+    push dword [HDC]
+    call [BitBlt]
+
+    push dword [ebp-4]                                  ; Delete buffer DC
+    call [DeleteDC]    
+
     leave
     ret
