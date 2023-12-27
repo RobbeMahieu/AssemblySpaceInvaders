@@ -49,7 +49,6 @@ LL_Delete:
     enter 0, 0
     push ebx
     push esi
-    push edi
 
     mov ebx, [ebp+8]
     mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
@@ -59,16 +58,16 @@ LL_Delete:
     jz .FinishedList
 
     ; Load node data
-    mov eax, ebx                                        ; eax contains base address of node
+    mov esi, ebx                                        ; esi contains base address of node
     mov ebx, [ebx + Node.next]                          ; Cache next address
 
     ; MemoryFree(&object)                               ; Deallocate data
-    push dword [ebx + Node.content]
+    push dword [esi + Node.content]
     call MemoryFree
     add esp, 4
 
     ; MemoryFree(&object)                               ; Deallocate node
-    push ebx
+    push esi
     call MemoryFree
     add esp, 4                 
 
@@ -76,11 +75,10 @@ LL_Delete:
 
     .FinishedList:
     ; MemoryFree(&object)                               ; Deallocate list
-    push esi
+    push dword [ebp+8]
     call MemoryFree
     add esp, 4
 
-    pop edi
     pop esi
     pop ebx
     leave
