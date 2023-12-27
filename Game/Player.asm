@@ -81,7 +81,7 @@ CreatePlayer:
 
     mov dword [ebx + Player.Ypos], WindowHeight         ; Calculate Ypos
     sub dword [ebx + Player.Ypos], PlayerHeight          
-    sub dword [ebx + Player.Ypos], 50                   ; Offset (Also include top menu bar)
+    sub dword [ebx + Player.Ypos], 100                  ; Offset (Also include top menu bar)
     fild dword [ebx + Player.Ypos]                      ; Convert to float
     fstp dword [ebx + Player.Ypos]                      ; Ypos                              
 

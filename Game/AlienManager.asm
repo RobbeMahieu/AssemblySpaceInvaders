@@ -12,7 +12,7 @@ AlienWidth equ 36
 AlienHeight equ 24
 AlienMoveDownCount equ 9
 
-AlienOffset equ 10
+AlienOffset equ 15
 AlienRows equ 5
 AlienColumns equ 11
 
@@ -30,6 +30,10 @@ AlienList dd 0                                          ; All aliens currently a
 
 Alien1SpritePath db "Resources\Sprites\alien1.bmp", 0
 Alien1Sprite dd 0
+Alien2SpritePath db "Resources\Sprites\alien2.bmp", 0
+Alien2Sprite dd 0
+Alien3SpritePath db "Resources\Sprites\alien3.bmp", 0
+Alien3Sprite dd 0
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -71,6 +75,16 @@ CreateAlienManager:
     call LoadImage
     add esp, 4
     mov dword [Alien1Sprite], eax
+
+    push Alien2SpritePath
+    call LoadImage
+    add esp, 4
+    mov dword [Alien2Sprite], eax
+
+    push Alien3SpritePath
+    call LoadImage
+    add esp, 4
+    mov dword [Alien3Sprite], eax
 
     ; Create alien list
     call LL_Create
@@ -175,6 +189,14 @@ AlienManagerDestroy:
     call DeleteImage
     add esp, 4
 
+    push dword [Alien2Sprite]
+    call DeleteImage
+    add esp, 4
+
+    push dword [Alien3Sprite]
+    call DeleteImage
+    add esp, 4
+
     leave
     ret
 
@@ -191,7 +213,8 @@ LayOutAlienGrid:
     ; [ebp-16] col
     ; [ebp-20] xpos
     ; [ebp-24] ypos
-    enter 24, 0
+    ; [ebp-28] jmp address
+    enter 28, 0
     push ebx
     push esi
 
@@ -208,17 +231,33 @@ LayOutAlienGrid:
     ; Calculate starting Y
     mov dword [ebp-8], AlienOffset                          ; Offset for one alien
     add dword [ebp-8], AlienHeight                          ; 1 space = alien + offset
-    mov esi, 50
+    mov esi, 350
 
     ; Loop to create the grid
     mov dword [ebp-12], 0                                   ; Reset row count
     mov dword [ebp-24], esi                                 ; Reset y pos
-    .NewRow:
 
+    .NewRow:
     mov dword [ebp-16], 0                                   ; Reset col count
     mov dword [ebp-20], ebx                                 ; Reset x pos
-    .NewCol:
 
+    lea edx, .SwitchTable                                   ; edx contains jump address
+    mov ecx, dword[ebp-12]                                  ; Jump address offset
+    inc ecx                                                 ; First row should only appear once
+    shr ecx, 1                                              ; I only want to change every 2 rows
+    shl ecx, 1                                              ; Instructions are 2 bytes long, so double the offset
+    add edx, ecx                                            ; Calculate correct address
+    mov [ebp-28], edx
+
+    .NewCol:
+    jmp dword[ebp-28]                                       ; Create correct alien
+
+    .SwitchTable:
+    jmp .Alien1
+    jmp .Alien2
+    jmp .Alien3
+
+    .Alien1:
     ; CreateAlien(&scene, x, y, &sprite)
     push dword [Alien1Sprite]
     push dword [ebp-24]
@@ -226,7 +265,29 @@ LayOutAlienGrid:
     push dword [ebp+8]
     call CreateAlien
     add esp, 16
+    jmp .CreatedAlien
 
+    .Alien2:
+    ; CreateAlien(&scene, x, y, &sprite)
+    push dword [Alien2Sprite]
+    push dword [ebp-24]
+    push dword [ebp-20]
+    push dword [ebp+8]
+    call CreateAlien
+    add esp, 16
+    jmp .CreatedAlien
+
+    .Alien3:
+    ; CreateAlien(&scene, x, y, &sprite)
+    push dword [Alien3Sprite]
+    push dword [ebp-24]
+    push dword [ebp-20]
+    push dword [ebp+8]
+    call CreateAlien
+    add esp, 16
+    jmp .CreatedAlien
+
+    .CreatedAlien:
     mov eax, [ebp-4]                                        ; Increase x pos
     add [ebp-20], eax
     inc dword [ebp-16]                      

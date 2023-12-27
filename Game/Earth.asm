@@ -7,7 +7,7 @@
 %include "engine.inc"
 
 ; Constants and Data
-EarthHeight equ 75
+EarthHeight equ 110
 
 struc Earth
     ; Owner

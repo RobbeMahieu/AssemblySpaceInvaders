@@ -95,7 +95,9 @@ DebugPrintValue:
     sub eax, 45                                         ; Bottom ScreenOffset
 
 
-    ; DrawString(&text, x, y, width, height, color)
+    ; DrawString(&text, x, y, width, height, color, size, justification)
+    push TEXT_JUSTIFY_LEFT
+    push 20
     push COLOR_RED
     push 60
     push 480
@@ -103,7 +105,7 @@ DebugPrintValue:
     push 5
     push buffer
     call DrawString
-    add esp, 24
+    add esp, 32
 
     .Done:
     pop edx                                             ; Reset register states

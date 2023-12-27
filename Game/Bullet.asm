@@ -29,7 +29,7 @@ struc Bullet
 endstruc
 
 section .data
-BulletLifetime dd 3.0
+BulletLifetime dd 5.0
 
 
 ;-------------------------------------------------------------------------------------------------------------------
