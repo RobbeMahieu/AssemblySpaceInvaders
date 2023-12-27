@@ -119,7 +119,9 @@ FillRectangle:
 DrawString:
     ; Local variables
     ; [ebp-16] RECT
-    enter 16, 0
+    ; [ebp-20] Font Handle
+    ; [ebp-24] Previous font Handle
+    enter 20, 0
     push ebx
 
     ; Create rectangle
@@ -145,6 +147,30 @@ DrawString:
     push dword [HDC]
     call SetBkMode
 
+    ; Set font size
+    push 0
+    push 0
+    push 0
+    push 0
+    push 0
+    push 0
+    push 0
+    push 0
+    push 0
+    push 0
+    push 0
+    push 0
+    push 0
+    push dword [ebp+32]
+    call CreateFontA
+    mov [ebp-20], eax  
+
+    ; SelectObject(DC, Object)                          ; Swap Font
+    push dword [ebp-20]
+    push dword [HDC]
+    call [SelectObject]
+    mov [ebp-24], eax
+
     ; DrawText(HDC, &text, length, &rect, &format)
     push dword [ebp+36]
     push ebx
@@ -152,6 +178,14 @@ DrawString:
     push dword [ebp+8]
     push dword [HDC]
     call DrawTextA
+
+    ; SelectObject(DC, Object)                          ; Swap back Font
+    push dword [ebp-24]
+    push dword [HDC]
+    call [SelectObject]
+
+    push dword [ebp-20]                                 ; Delete font
+    call [DeleteObject]  
 
     pop ebx
     leave

@@ -30,6 +30,7 @@ extern SelectObject
 extern BitBlt
 extern wsprintfA
 extern SetTextColor
+extern CreateFontA
 extern DrawTextA
 extern SetBkMode
 extern GetProcessHeap
