@@ -57,7 +57,7 @@ CreateMenu:
 
     ; CreateTextbox(&text,x, y, width, height, color, size, justification)   ; Title
     push dword [TEXT_JUSTIFY_CENTER]
-    push 50
+    push 40
     push dword [COLOR_WHITE]
     push WindowHeight
     push WindowWidth
@@ -70,11 +70,13 @@ CreateMenu:
 
     ; CreateTextbox(&text,x, y, width, height, color, size, justification)   ; Message
     push dword [TEXT_JUSTIFY_CENTER]
-    push 20
+    push 2    ; Clean up temp objects
+    push dword [ebp-4]                                  ; Delete brush
+    call [DeleteObject]  0
     push dword [COLOR_WHITE]
     push WindowHeight
     push WindowWidth
-    push 250
+    push 300
     push 0
     push dword [ebp+16]
     call CreateTextbox
