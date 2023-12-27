@@ -50,7 +50,7 @@ CreateAlienManager:
     enter 0, 0
     push ebx
 
-    push AlienManager_size                              ; Create Alien struct
+    push AlienManager_size                              ; Create AlienManager struct
     call [MemoryAlloc]
     add esp, 4
     mov ebx, eax
@@ -197,13 +197,13 @@ AlienManagerDestroy:
     call DeleteImage
     add esp, 4
 
-
     ; LL_ForEach(&list, &callback)                      ; Delete leftover aliens
     push DeleteAlienFromManager
     push dword [AlienList]
     call LL_ForEach
     add esp, 8 
 
+    ; Delete the list itself
     push dword [AlienList]
     call LL_Delete
     add esp, 4

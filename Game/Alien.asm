@@ -158,11 +158,9 @@ AlienDestroy:
     add esp, 4
 
     ; LL_Remove(&scene, &object, destroyObject)
-    push 0
     push ebx
-    push dword [AlienList]
-    call [LL_Remove]
-    add esp, 12
+    call DeleteAlienFromManager
+    add esp, 4
 
     pop ebx
     leave

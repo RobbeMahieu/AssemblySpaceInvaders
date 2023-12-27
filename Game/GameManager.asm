@@ -90,7 +90,7 @@ RenderGame:
 CleanupGame:
     enter 0, 0
 
-    ; Clean up all scenes
+    ; Clean up scene
     push dword [ActiveScene]                                  
     call DeleteScene
     add esp, 4
@@ -244,24 +244,22 @@ LoadScene:
 
     .Menu:                                              ; Load Menu scene
     call CreateMenuScene           
-    mov dword [ActiveScene], eax         
     jmp .SwitchEnd
 
     .Game:                                              ; Load Game scene
     call CreateGameScene
-    mov dword [ActiveScene], eax
     jmp .SwitchEnd
 
     .Win:                                               ; Load Win scene
-    call CreateWinScene           
-    mov dword [ActiveScene], eax         
+    call CreateWinScene                  
     jmp .SwitchEnd
 
     .Lose:                                              ; Load Lose scene
-    call CreateLoseScene           
-    mov dword [ActiveScene], eax         
+    call CreateLoseScene                  
     jmp .SwitchEnd
 
     .SwitchEnd:
+    mov dword [ActiveScene], eax 
+
     leave
     ret

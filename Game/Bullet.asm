@@ -115,11 +115,11 @@ BulletUpdate:
     mov ebx, [ebp+8]                                    ; Cache object in ebx
 
     ; Sub elapsedSec from lifetime
-    fld dword [ebx + Bullet.Lifetime]                   ; Load jump timer in float stack
+    fld dword [ebx + Bullet.Lifetime]                   ; Load lifetime in float stack
     call [GetElapsed]                                   ; Get ElapsedSec
     mov [ebp-4], eax
 
-    fsub dword [ebp-4]                                  ; Add to the timer
+    fsub dword [ebp-4]                                  ; Substract from the timer
     fstp dword [ebx + Bullet.Lifetime]                  ; Store the result
     
     ; Check lifetime condition

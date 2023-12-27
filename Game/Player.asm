@@ -295,12 +295,11 @@ MoveLeft:
 
     mov ebx, [ebp+8]                                        ; Object data in ebx
 
-    fild dword [ebx + Player.Speed]
-    fchs                                                    ; Invert Speed
-
     call [GetElapsed]                                       ; Get ElapsedSec
     mov [ebp-4], eax
 
+    fild dword [ebx + Player.Speed]
+    fchs                                                    ; Invert Speed
     fmul dword [ebp-4]
     fadd dword [ebx + Player.Xpos]
     fstp dword [ebx + Player.Xpos]
@@ -322,11 +321,10 @@ MoveRight:
 
     mov ebx, [ebp+8]                                        ; Object data in ebx
 
-    fild dword [ebx + Player.Speed]
-
     call [GetElapsed]                                       ; Get ElapsedSec
     mov [ebp-4], eax
 
+    fild dword [ebx + Player.Speed]
     fmul dword [ebp-4]
     fadd dword [ebx + Player.Xpos]
     fstp dword [ebx + Player.Xpos]
