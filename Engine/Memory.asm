@@ -7,7 +7,11 @@
 %include "windows.inc"
 
 ; Constants and Data
- HEAP_ZERO_MEMORY equ 0x00000008
+
+section .data
+
+HeapAllocatedSize dd 0
+MemoryLeakMessage dd "Memory Leak detected!", 0
 
 section .bss
 
@@ -40,6 +44,9 @@ InitMemory:
 MemoryAlloc:
     enter 0, 0
 
+    mov eax, [ebp+8]                                    ; Increase allocated size
+    add dword [HeapAllocatedSize], eax
+
     ; HeapAlloc(Heap, settings, size)                   ; Allocate memory
     push dword [ebp+8]
     push HEAP_ZERO_MEMORY
@@ -57,11 +64,40 @@ MemoryAlloc:
 MemoryFree:
     enter 0, 0
 
+    push dword [ebp+8]
+    push 0
+    push dword [Heap]
+    call HeapSize
+    sub dword [HeapAllocatedSize], eax                  ; Decrease allocated size
+
     ; HeapFree(Heap, settings, object)                  ; Deallocate memory
     push dword [ebp+8]
     push 0
     push dword [Heap]
-    call HeapFree
+    call HeapFree                                 
+    
+    leave
+    ret
 
+;
+; CleanupMemory()
+;
+
+CleanupMemory:
+    enter 0, 0
+
+    cmp dword [HeapAllocatedSize], 0
+    je .Done
+
+    push MemoryLeakMessage
+    call DebugString
+    add esp, 4
+
+    push formatDecimal
+    push dword [HeapAllocatedSize]
+    call DebugValue
+    add esp, 8
+
+    .Done:
     leave
     ret

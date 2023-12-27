@@ -36,7 +36,6 @@ section .bss
 
 hInstance resd 1                                        ; Instance handle
 HWND resd 1                                             ; Window handle
-
 GameUpdateFunction resd 1                               ; Game update function
 GameRenderFunction resd 1                               ; Game render function
 
@@ -210,6 +209,7 @@ CleanupEngine:
 
     call CleanupInput                                   ; Clean up input memory
     call CleanupPhysics                                 ; Clean up physics memory
+    call CleanupMemory                                  ; Clean up hep (check if everything is released)
 
     push ebx
     call [ExitProcess]                                  ; Stop process
