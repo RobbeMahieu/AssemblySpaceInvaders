@@ -243,7 +243,7 @@ DrawImage:
     ; [ebp-4] bitmap HDC
     enter 4, 0
 
-    push dword [ebp-16]                                 ; CreateCompatibleDC(HDC)
+    push dword [HDC]                                 ; CreateCompatibleDC(HDC)
     call [CreateCompatibleDC]
     mov [ebp-4], eax                                    ; Cache Buffer HDC
 
@@ -259,8 +259,8 @@ DrawImage:
     push dword [ebp-4]
     push dword [ebp+24]
     push dword [ebp+20]
-    push 0
-    push 0
+    push dword [ebp+16]
+    push dword [ebp+12]
     push dword [HDC]
     call [BitBlt]
 
