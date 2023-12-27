@@ -34,35 +34,17 @@ CreateScene:
 
 DeleteScene:
     enter 0, 0
-    push ebx
 
-    ; Clean up scene
-    mov ebx, [ebp+8]
-    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
-
-    .NextNode:
-    cmp ebx, 0
-    jz .FinishedList
-
-    ; Load node data
-    mov eax, dword [ebx + Node.content]                 ; esi contains base address of gameobject
-    mov ebx, [ebx + Node.next]                          ; Cache next address
-
-    ; DeleteGameobject(&object)
-    push eax                                            ; Delete the gameobject
-    call DeleteGameObject 
-    add esp, 4                   
-
-    jmp .NextNode                                       ; Loop through all nodes
-
-    .FinishedList:
+    push DeleteGameObject
+    push dword [ebp+8]
+    call LL_ForEach
+    add esp, 8
 
     ; Delete the scene
     push dword [ebp+8]                       
     call LL_Delete
     add esp, 4
 
-    pop ebx
     leave
     ret
 
@@ -109,29 +91,12 @@ RemoveGameObjectFromScene:
 
 UpdateScene:
     enter 0, 0
-    push ebx
 
-    mov ebx, [ebp+8]
-    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
+    push UpdateGameObject
+    push dword [ebp+8]
+    call LL_ForEach
+    add esp, 8
 
-    .NextNode:
-    cmp ebx, 0
-    jz .FinishedList
-
-    ; Load node
-    mov eax, dword [ebx + Node.content]                 ; esi contains base address of data
-    mov ebx, [ebx + Node.next]                          ; Cache next address
-
-    ; Update(&object)
-    push dword [eax + Gameobject.objectData]
-    call [eax + Gameobject.update]
-    add esp, 4
-
-    jmp .NextNode                                       ; Loop through all nodes
-
-    .FinishedList:
-
-    pop ebx
     leave
     ret
 
@@ -142,28 +107,11 @@ UpdateScene:
 
 RenderScene:
     enter 0, 0
-    push ebx
 
-    mov ebx, [ebp+8]
-    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
+    push RenderGameObject
+    push dword [ebp+8]
+    call LL_ForEach
+    add esp, 8
 
-    .NextNode:
-    cmp ebx, 0
-    jz .FinishedList
-
-    ; Load node
-    mov eax, dword [ebx + Node.content]                 ; esi contains base address of data
-    mov ebx, [ebx + Node.next]                          ; Cache next address
-
-    ; Render(&object)
-    push dword [eax + Gameobject.objectData]
-    call [eax + Gameobject.render]
-    add esp, 4
-
-    jmp .NextNode                                       ; Loop through all nodes
-
-    .FinishedList:
-
-    pop ebx
     leave
     ret

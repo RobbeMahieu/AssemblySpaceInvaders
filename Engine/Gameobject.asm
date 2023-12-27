@@ -95,3 +95,37 @@ DeleteGameObject:
     pop ebx
     leave
     ret
+
+;
+; UpdateGameObject(&object)
+; [ebp+8] object
+;
+
+UpdateGameObject:
+    enter 0, 0
+
+    ; Update(&object)
+    mov eax, [ebp+8]
+    push dword [eax + Gameobject.objectData]
+    call [eax + Gameobject.update]
+    add esp, 4
+
+    leave
+    ret
+
+;
+; RenderGameObject(&object)
+; [ebp+8] object
+;
+
+RenderGameObject:
+    enter 0, 0
+
+    ; Update(&object)
+    mov eax, [ebp+8]
+    push dword [eax + Gameobject.objectData]
+    call [eax + Gameobject.render]
+    add esp, 4
+
+    leave
+    ret
