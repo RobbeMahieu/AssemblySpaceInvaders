@@ -120,6 +120,8 @@ CreateGameScene:
     call CreateScore                                    ; CreateScore(&scene)
     add esp, 4
 
+    call ScoreReset                                     ; Reset the score at the beginning of a game
+
     mov eax, ebx                                        ; Put scene address as return
 
     pop ebx
@@ -167,7 +169,8 @@ CreateWinScene:
     push WinMessage
     push WinTitle
     push ebx                                            ; Put scene on the stack
-    call CreateMenu                                     ; CreateMenu(&scene)   
+    call CreateMenu                                     ; CreateMenu(&scene) 
+    call CreateScore                                    ; CreateScore(&scene)  
     add esp, 12
 
     mov eax, ebx                                        ; Put scene address as return
@@ -192,7 +195,8 @@ CreateLoseScene:
     push LoseMessage
     push LoseTitle
     push ebx                                            ; Put scene on the stack
-    call CreateMenu                                     ; CreateMenu(&scene)   
+    call CreateMenu                                     ; CreateMenu(&scene) 
+    call CreateScore                                    ; CreateScore(&scene)  
     add esp, 12
 
     mov eax, ebx                                        ; Put scene address as return
