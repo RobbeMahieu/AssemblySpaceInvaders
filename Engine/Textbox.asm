@@ -131,6 +131,7 @@ SetTextboxText:
     enter 0, 0
 
     mov eax, [ebp+8]                                    ; Cache Textbox in eax
+    mov edx, [ebp+12]
     mov [eax + Textbox.TextString], edx
 
     leave
