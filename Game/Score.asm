@@ -30,8 +30,10 @@ section .text                                           ; Code
 
 
 ;
-; CreateScore(&scene)
+; CreateScore(&scene, y, size)
 ; [ebp+8] scene
+; [ebp+12] y
+; [ebp+16] size
 ; 
 ; eax => Gameobject address
 ;
@@ -59,11 +61,11 @@ CreateScore:
 
     ; CreateTextbox(&text,x, y, width, height, color, size, justification)   ; Textbox
     push dword [TEXT_JUSTIFY_CENTER]
-    push 25
+    push dword[ebp+16]
     push dword [COLOR_WHITE]
-    push 40
+    push dword [ebp+16]
     push WindowWidth
-    push 0
+    push dword [ebp+12]
     push 0
     push ScoreTextBuffer
     call CreateTextbox

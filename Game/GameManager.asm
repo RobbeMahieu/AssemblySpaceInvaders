@@ -117,8 +117,14 @@ CreateGameScene:
     call CreatePlayer                                   ; CreatePlayer(&scene)   
     call CreateEarth                                    ; CreateEarth(&scene)   
     call CreateAlienManager                             ; CreateAlienManager(&scene)
-    call CreateScore                                    ; CreateScore(&scene)
     add esp, 4
+
+    ; CreateScore(&scene, y, size)
+    push 25
+    push 0
+    push ebx
+    call CreateScore 
+    add esp, 12
 
     call ScoreReset                                     ; Reset the score at the beginning of a game
 
@@ -170,7 +176,13 @@ CreateWinScene:
     push WinTitle
     push ebx                                            ; Put scene on the stack
     call CreateMenu                                     ; CreateMenu(&scene) 
-    call CreateScore                                    ; CreateScore(&scene)  
+    add esp, 12
+
+    ; CreateScore(&scene, y, size)
+    push 20
+    push 240
+    push ebx
+    call CreateScore 
     add esp, 12
 
     mov eax, ebx                                        ; Put scene address as return
@@ -195,8 +207,14 @@ CreateLoseScene:
     push LoseMessage
     push LoseTitle
     push ebx                                            ; Put scene on the stack
-    call CreateMenu                                     ; CreateMenu(&scene) 
-    call CreateScore                                    ; CreateScore(&scene)  
+    call CreateMenu 
+    add esp, 12
+
+    ; CreateScore(&scene, y, size)
+    push 20
+    push 240
+    push ebx
+    call CreateScore 
     add esp, 12
 
     mov eax, ebx                                        ; Put scene address as return
