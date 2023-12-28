@@ -8,8 +8,8 @@
 
 ; Constants and Data
 
-BulletWidth equ 4
-BulletHeight equ 15
+BulletWidth equ 3
+BulletHeight equ 21
 
 struc Bullet
     ; Owner
@@ -66,8 +66,13 @@ CreateBullet:
     mov eax, [ebp+24]
     mov dword [ebx + Bullet.Color], eax                 ; Speed
 
-    mov eax, [ebp+12]                                   ; Xpos 
-    mov dword [ebx + Bullet.Xpos], eax                               
+    ; Calculate xpos
+    mov eax, dword [ebx + Bullet.Width]                 ; Width
+    shr eax, 1                                          ; Divide by 2 
+    mov dword [ebx + Bullet.Xpos], eax
+    fld dword [ebp+12]                                  ; Load center xpos
+    fisub dword [ebx + Bullet.Xpos]                     ; Substract half the width
+    fstp dword [ebx + Bullet.Xpos]                      ; Store the calculated Xpos
 
     mov eax, [ebp+16]                                   ; Ypos 
     mov dword [ebx + Bullet.Ypos], eax                              

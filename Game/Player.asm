@@ -340,7 +340,7 @@ MoveRight:
 
 Shoot:
     ; Local variables
-    ; [ebp-4] temp float address
+    ; [ebp-4] center x coord
     enter 4, 0
     push ebx
 
@@ -363,7 +363,7 @@ Shoot:
     mov [ebp-4], eax                                         
     fild dword [ebp-4]                                  ; Convert to float
     fadd dword [ebx + Player.Xpos]    
-    fstp dword [ebp-4]                                  ; Bullet Xpos    
+    fstp dword [ebp-4]                                  ; Bullet Xpos
 
     mov eax, [ebx + Player.Gameobject]
     mov eax, [ebx + Gameobject.scene]
@@ -371,7 +371,7 @@ Shoot:
     ; CreateBullet(&scene, x, y, speed, color)
     push dword [COLOR_GREEN]
     push dword [ebx + Player.BulletSpeed]
-    push dword [ebx + Player.Ypos]
+    push dword [ebx + Player.Ypos] 
     push dword [ebp-4]
     push dword [eax]
     call CreateBullet

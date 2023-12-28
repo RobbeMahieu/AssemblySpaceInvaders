@@ -12,7 +12,7 @@ AlienWidth equ 36
 AlienHeight equ 24
 AlienMoveDownCount equ 9
 
-AlienOffset equ 15
+AlienOffset equ 16
 AlienRows equ 5
 AlienColumns equ 11
 
