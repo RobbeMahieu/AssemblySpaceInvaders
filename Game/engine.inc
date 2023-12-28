@@ -113,3 +113,4 @@ extern DestroyTextbox
 extern SetTextboxBounds
 extern SetTextboxText
 extern TextboxRender
+extern wsprintfA

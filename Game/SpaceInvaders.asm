@@ -14,6 +14,7 @@ cpu x64                                                 ; Limit instructions to 
 %define HL_ENEMY C_HITLAYER_2
 
 %include "./GameManager.asm"
+%include "./Score.asm"
 %include "./Bullet.asm"
 %include "./Player.asm"
 %include "./AlienManager.asm"

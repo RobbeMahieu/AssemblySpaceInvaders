@@ -114,9 +114,10 @@ CreateGameScene:
 
     ; Create game scene
     push ebx                                            ; Put scene on the stack
-    call CreatePlayer                                   ; CreatePlayer()   
-    call CreateEarth                                    ; CreateEarth()   
-    call CreateAlienManager                             ; CreateAlienManager()
+    call CreatePlayer                                   ; CreatePlayer(&scene)   
+    call CreateEarth                                    ; CreateEarth(&scene)   
+    call CreateAlienManager                             ; CreateAlienManager(&scene)
+    call CreateScore                                    ; CreateScore(&scene)
     add esp, 4
 
     mov eax, ebx                                        ; Put scene address as return
@@ -141,7 +142,7 @@ CreateMenuScene:
     push MenuMessage
     push MenuTitle
     push ebx                                            ; Put scene on the stack
-    call CreateMenu                                     ; CreateMenu()   
+    call CreateMenu                                     ; CreateMenu(&scene)   
     add esp, 12
 
     mov eax, ebx                                        ; Put scene address as return
@@ -166,7 +167,7 @@ CreateWinScene:
     push WinMessage
     push WinTitle
     push ebx                                            ; Put scene on the stack
-    call CreateMenu                                     ; CreateMenu()   
+    call CreateMenu                                     ; CreateMenu(&scene)   
     add esp, 12
 
     mov eax, ebx                                        ; Put scene address as return
@@ -191,7 +192,7 @@ CreateLoseScene:
     push LoseMessage
     push LoseTitle
     push ebx                                            ; Put scene on the stack
-    call CreateMenu                                     ; CreateMenu()   
+    call CreateMenu                                     ; CreateMenu(&scene)   
     add esp, 12
 
     mov eax, ebx                                        ; Put scene address as return
