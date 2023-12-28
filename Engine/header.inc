@@ -127,8 +127,8 @@ export RenderScene
 
 global CreateGameObject
 export CreateGameObject
-global DeleteGameObject
-export DeleteGameObject
+global DestroyGameObject
+export DestroyGameObject
 
 ; Textbox
 global CreateTextbox

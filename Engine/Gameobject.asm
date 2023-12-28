@@ -14,6 +14,7 @@ struc Gameobject
     .update: resd 1
     .render: resd 1
     .destroy: resd 1
+    .destroyFlag: resd 1
 endstruc
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -52,6 +53,7 @@ CreateGameObject:
     mov [ebx + Gameobject.render], eax                  ; Fill in render function
     mov eax, [ebp+24]
     mov [ebx + Gameobject.destroy], eax                 ; Fill in destroy function
+    mov dword [ebx + Gameobject.destroyFlag], 0         ; Clear destroyFlag
 
     ; AddGameObjectToScene(&scene, &gameobject)         ; Add it to the scene
     push ebx                                            
@@ -127,5 +129,39 @@ RenderGameObject:
     call [eax + Gameobject.render]
     add esp, 4
 
+    leave
+    ret
+
+;
+; DestroyGameObject(&gameObject)
+; [ebp+8] gameobject
+;
+
+DestroyGameObject:
+    enter 0, 0
+
+    mov eax, [ebp+8]
+    mov dword [eax + Gameobject.destroyFlag], 1         ; Set the destroyflag
+
+    leave
+    ret
+
+;
+; CheckedDeleteGameObject(&gameObject)
+; [ebp+8] gameobject
+;
+
+CheckedDeleteGameObject:
+    enter 0, 0
+
+    mov eax, [ebp+8]
+    cmp dword [eax + Gameobject.destroyFlag], 1         ; Set the destroyflag
+    jne .Done
+
+    push eax
+    call DeleteGameObject
+    add esp, 4
+
+    .Done:
     leave
     ret

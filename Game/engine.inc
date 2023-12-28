@@ -98,13 +98,14 @@ extern UpdateScene
 extern RenderScene
 
 extern CreateGameObject
-extern DeleteGameObject
+extern DestroyGameObject
 
 %define Gameobject.scene 0
 %define Gameobject.objectData 4
 %define Gameobject.update 8
 %define Gameobject.render 12
 %define Gameobject.destroy 16
+%define Gameobject.destroyFlag 20
 
 ; Textbox
 extern CreateTextbox

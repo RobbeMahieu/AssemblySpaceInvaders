@@ -208,10 +208,14 @@ CreateLoseScene:
 SwapScene:
     enter 0, 0
 
+    cmp dword [NewScene], 1                             ; Skip if in the middle of a scene swap
+    je .Done
+
     mov dword [NewScene], 1                             ; Set bool true
     mov eax, [ebp+8]
     mov dword [SceneIndex], eax                         ; Save new scene index
 
+    .Done:
     leave
     ret
 

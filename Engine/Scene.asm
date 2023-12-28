@@ -98,6 +98,12 @@ UpdateScene:
     call LL_ForEach
     add esp, 8
 
+    ; Remove destroyed objects
+    push CheckedDeleteGameObject
+    push dword[ebp+8]
+    call LL_ForEach
+    add esp, 8
+
     leave
     ret
 

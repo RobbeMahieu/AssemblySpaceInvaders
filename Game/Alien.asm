@@ -165,6 +165,8 @@ AlienDestroy:
     push ebx
     call DeleteAlienFromManager
     add esp, 4
+    
+    call CheckAliensLeft
 
     pop ebx
     leave

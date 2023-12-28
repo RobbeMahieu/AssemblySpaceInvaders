@@ -231,9 +231,9 @@ BulletDespawn:
 
     mov ebx, [ebp+8]
 
-    ; DeleteGameObject(&object)
+    ; DestroyGameObject(&object)
     push dword [ebx + Bullet.Gameobject]
-    call DeleteGameObject
+    call DestroyGameObject
     add esp, 4
 
     pop ebx
@@ -259,12 +259,10 @@ OnBulletHit:
     mov eax, [ebp+12]
     mov eax, [eax + Hitbox.Owner]   
 
-    ; DeleteGameObject(&other)
+    ; DestroyGameObject(&other)
     push dword [eax + Bullet.Gameobject] 
-    call DeleteGameObject
+    call DestroyGameObject
     add esp, 4
-
-    call CheckAliensLeft
 
     leave
     ret
