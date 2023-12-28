@@ -8,8 +8,13 @@
 
 ; Constants and Data
 
-AlienWidth equ 36
+Alien1Width equ 24
+Alien2Width equ 33
+Alien3Width equ 36
+AlienMaxWidth equ 36
 AlienHeight equ 24
+
+
 AlienMoveDownCount equ 9
 
 AlienOffset equ 16
@@ -249,7 +254,7 @@ LayOutAlienGrid:
 
     ; Calculate starting X
     mov dword [ebp-4], AlienOffset                          ; Offset for one alien
-    add dword [ebp-4], AlienWidth                           ; 1 space = alien + offset
+    add dword [ebp-4], AlienMaxWidth                        ; 1 space = alien + offset
     mov eax, AlienColumns                                   ; Total width of alien grid = cols * space
     mul dword [ebp-4]
     sub eax, AlienOffset                                    ; This is one offset too much (last one doesn't need it)
@@ -287,33 +292,54 @@ LayOutAlienGrid:
     jmp .Alien3
 
     .Alien1:
-    ; CreateAlien(&scene, x, y, &sprite)
+    mov eax, AlienMaxWidth                                  ; Calculate x offset on spawnpoint
+    sub eax, Alien1Width                                    ; Based on the alien's width
+    shr eax, 1
+    add eax, dword [ebp-20]
+
+    ; CreateAlien(&scene, x, y, width, height, &sprite)
     push dword [Alien1Sprite]
+    push AlienHeight
+    push Alien1Width
     push dword [ebp-24]
-    push dword [ebp-20]
+    push eax
     push dword [ebp+8]
     call CreateAlien
-    add esp, 16
+    add esp, 24
     jmp .CreatedAlien
 
     .Alien2:
-    ; CreateAlien(&scene, x, y, &sprite)
+    mov eax, AlienMaxWidth                                  ; Calculate x offset on spawnpoint
+    sub eax, Alien2Width                                    ; Based on the alien's width
+    shr eax, 1
+    add eax, dword [ebp-20]
+
+    ; CreateAlien(&scene, x, y, width, height, &sprite)
     push dword [Alien2Sprite]
+    push AlienHeight
+    push Alien2Width
     push dword [ebp-24]
-    push dword [ebp-20]
+    push eax
     push dword [ebp+8]
     call CreateAlien
-    add esp, 16
+    add esp, 24
     jmp .CreatedAlien
 
     .Alien3:
-    ; CreateAlien(&scene, x, y, &sprite)
+    mov eax, AlienMaxWidth                                  ; Calculate x offset on spawnpoint
+    sub eax, Alien3Width                                    ; Based on the alien's width
+    shr eax, 1
+    add eax, dword [ebp-20]
+
+    ; CreateAlien(&scene, x, y, width, height, &sprite)
     push dword [Alien3Sprite]
+    push AlienHeight
+    push Alien3Width
     push dword [ebp-24]
-    push dword [ebp-20]
+    push eax
     push dword [ebp+8]
     call CreateAlien
-    add esp, 16
+    add esp, 24
     jmp .CreatedAlien
 
     .CreatedAlien:

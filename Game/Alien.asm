@@ -28,11 +28,13 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreateAlien(&scene, x, y, &sprite)
+; CreateAlien(&scene, x, y, width, height, &sprite)
 ; [ebp+8] scene
 ; [ebp+12] x
 ; [ebp+16] y
-; [ebp+20] sprite
+; [ebp+20] width
+; [ebp+24] height
+; [ebp+28] sprite
 ; 
 ; eax => Gameobject address
 ;
@@ -47,10 +49,12 @@ CreateAlien:
     add esp, 4
     mov ebx, eax
 
-    ; Fill in fields                     
-    mov dword [ebx + Alien.Width], AlienWidth           ; Width                                  
-    mov dword [ebx + Alien.Height], AlienHeight         ; Height
-    mov eax, [ebp+20]                                   ; Sprite
+    ; Fill in fields   
+    mov eax, [ebp+20]                                   ; Width
+    mov dword [ebx + Alien.Width], eax              
+    mov eax, [ebp+24]                                   ; Height
+    mov dword [ebx + Alien.Height], eax         
+    mov eax, [ebp+28]                                   ; Sprite
     mov dword [ebx + Alien.Sprite], eax            
 
     mov eax, [ebp+12]                                   ; Xpos 
