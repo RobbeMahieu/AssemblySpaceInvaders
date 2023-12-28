@@ -21,6 +21,9 @@ struc Alien
     .Width resd 1
     .Height resd 1
     .Hitbox resd 1
+
+    ; Properties
+    .Points resd 1
 endstruc
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -28,13 +31,14 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreateAlien(&scene, x, y, width, height, &sprite)
+; CreateAlien(&scene, x, y, width, height, points, &sprite)
 ; [ebp+8] scene
 ; [ebp+12] x
 ; [ebp+16] y
 ; [ebp+20] width
 ; [ebp+24] height
-; [ebp+28] sprite
+; [ebp+28] points
+; [ebp+32] sprite
 ; 
 ; eax => Gameobject address
 ;
@@ -54,8 +58,10 @@ CreateAlien:
     mov dword [ebx + Alien.Width], eax              
     mov eax, [ebp+24]                                   ; Height
     mov dword [ebx + Alien.Height], eax         
-    mov eax, [ebp+28]                                   ; Sprite
-    mov dword [ebx + Alien.Sprite], eax            
+    mov eax, [ebp+28]                                   ; Points
+    mov dword [ebx + Alien.Points], eax 
+    mov eax, [ebp+32]                                   ; Sprite
+    mov dword [ebx + Alien.Sprite], eax                       
 
     mov eax, [ebp+12]                                   ; Xpos 
     mov dword [ebx + Alien.Xpos], eax
@@ -234,5 +240,21 @@ AlienUpdateHitbox:
     add esp, 20
 
     pop ebx
+    leave
+    ret
+
+;
+; AlienGetScore(&alien)
+; [ebp+8] alien
+;
+; eax => score
+;
+
+AlienGetScore:
+    enter 0, 0
+
+    mov eax, [ebp+8]
+    mov eax, [eax + Alien.Points]
+
     leave
     ret

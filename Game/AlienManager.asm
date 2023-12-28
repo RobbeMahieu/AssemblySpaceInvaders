@@ -297,8 +297,9 @@ LayOutAlienGrid:
     shr eax, 1
     add eax, dword [ebp-20]
 
-    ; CreateAlien(&scene, x, y, width, height, &sprite)
+    ; CreateAlien(&scene, x, y, width, height, points, &sprite)
     push dword [Alien1Sprite]
+    push 30
     push AlienHeight
     push Alien1Width
     push dword [ebp-24]
@@ -314,8 +315,9 @@ LayOutAlienGrid:
     shr eax, 1
     add eax, dword [ebp-20]
 
-    ; CreateAlien(&scene, x, y, width, height, &sprite)
+    ; CreateAlien(&scene, x, y, width, height, points, &sprite)
     push dword [Alien2Sprite]
+    push 20
     push AlienHeight
     push Alien2Width
     push dword [ebp-24]
@@ -331,8 +333,9 @@ LayOutAlienGrid:
     shr eax, 1
     add eax, dword [ebp-20]
 
-    ; CreateAlien(&scene, x, y, width, height, &sprite)
+    ; CreateAlien(&scene, x, y, width, height, points, &sprite)
     push dword [Alien3Sprite]
+    push 10
     push AlienHeight
     push Alien3Width
     push dword [ebp-24]
