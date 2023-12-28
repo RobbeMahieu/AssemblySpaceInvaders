@@ -14,8 +14,8 @@ Alien3Width equ 36
 AlienMaxWidth equ 36
 AlienHeight equ 24
 
-
 AlienMoveDownCount equ 9
+AlienStartJumpTime equ 0x3f000000
 
 AlienOffset equ 16
 AlienRows equ 5
@@ -27,8 +27,9 @@ struc AlienManager
 endstruc
 
 section .data
-AlienJumpTime dd 0x3f000000                             ; 0.5f
-AlienJumpTimer dd 0                                     ; 0.0f
+AlienJumpTime dd 0.5
+AlienJumpTimer dd 0.0
+AlienJumpTimeDecrease dd 0.75
 AlienJumpDistance dd 5
 AlienMoveDownCounter dd 0
 AlienList dd 0                                          ; All aliens currently alive
@@ -74,6 +75,7 @@ CreateAlienManager:
     push dword [ebp+8]
     call CreateGameObject
     add esp, 20
+    mov dword [ebx + AlienManager.Gameobject], eax      ; Cache gameobject address
 
     ; Load sprites
     push Alien1SpritePath
@@ -364,21 +366,39 @@ LayOutAlienGrid:
     ret
 
 ;
-; CheckAliensLeft
+; CheckAliensLeft(&scene)
+; [ebp+8] scene
 ;
 
 CheckAliensLeft:
     enter 0, 0
 
+
     mov eax, [AlienList]
     cmp dword [eax + LinkedList.count], 0
     jne .StillAliens
 
-    .AllAliensDied:
-    push WIN_SCENE
+    .AllAliensDied:                                         ; Respawn faster aliens
+    fld dword [AlienJumpTime]
+    fmul dword [AlienJumpTimeDecrease]
+    fstp dword [AlienJumpTime]                              ; Decrease time between jumps
+
+    push GAME_SCENE
     call SwapScene
     add esp, 4
 
     .StillAliens:
+    leave
+    ret
+
+;
+; ResetAlienSpeed()
+;
+
+ResetAlienSpeed:
+    enter 0, 0
+
+    mov dword [AlienJumpTime], AlienStartJumpTime
+
     leave
     ret

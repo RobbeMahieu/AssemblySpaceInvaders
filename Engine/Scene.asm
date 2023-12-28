@@ -62,6 +62,10 @@ AddGameObjectToScene:
     push dword [ebp+8]
     call LL_Add
     add esp, 8
+    
+    mov eax, [ebp+12]                                   ; Cache the gameobject 
+    mov edx, [ebp+8]                                    ; Cache the scene
+    mov [eax + Gameobject.scene], edx
 
     leave
     ret

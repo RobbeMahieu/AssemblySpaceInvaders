@@ -10,8 +10,7 @@
 
 MENU_SCENE equ 0
 GAME_SCENE equ 1
-WIN_SCENE equ 2
-LOSE_SCENE equ 3
+LOSE_SCENE equ 2
 
 section .data
 ActiveScene dd 0
@@ -20,8 +19,6 @@ SceneIndex dd 0
 
 MenuTitle db "SPACE INVADERS!", 0
 MenuMessage db "Press SPACE to start...", 0
-WinTitle db "YOU WIN!", 0
-WinMessage db "Press SPACE to play again...", 0
 LoseTitle db "GAME OVER", 0
 LoseMessage db "Press SPACE to retry...", 0
 
@@ -126,8 +123,6 @@ CreateGameScene:
     call CreateScore 
     add esp, 12
 
-    call ScoreReset                                     ; Reset the score at the beginning of a game
-
     mov eax, ebx                                        ; Put scene address as return
 
     pop ebx
@@ -151,38 +146,6 @@ CreateMenuScene:
     push MenuTitle
     push ebx                                            ; Put scene on the stack
     call CreateMenu                                     ; CreateMenu(&scene)   
-    add esp, 12
-
-    mov eax, ebx                                        ; Put scene address as return
-
-    pop ebx
-    leave
-    ret
-
-;
-; CreateWinScene
-;
-
-CreateWinScene:
-    enter 0, 0
-    push ebx
-
-    ; Create menu scene
-    call [CreateScene]
-    mov ebx, eax
-
-    ; CreateMenu(&scene, &title, &message)
-    push WinMessage
-    push WinTitle
-    push ebx                                            ; Put scene on the stack
-    call CreateMenu                                     ; CreateMenu(&scene) 
-    add esp, 12
-
-    ; CreateScore(&scene, y, size)
-    push 20
-    push 240
-    push ebx
-    call CreateScore 
     add esp, 12
 
     mov eax, ebx                                        ; Put scene address as return
@@ -266,7 +229,6 @@ LoadScene:
     .SceneSwitch:                                       ; Jump table
     jmp .Menu
     jmp .Game
-    jmp .Win
     jmp .Lose
 
     .Menu:                                              ; Load Menu scene
@@ -275,10 +237,6 @@ LoadScene:
 
     .Game:                                              ; Load Game scene
     call CreateGameScene
-    jmp .SwitchEnd
-
-    .Win:                                               ; Load Win scene
-    call CreateWinScene                  
     jmp .SwitchEnd
 
     .Lose:                                              ; Load Lose scene

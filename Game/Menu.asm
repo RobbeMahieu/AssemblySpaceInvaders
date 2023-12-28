@@ -170,5 +170,8 @@ MenuOnSelect:
     call SwapScene
     add esp, 4
 
+    call ScoreReset                                     ; Reset the score at the beginning of a game
+    call ResetAlienSpeed                                ; Reset the alien speed at the beginning of the game
+
     leave
     ret

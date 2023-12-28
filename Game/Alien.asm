@@ -159,21 +159,28 @@ AlienRender:
 AlienDestroy:
     enter 0, 0
     push ebx
+    push esi
 
     mov ebx, [ebp+8]
+    mov esi, [ebx + Alien.Gameobject]
+    mov esi, [ebx + Gameobject.scene]                       ; Cache current scene
 
     ; DeleteHitbox(&hitbox)
     push dword [ebx + Alien.Hitbox]
     call DeleteHitbox
     add esp, 4
 
-    ; LL_Remove(&scene, &object, destroyObject)
+    ; DeleteAlienFromManager(&alien)
     push ebx
     call DeleteAlienFromManager
     add esp, 4
     
+    ; CheckAliensLeft(&scene)
+    push esi
     call CheckAliensLeft
+    add esp, 4
 
+    pop esi
     pop ebx
     leave
     ret
