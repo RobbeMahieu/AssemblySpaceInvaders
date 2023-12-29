@@ -110,6 +110,8 @@ global GetElapsed
 export GetElapsed
 global RandomInRange
 export RandomInRange
+global RandomInRangeContinous
+export RandomInRangeContinous
 
 ; Physics
 global CreateHitbox

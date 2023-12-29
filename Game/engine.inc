@@ -69,6 +69,7 @@ extern LL_Random
 extern CalculateFPS
 extern GetElapsed
 extern RandomInRange
+extern RandomInRangeContinous
 
 ; Physics
 extern CreateHitbox

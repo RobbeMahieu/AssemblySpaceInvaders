@@ -160,3 +160,40 @@ RandomInRange:
 
     leave
     ret
+
+;
+; RandomInRangeContinous(min, exclusiveMax, precision)
+; [ebp+8] min
+; [ebp+12] max
+; [ebp+16] precision
+;
+; eax => randomNumber
+;
+
+RandomInRangeContinous:
+    ; Local variables
+    ; [ebp-4] result
+    enter 4, 0
+
+    mov eax, [ebp+8]
+    mul dword [ebp+16]
+    mov ecx, eax                                        ; esi contains minimum*precision
+                                          
+    mov eax, [ebp+12]
+    mul dword [ebp+16]
+    mov edx, eax                                        ; edi contains maximum*precision
+
+    ; RandomInRange(min, exclusiveMax)
+    push edx
+    push ecx
+    call RandomInRange
+    add esp, 8
+    mov [ebp-4], eax                                    ; Random delay
+
+    fild dword [ebp-4]                                  ; Turn delay into float
+    fidiv dword [ebp+16]                                ; Divide back by precision
+    fstp dword [ebp-4]
+    mov eax, [ebp-4]                                    ; Set value as return value in eax
+
+    leave
+    ret
