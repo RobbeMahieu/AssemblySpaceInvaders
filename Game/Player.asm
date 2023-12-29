@@ -98,9 +98,9 @@ CreatePlayer:
     ; Additional Setup
 
     ; CreateHitbox(x, y, width, height, &onHit, &onHitting, &onHitEnd)  ; Add a hitbox
-    push 0
+    push HL_ENEMYPROJECTILE
     push HL_FRIENDLY
-    push 0
+    push OnPlayerHit
     push dword [ebx + Player.Height]
     push dword [ebx + Player.Width]
     push dword [ebx + Player.Ypos]
@@ -381,5 +381,21 @@ PlayerShoot:
 
     .ShootRet:
     pop ebx
+    leave
+    ret
+
+;
+; OnPlayerHit(&hitbox, &hitboxOther)
+; [ebp+8] hitbox
+; [ebp+12] hitboxOther
+;
+
+OnPlayerHit:
+    enter 0, 0
+
+    push LOSE_SCENE
+    call SwapScene
+    add esp, 4
+
     leave
     ret
