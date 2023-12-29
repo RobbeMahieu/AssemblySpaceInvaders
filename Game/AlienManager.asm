@@ -127,6 +127,14 @@ AlienManagerUpdate:
     enter 4, 0
     push ebx
 
+    mov eax, [ebp+8]
+    mov eax, [eax + AlienManager.Gameobject]
+
+    ; CheckAliensLeft(&scene)
+    push dword [eax + Gameobject.scene]
+    call CheckAliensLeft
+    add esp, 4
+
     ; Add elapsedSec to bulletDelay
     fld dword [AlienBulletTimer]                        ; Load jump timer in float stack
     call [GetElapsed]                                   ; Get ElapsedSec
@@ -412,7 +420,6 @@ LayOutAlienGrid:
 CheckAliensLeft:
     enter 0, 0
 
-
     mov eax, [AlienList]
     cmp dword [eax + LinkedList.count], 0
     jne .StillAliens
@@ -422,8 +429,8 @@ CheckAliensLeft:
     fmul dword [AlienJumpTimeDecrease]
     fstp dword [AlienJumpTime]                              ; Decrease time between jumps
 
-    push GAME_SCENE
-    call SwapScene
+    push dword [ebp+8]
+    call LayOutAlienGrid
     add esp, 4
 
     .StillAliens:

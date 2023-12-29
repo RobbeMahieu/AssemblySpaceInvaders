@@ -18,8 +18,9 @@ struc Player
     ; Owner
     .Gameobject resd 1
 
-    ; Image
+    ; Visuals
     .Sprite resd 1
+    .LivesDisplay resd 1
 
     ; Bounds
     .Xpos resd 1
@@ -28,9 +29,10 @@ struc Player
     .Height resd 1
     .Hitbox resd 1
 
-    ; Propertied
+    ; Properties
     .Speed resd 1
     .Lives resd 1
+    .LivesText resb 20
 
     ; Bullet
     .BulletSpeed resd 1
@@ -47,6 +49,7 @@ section .data
 
 BulletDelay dd 0.5
 PlayerImage db "Resources\Sprites\player.bmp", 0
+LivesTextformat db "%d", 0
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -112,6 +115,28 @@ CreatePlayer:
     add esp, 28
     mov dword [ebx + Player.Hitbox], eax                ; Store the hitbox address
     mov dword [eax + Hitbox.Owner], ebx                 ; Store owner in hitbox
+
+    ; CreateTextbox(&text,x, y, width, height, color, size, justification)   ; Textbox
+    lea eax, dword [ebx + Player.LivesText]
+    push dword [TEXT_JUSTIFY_LEFT]
+    push 30
+    push dword [COLOR_WHITE]
+    push 30
+    push WindowWidth
+    push WindowHeight - 60
+    push 5
+    push eax
+    call CreateTextbox
+    add esp, 32
+    mov [ebx + Player.LivesDisplay], eax                ; Cache the textbox
+
+    ; wsprintfA(&string, &format, extra variables)      ; Set lives string
+    lea eax, dword [ebx + Player.LivesText]
+    push dword [ebx + Player.Lives]
+    push LivesTextformat
+    push eax
+    call wsprintfA
+    add esp, 12   
 
     ; AddAction(key, state, callback, data)             ; Move left
     push ebx
@@ -241,6 +266,11 @@ PlayerRender:
     call DrawImage
     add esp, 20
 
+    ; Draw Lives Dispaly
+    push dword [ebx + Player.LivesDisplay]
+    call TextboxRender
+    add esp, 4
+
     pop ebx
     leave
     ret
@@ -259,6 +289,11 @@ PlayerDestroy:
     ; DeleteHitbox(&hitbox)
     push dword [ebx + Player.Hitbox]
     call DeleteHitbox
+    add esp, 4
+
+    ; DestroyTextbox(&textbox)
+    push dword [ebx + Player.LivesDisplay]
+    call DestroyTextbox
     add esp, 4
 
     ; RemoveAction(&hitbox)                                 ; Delete move left action
@@ -395,12 +430,22 @@ PlayerShoot:
 
 OnPlayerHit:
     enter 0, 0
+    push ebx
 
-    mov eax, [ebp+8]
-    mov eax, [eax + Hitbox.Owner]
+    mov ebx, [ebp+8]
+    mov ebx, [ebx + Hitbox.Owner]
 
-    dec dword [eax + Player.Lives]
-    cmp dword [eax + Player.Lives], 0
+    dec dword [ebx + Player.Lives]                      ; Decrease live
+
+    ; wsprintfA(&string, &format, extra variables)      ; Update lives string
+    lea eax, dword [ebx + Player.LivesText]
+    push dword [ebx + Player.Lives]
+    push LivesTextformat
+    push eax
+    call wsprintfA
+    add esp, 12   
+
+    cmp dword [ebx + Player.Lives], 0                   ; Check if player died
     jne .Done
 
     push LOSE_SCENE
@@ -408,5 +453,6 @@ OnPlayerHit:
     add esp, 4
 
     .Done:
+    pop ebx
     leave
     ret
