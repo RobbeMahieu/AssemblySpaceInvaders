@@ -45,7 +45,7 @@ endstruc
 
 section .data
 
-BulletDelay dd 0.75
+BulletDelay dd 0.5
 PlayerImage db "Resources\Sprites\player.bmp", 0
 
 ;-------------------------------------------------------------------------------------------------------------------
