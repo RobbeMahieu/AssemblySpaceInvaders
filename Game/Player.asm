@@ -14,7 +14,7 @@ PlayerStartSpeed equ 200
 BulletStartBulletSpeed equ -200
 PlayerStartLives equ 3
 
-PlayerLivesDisplayXpos equ 5
+PlayerLivesDisplayXpos equ 0
 PlayerLivesDisplayYpos equ WindowHeight - 60
 
 struc Player
@@ -52,7 +52,7 @@ section .data
 
 BulletDelay dd 0.5
 PlayerImage db "Resources\Sprites\player.bmp", 0
-LivesTextformat db "%d", 0
+LivesTextformat db "   %d", 0
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -285,7 +285,7 @@ PlayerRender:
     dec dword [ebp-12]
 
     mov eax, dword [ebx + Player.Width]
-    add eax, 10
+    add eax, 5
     add [ebp-4], eax
 
     ; DrawImage(&image, x, y, width, height)
