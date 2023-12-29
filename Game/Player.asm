@@ -14,6 +14,9 @@ PlayerStartSpeed equ 200
 BulletStartBulletSpeed equ -200
 PlayerStartLives equ 3
 
+PlayerLivesDisplayXpos equ 5
+PlayerLivesDisplayYpos equ WindowHeight - 60
+
 struc Player
     ; Owner
     .Gameobject resd 1
@@ -123,8 +126,8 @@ CreatePlayer:
     push dword [COLOR_WHITE]
     push 30
     push WindowWidth
-    push WindowHeight - 60
-    push 5
+    push PlayerLivesDisplayYpos
+    push PlayerLivesDisplayXpos
     push eax
     call CreateTextbox
     add esp, 32
@@ -246,7 +249,8 @@ PlayerUpdate:
 PlayerRender:
     ; [ebp-4] XposInt
     ; [ebp-8] YposInt
-    enter 8, 0
+    ; [ebp-12] loop indew
+    enter 12, 0
     push ebx
 
     mov ebx, [ebp+8]                                        ; Object data in ebx
@@ -271,6 +275,31 @@ PlayerRender:
     call TextboxRender
     add esp, 4
 
+    mov eax, [ebx + Player.Lives]
+    mov [ebp-12], eax
+    mov dword [ebp-4], PlayerLivesDisplayXpos
+
+    .Loop:
+    cmp dword [ebp-12], 0
+    je .Done
+    dec dword [ebp-12]
+
+    mov eax, dword [ebx + Player.Width]
+    add eax, 10
+    add [ebp-4], eax
+
+    ; DrawImage(&image, x, y, width, height)
+    push dword [ebx + Player.Height]
+    push dword [ebx + Player.Width]
+    push PlayerLivesDisplayYpos
+    push dword [ebp-4]
+    push dword [ebx + Player.Sprite]
+    call DrawImage
+    add esp, 20
+
+    jmp .Loop
+
+    .Done:
     pop ebx
     leave
     ret
