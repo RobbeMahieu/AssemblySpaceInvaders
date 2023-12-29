@@ -180,8 +180,8 @@ RectCollision:
     .OnHit:
     cmp dword [ebx + Hitbox.OnHit], 0
     je .OnHitOther                                      ; Hitbox has a callback
-    mov eax, dword [ebx + Hitbox.Layer]                 
-    and eax, [esi + Hitbox.HitLayers]
+    mov eax, dword [esi + Hitbox.Layer]                 
+    and eax, [ebx + Hitbox.HitLayers]
     cmp eax, 0
     je .OnHitOther                                      ; Hitlayers contains other layer
 
@@ -194,8 +194,8 @@ RectCollision:
     .OnHitOther:
     cmp dword [esi + Hitbox.OnHit], 0
     je .CollisionHandlingDone                           ; Other.Hitbox has a callback
-    mov eax, dword [esi + Hitbox.Layer]                 
-    and eax, [ebx + Hitbox.HitLayers]
+    mov eax, dword [ebx + Hitbox.Layer]                 
+    and eax, [esi + Hitbox.HitLayers]
     cmp eax, 0
     je .CollisionHandlingDone                           ; Other.Hitlayers contains layer
 

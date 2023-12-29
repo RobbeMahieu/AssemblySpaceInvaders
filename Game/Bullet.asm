@@ -37,12 +37,14 @@ section .text                                           ; Code
 ;-------------------------------------------------------------------------------------------------------------------
 
 ;
-; CreateBullet(&scene, x, y, speed, color)
+; CreateBullet(&scene, x, y, speed, color, layer, hitlayers)
 ; [ebp+8] scene
 ; [ebp+12] x
 ; [ebp+16] y
 ; [ebp+20] speed
 ; [ebp+24] color
+; [ebp+28] layer
+; [ebp+32] hitLayers
 ; 
 ; eax => Gameobject address
 ;
@@ -89,8 +91,8 @@ CreateBullet:
     mov dword [ebx + Bullet.Gameobject], eax            ; Store reference to the owning gameobject
 
     ; CreateHitbox(x, y, width, height, &onHit, layer, hitLayers)  ; Add a hitbox
-    push HL_ENEMY
-    push HL_FRIENDLY
+    push dword [ebp+32]
+    push dword [ebp+28]
     push OnBulletHit
     push dword [ebx + Bullet.Height]
     push dword [ebx + Bullet.Width]

@@ -277,3 +277,43 @@ OnAlienHit:
     pop ebx
     leave
     ret
+
+;
+; AlienShoot(&alien)
+; [ebp+8] alien
+;
+
+AlienShoot:
+    ; Local variables
+    ; [ebp-4] center x coord
+    enter 4, 0
+    push ebx
+
+    mov ebx, [ebp+8]
+
+    ; Calculate xpos
+    mov eax, dword [ebx + Alien.Width]                 ; Calculate Xpos
+    shr eax, 1                                          ; divide by 2
+    mov [ebp-4], eax                                         
+    fild dword [ebp-4]                                  ; Convert to float
+    fadd dword [ebx + Alien.Xpos]    
+    fstp dword [ebp-4]                                  ; Bullet Xpos
+
+    mov eax, [ebx + Alien.Gameobject]
+    mov eax, [ebx + Gameobject.scene]
+
+    ; CreateBullet(&scene, x, y, speed, color, layer, hitLayers)
+    push HL_FRIENDLY
+    push HL_ENEMYPROJECTILE
+    push dword [COLOR_WHITE]
+    push 200
+    push dword [ebx + Alien.Ypos] 
+    push dword [ebp-4]
+    push dword [eax]
+    call CreateBullet
+    add esp, 28
+
+    .ShootRet:
+    pop ebx
+    leave
+    ret

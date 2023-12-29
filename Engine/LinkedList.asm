@@ -233,6 +233,7 @@ LL_ForEach:
 
 ;
 ; LL_Random(&list)
+; [ebp+8] list
 ;
 ; eax => data of random node
 ;
@@ -240,7 +241,7 @@ LL_ForEach:
 LL_Random:
     enter 0, 0
     push ebx
-    pus edi
+    push edi
 
     mov eax, [ebp+8]
     mov ebx, [eax + LinkedList.start]                   ; ebx contains base address of node
@@ -264,7 +265,7 @@ LL_Random:
     .Done:
     mov eax, dword [ebx + Node.content]                 ; eax contains base address of content
 
-    pus edi
+    pop edi
     pop ebx
     leave
     ret

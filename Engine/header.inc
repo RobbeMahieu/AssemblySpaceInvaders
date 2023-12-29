@@ -100,12 +100,16 @@ global LL_Remove
 export LL_Remove
 global LL_ForEach
 export LL_ForEach
+global LL_Random
+export LL_Random
 
 ; Time
 global CalculateFPS
 export CalculateFPS
 global GetElapsed
 export GetElapsed
+global RandomInRange
+export RandomInRange
 
 ; Physics
 global CreateHitbox

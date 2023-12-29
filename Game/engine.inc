@@ -56,6 +56,7 @@ extern LL_Delete
 extern LL_Add
 extern LL_Remove
 extern LL_ForEach
+extern LL_Random
 
 %define LinkedList.start 0
 %define LinkedList.end 4
@@ -67,6 +68,7 @@ extern LL_ForEach
 ; Time
 extern CalculateFPS
 extern GetElapsed
+extern RandomInRange
 
 ; Physics
 extern CreateHitbox

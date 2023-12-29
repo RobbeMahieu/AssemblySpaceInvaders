@@ -130,7 +130,7 @@ CreatePlayer:
 
     ; AddAction(key, state, callback, data)             ; Shoot
     push ebx
-    push Shoot
+    push PlayerShoot
     push dword [PRESS]
     push dword [KEY_SPACE]
     call [AddAction]
@@ -334,11 +334,11 @@ MoveRight:
     ret
 
 ;
-; Shoot(&object)
+; PlayerShoot(&object)
 ; [ebp+8] object
 ;
 
-Shoot:
+PlayerShoot:
     ; Local variables
     ; [ebp-4] center x coord
     enter 4, 0
@@ -368,14 +368,16 @@ Shoot:
     mov eax, [ebx + Player.Gameobject]
     mov eax, [ebx + Gameobject.scene]
 
-    ; CreateBullet(&scene, x, y, speed, color)
+    ; CreateBullet(&scene, x, y, speed, color, layer, hitLayers)
+    push HL_ENEMY + HL_ENEMYPROJECTILE
+    push HL_FRIENDLY
     push dword [COLOR_GREEN]
     push dword [ebx + Player.BulletSpeed]
     push dword [ebx + Player.Ypos] 
     push dword [ebp-4]
     push dword [eax]
     call CreateBullet
-    add esp, 20
+    add esp, 28
 
     .ShootRet:
     pop ebx

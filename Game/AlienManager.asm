@@ -152,6 +152,15 @@ AlienManagerUpdate:
     call LL_ForEach
     add esp, 8
 
+    ; Let random alien shoot
+    push dword [AlienList]
+    call LL_Random
+    add esp, 4
+
+    push eax
+    call AlienShoot
+    add esp, 4
+
     jmp .UpdateHitbox
 
     .NoRowDown:
