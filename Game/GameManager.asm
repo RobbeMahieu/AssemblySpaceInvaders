@@ -33,6 +33,8 @@ section .text                                           ; Program start
 InitializeGame:
     enter 0, 0
 
+    call LoadHighScore
+
     mov dword [SceneIndex], MENU_SCENE
     call LoadScene
 
@@ -164,6 +166,9 @@ CreateMenuScene:
 CreateLoseScene:
     enter 0, 0
     push ebx
+
+    ; Save Highscore if necessary
+    call SaveHighScore
 
     ; Create menu scene
     call [CreateScene]

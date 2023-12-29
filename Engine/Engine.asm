@@ -13,6 +13,7 @@ cpu x64                                                 ; Limit instructions to 
 ; Includes
 %include "windows.inc"
 %include "./Memory.asm"
+%include "./File.asm"
 %include "./LinkedList.asm"
 %include "./Graphics.asm"
 %include "./Debug.asm"

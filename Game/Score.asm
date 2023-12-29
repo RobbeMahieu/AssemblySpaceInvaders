@@ -13,16 +13,22 @@ struc Score
     .Gameobject resd 1
 
     ; UI
-    .Textbox      resd 1
+    .ScoreTextbox      resd 1
+    .HighScoreTextbox   resd 1
 endstruc
 
 section .data
 ScoreAmount dd 0
 ScoreTextformat db "Score: %08d", 0
 
+HighScore dd 0
+HighScoreTextformat db "Highscore: %08d", 0
+HighScoreFilepath db "Resources/score.bin", 0
+
 section .bss
 
-ScoreTextBuffer resb 20
+ScoreText resb 20
+HighScoreText resb 20
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -67,10 +73,28 @@ CreateScore:
     push WindowWidth
     push dword [ebp+12]
     push 0
-    push ScoreTextBuffer
+    push ScoreText
     call CreateTextbox
     add esp, 32
-    mov [ebx + Score.Textbox], eax                      ; Cache the textbox 
+    mov [ebx + Score.ScoreTextbox], eax                 ; Cache the textbox 
+
+    ; Calculate highscore position              
+    mov eax, [ebp+12]                                   ; Start from score y
+    add eax, dword [ebp+16]                             ; add textsize
+    add eax, 5                                          ; add offset
+
+    ; CreateTextbox(&text,x, y, width, height, color, size, justification)   ; Textbox
+    push dword [TEXT_JUSTIFY_CENTER]
+    push dword[ebp+16]
+    push dword [COLOR_WHITE]
+    push dword [ebp+16]
+    push WindowWidth
+    push eax
+    push 0
+    push HighScoreText
+    call CreateTextbox
+    add esp, 32
+    mov [ebx + Score.HighScoreTextbox], eax             ; Cache the textbox 
 
     push 0                                              ; Make sure the text is up to date
     call ScoreAdd
@@ -103,13 +127,11 @@ ScoreRender:
 
     mov ebx, [ebp+8]
 
-    ; SetTextboxText(&object, &text)                    ; Update the text
-    push ScoreTextBuffer        
-    push dword [ebx + Score.Textbox]
-    call SetTextboxText
-    add esp, 8
+    push dword [ebx + Score.ScoreTextbox]
+    call TextboxRender
+    add esp, 4
 
-    push dword [ebx + Score.Textbox]
+    push dword [ebx + Score.HighScoreTextbox]
     call TextboxRender
     add esp, 4
 
@@ -129,7 +151,12 @@ ScoreDestroy:
     mov ebx, [ebp+8]
 
     ; DestroyTextbox(&textbox)
-    push dword [ebx + Score.Textbox]
+    push dword [ebx + Score.ScoreTextbox]
+    call DestroyTextbox
+    add esp, 4
+
+    ; DestroyTextbox(&textbox)
+    push dword [ebx + Score.HighScoreTextbox]
     call DestroyTextbox
     add esp, 4
 
@@ -151,7 +178,7 @@ ScoreAdd:
     ; wsprintfA(&string, &format, extra variables)      ; Update text string
     push dword [ScoreAmount]
     push ScoreTextformat
-    push ScoreTextBuffer
+    push ScoreText
     call wsprintfA
     add esp, 12       
 
@@ -174,4 +201,60 @@ ScoreReset:
     add esp, 4
 
     leave
+    ret
+
+;
+; LoadHighScore()
+;
+
+LoadHighScore: 
+    enter 0, 0
+
+    ; ReadFromFile(&path, &buffer, length)
+    push 4
+    push HighScore
+    push HighScoreFilepath
+    call ReadFromFile
+    add esp, 12
+
+    ; wsprintfA(&string, &format, extra variables)      ; Update text string
+    push dword [HighScore]
+    push HighScoreTextformat
+    push HighScoreText
+    call wsprintfA
+    add esp, 12  
+
+    leave 
+    ret
+
+;
+; SaveHighScore()
+;
+
+SaveHighScore: 
+    enter 0, 0
+
+    mov eax, dword [ScoreAmount]
+    cmp eax, [HighScore]
+    jle .Done
+    
+    ; Update the highscore
+    mov [HighScore], eax
+
+    ; wsprintfA(&string, &format, extra variables)      ; Update text string
+    push dword [HighScore]
+    push HighScoreTextformat
+    push HighScoreText
+    call wsprintfA
+    add esp, 12  
+
+    ; WriteToFile(&path, &buffer, length)
+    push 4
+    push HighScore
+    push HighScoreFilepath
+    call WriteToFile
+    add esp, 12
+
+    .Done:
+    leave 
     ret
