@@ -138,3 +138,24 @@ LockFramerate:
     pop ebx
     leave
     ret
+
+;
+; RandomInRange(min, exclusiveMa)
+; [ebp+8] min
+; [ebp+12] max
+;
+; eax => randomNumber
+;
+
+RandomInRange:
+    enter 0, 0
+
+    rdtsc                                           ; Get timestamp in edx:eax
+    mov ecx, [ebp+12]                               ; max in ecx
+    sub ecx, [ebp+8]                                ; ecx contains max - min
+    div ecx                                         ; eax / ecx => remainder in edx
+    add edx, [ebp+8]                                ; This is our random number
+    mov eax, edx
+
+    leave
+    ret
