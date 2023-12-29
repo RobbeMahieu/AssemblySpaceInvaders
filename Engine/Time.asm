@@ -140,7 +140,7 @@ LockFramerate:
     ret
 
 ;
-; RandomInRange(min, exclusiveMa)
+; RandomInRange(min, exclusiveMax)
 ; [ebp+8] min
 ; [ebp+12] max
 ;

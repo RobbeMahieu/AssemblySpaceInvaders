@@ -230,3 +230,41 @@ LL_ForEach:
     pop ebx
     leave
     ret
+
+;
+; LL_Random(&list)
+;
+; eax => data of random node
+;
+
+LL_Random:
+    enter 0, 0
+    push ebx
+    pus edi
+
+    mov eax, [ebp+8]
+    mov ebx, [eax + LinkedList.start]                   ; ebx contains base address of node
+
+    ; RandomInRange(min, exclusiveMax)                  ; Get random number between 0 and listcount
+    push dword [eax + LinkedList.count]                 
+    push 0
+    call RandomInRange
+    add esp, 8
+    mov edi, eax                                        ; edi contains random number
+
+    ; Get random node
+    .NextNode:
+    cmp edi, 0
+    je .Done
+
+    mov ebx, [ebx + Node.next]                          ; Cache next address
+    dec edi
+    jmp .NextNode
+
+    .Done:
+    mov eax, dword [ebx + Node.content]                 ; eax contains base address of content
+
+    pus edi
+    pop ebx
+    leave
+    ret
