@@ -69,12 +69,6 @@ CreateAlienManager:
     add esp, 4
     mov ebx, eax
 
-    ; Fill in fields                     
-    mov eax, AlienMoveDownCount                         ; Start at half (aliens start in the middle)
-    shr eax, 1
-    inc eax                                             
-    mov dword [AlienMoveDownCounter], eax               ; MoveDownCounter
-
     mov dword [AlienBulletTimer], 0                     ; Reset Delay
     call AlienManagerGenerateBulletDelay                ; Get new delay    
 
@@ -300,6 +294,11 @@ LayOutAlienGrid:
     enter 28, 0
     push ebx
     push esi
+                   
+    mov eax, AlienMoveDownCount                         ; Start at half (aliens start in the middle)
+    shr eax, 1
+    inc eax                                             
+    mov dword [AlienMoveDownCounter], eax               ; MoveDownCounter
 
     ; Calculate starting X
     mov dword [ebp-4], AlienOffset                          ; Offset for one alien
