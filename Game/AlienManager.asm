@@ -15,7 +15,7 @@ AlienMaxWidth equ 36
 AlienHeight equ 24
 
 AlienMinBulletDelay equ 1
-AlienMaxBulletDelay equ 55
+AlienMaxBulletDelay equ 5
 
 AlienMinUfoDelay equ 10
 AlienMaxUfoDelay equ 40
