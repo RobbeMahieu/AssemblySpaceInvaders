@@ -86,7 +86,7 @@ CreateAlien:
     ; CreateHitbox(x, y, width, height, &onHit, layer, hitLayers)  ; Add a hitbox
     push HL_FRIENDLY
     push HL_ENEMY
-    push 0
+    push OnAlienHit
     push dword [ebx + Alien.Height]
     push dword [ebx + Alien.Width]
     push dword [ebx + Alien.Ypos]
@@ -251,17 +251,29 @@ AlienUpdateHitbox:
     ret
 
 ;
-; AlienGetScore(&alien)
-; [ebp+8] alien
+; OnAlienHit(&hitbox, &hitboxOther)
+; [ebp+8] hitbox
+; [ebp+12] hitboxOther
 ;
-; eax => score
 ;
 
-AlienGetScore:
+OnAlienHit:
     enter 0, 0
+    push ebx
 
     mov eax, [ebp+8]
-    mov eax, [eax + Alien.Points]
+    mov ebx, [eax + Hitbox.Owner]
 
+    ; ScoreAdd(amount)                                      ; Add the amount to the totalScore
+    push dword [ebx + Alien.Points]
+    call ScoreAdd
+    add esp, 4   
+
+    ; DestroyGameObject(&other)
+    push dword [ebx + Alien.Gameobject] 
+    call DestroyGameObject
+    add esp, 4
+
+    pop ebx
     leave
     ret

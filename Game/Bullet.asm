@@ -257,24 +257,6 @@ OnBulletHit:
     call BulletDespawn
     add esp, 4
 
-    mov ebx, [ebp+12]
-    mov ebx, [ebx + Hitbox.Owner]                           ; ebx contains Alien
-
-    ; AlienGetScore(&alien)                                 ; Get the score in eax
-    push ebx
-    call AlienGetScore
-    add esp, 4
-
-    ; ScoreAdd(amount)                                      ; Add the amount to the totalScore
-    push eax
-    call ScoreAdd
-    add esp, 4   
-
-    ; DestroyGameObject(&other)
-    push dword [ebx + Alien.Gameobject] 
-    call DestroyGameObject
-    add esp, 4
-
     pop ebx
     leave
     ret
