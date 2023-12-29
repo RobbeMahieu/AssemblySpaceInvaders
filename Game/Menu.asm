@@ -18,7 +18,15 @@ struc Menu
 
     ; Actions
     .Select     resd 1
+
+    ;Properties
+    .Activated resd 1
+    .ActivationAccuDelay resd 1
 endstruc
+
+section .data
+
+ActivationDelay dd 0.2
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -41,7 +49,11 @@ CreateMenu:
     push Menu_size                                      ; Create Menu struct
     call [MemoryAlloc]
     add esp, 4
-    mov ebx, eax                   
+    mov ebx, eax
+
+    ; Fill in fiels
+    mov dword [ebx + Menu.ActivationAccuDelay], 0       ; Activation delay                   
+    mov dword [ebx + Menu.Activated], 0                 ; Activation bool                   
 
     ; CreateGameobject(&scene, &data, &update, &render, &destroy)
     push MenuDestroy
@@ -81,15 +93,6 @@ CreateMenu:
     add esp, 32
     mov [ebx + Menu.Message], eax                       ; Cache the message textbox 
 
-    ; AddAction(key, state, callback, data)             ; Shoot
-    push ebx
-    push MenuOnSelect
-    push dword [PRESS]
-    push dword [KEY_SPACE]
-    call [AddAction]
-    add esp, 16
-    mov dword [ebx + Menu.Select], eax                  ; Store the action address
-
     mov eax, dword [ebx + Menu.Gameobject]              ; Return gameobject address
 
     pop ebx
@@ -102,7 +105,44 @@ CreateMenu:
 ;
 
 MenuUpdate:
-    enter 0, 0
+    ; Local variables
+    ; [ebp-4] temp float storage
+    enter 4, 0
+    push ebx
+
+    mov ebx, [ebp+8]
+    cmp dword [ebx + Menu.Activated], 1
+    je .Done
+
+    ; Add elapsedSec to ActivationAccuDelay
+    fld dword [ebx + Menu.ActivationAccuDelay]          ; Load jump timer in float stack
+    call [GetElapsed]                                   ; Get ElapsedSec
+    mov [ebp-4], eax
+    fadd dword [ebp-4]                                  ; Add to the timer
+    fstp dword [ebx + Menu.ActivationAccuDelay]         ; Store the result
+
+    ; Check activation condition
+    fld dword [ActivationDelay]                         ; Put ActivationDelay in float stack
+    fcomp dword [ebx + Menu.ActivationAccuDelay]        ; ActivationDelay <= ActivationAccuDelay?
+    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
+    fwait
+    sahf                                                ; Transfer ax codes to status register
+    ja .Done                                            ; I can finally compare now
+
+    .Activate:
+    mov dword [ebx + Menu.Activated], 1                 ; Activation bool 
+
+    ; AddAction(key, state, callback, data)             ; Menu Select
+    push ebx
+    push MenuOnSelect
+    push dword [PRESS]
+    push dword [KEY_SPACE]
+    call [AddAction]
+    add esp, 16
+    mov dword [ebx + Menu.Select], eax                  ; Store the action address
+
+    .Done:
+    pop ebx
     leave
     ret
 
@@ -121,10 +161,14 @@ MenuRender:
     call TextboxRender
     add esp, 4
 
+    cmp dword [ebx + Menu.Activated], 1
+    jne .Done
+
     push dword [ebx + Menu.Message]
     call TextboxRender
     add esp, 4
 
+    .Done:
     pop ebx
     leave
     ret
@@ -150,11 +194,15 @@ MenuDestroy:
     call DestroyTextbox
     add esp, 4
 
+    cmp dword [ebx + Menu.Activated], 1
+    jne .Done
+
     ; RemoveAction(&action)                                 ; Delete select action
     push dword [ebx + Menu.Select]
     call RemoveAction
     add esp, 4
 
+    .Done:
     pop ebx
     leave
     ret
