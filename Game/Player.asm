@@ -12,6 +12,7 @@ PlayerWidth equ 39
 PlayerHeight equ 24
 PlayerStartSpeed equ 200
 BulletStartBulletSpeed equ -200
+PlayerStartLives equ 3
 
 struc Player
     ; Owner
@@ -27,8 +28,9 @@ struc Player
     .Height resd 1
     .Hitbox resd 1
 
-    ; Speed
+    ; Propertied
     .Speed resd 1
+    .Lives resd 1
 
     ; Bullet
     .BulletSpeed resd 1
@@ -72,6 +74,7 @@ CreatePlayer:
     mov dword [ebx + Player.Speed], PlayerStartSpeed    ; Speed
     mov dword [ebx + Player.BulletSpeed], BulletStartBulletSpeed    ; Bullet speed
     mov dword [ebx + Player.AccuBulletDelay], 0         ; Accumulated bullet delay
+    mov dword [ebx + Player.Lives], PlayerStartLives    ; Lives
 
     mov dword [ebx + Player.Xpos], WindowWidth          ; Calculate Xpos
     sub dword [ebx + Player.Xpos], PlayerWidth          
@@ -393,9 +396,17 @@ PlayerShoot:
 OnPlayerHit:
     enter 0, 0
 
+    mov eax, [ebp+8]
+    mov eax, [eax + Hitbox.Owner]
+
+    dec dword [eax + Player.Lives]
+    cmp dword [eax + Player.Lives], 0
+    jne .Done
+
     push LOSE_SCENE
     call SwapScene
     add esp, 4
 
+    .Done:
     leave
     ret
