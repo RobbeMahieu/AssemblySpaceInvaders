@@ -147,3 +147,9 @@ global SetTextboxText
 export SetTextboxText
 global TextboxRender
 export TextboxRender
+
+; File
+global ReadFromFile
+export ReadFromFile
+global WriteToFile
+export WriteToFile

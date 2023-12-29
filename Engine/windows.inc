@@ -39,6 +39,10 @@ extern HeapFree
 extern HeapSize
 extern QueryPerformanceFrequency
 extern QueryPerformanceCounter
+extern CreateFileA
+extern ReadFile
+extern WriteFile
+extern CloseHandle
 
 %define WNDCLASSEX_SIZE     48
 
@@ -90,6 +94,13 @@ extern QueryPerformanceCounter
 %define HEAP_ZERO_MEMORY    0x00000008
 
 %define MAX_PATH            260
+
+%define FILE_ATTRIBUTE_NORMAL   0x00000080
+
+%define OPEN_ALWAYS             0x00000004
+
+%define GENERIC_READ            0x80000000
+%define GENERIC_WRITE           0x40000000
 
 ; Include guard
 %endif  

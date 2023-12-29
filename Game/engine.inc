@@ -117,3 +117,7 @@ extern SetTextboxBounds
 extern SetTextboxText
 extern TextboxRender
 extern wsprintfA
+
+; File
+extern ReadFromFile
+extern WriteToFile
