@@ -20,6 +20,7 @@ cpu x64                                                 ; Limit instructions to 
 %include "./Player.asm"
 %include "./AlienManager.asm"
 %include "./Alien.asm"
+%include "./Ufo.asm"
 %include "./Earth.asm"
 %include "./Menu.asm"
 

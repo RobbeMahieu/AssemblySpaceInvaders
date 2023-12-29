@@ -15,7 +15,11 @@ AlienMaxWidth equ 36
 AlienHeight equ 24
 
 AlienMinBulletDelay equ 1
-AlienMaxBulletDelay equ 5
+AlienMaxBulletDelay equ 55
+
+AlienMinUfoDelay equ 10
+AlienMaxUfoDelay equ 40
+
 AlienDelayPrecision equ 10
 
 AlienMoveDownCount equ 9
@@ -37,8 +41,8 @@ AlienJumpTimeDecrease dd 0.75
 AlienJumpDistance dd 5
 AlienMoveDownCounter dd 0
 
-AlienBulletDelay dd 0.5
-AlienBulletTimer dd 0.0
+AlienBulletTimer dd 0.5
+AlienUfoTimer dd 0.0 
 
 AlienList dd 0                                          ; All aliens currently alive
 
@@ -69,8 +73,9 @@ CreateAlienManager:
     add esp, 4
     mov ebx, eax
 
-    mov dword [AlienBulletTimer], 0                     ; Reset Delay
-    call AlienManagerGenerateBulletDelay                ; Get new delay    
+    mov dword [AlienJumpTime], AlienStartJumpTime       ; JumpTime
+    call AlienManagerGenerateBulletDelay                ; Bullet Delay   
+    call AlienManagerGenerateUfoDelay                   ; Ufo Delay
 
     ; CreateGameobject(&render, &data, &update, &render, &destroy)
     push AlienManagerDestroy
@@ -129,22 +134,21 @@ AlienManagerUpdate:
     call CheckAliensLeft
     add esp, 4
 
-    ; Add elapsedSec to bulletDelay
-    fld dword [AlienBulletTimer]                        ; Load jump timer in float stack
+    ; Subtract elapsedSec from bulletDelay
+    fld dword [AlienBulletTimer]                        ; Load bulletDelay in float stack
     call [GetElapsed]                                   ; Get ElapsedSec
     mov [ebp-4], eax
-    fadd dword [ebp-4]                                  ; Add to the timer
+    fsub dword [ebp-4]                                  ; Remove from the timer
     fstp dword [AlienBulletTimer]                       ; Store the result
 
     ; Check it delay has passed
-    fld dword [AlienBulletDelay]                        ; Load accumulated time
-    fcomp dword [AlienBulletTimer]                      ;  BulletDelay <= AccuBulletTimer ?
+    fldz                                                ; Load accumulated time
+    fcomp dword [AlienBulletTimer]                      ;  0 <= AccuBulletTimer ?
     fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
     fwait
     sahf                                                ; Transfer ax codes to status register
-    ja .NoShoot                                        ; I can finally compare now
+    jbe .NoShoot                                        ; I can finally compare now
 
-    mov dword [AlienBulletTimer], 0                     ; Reset Delay
     call AlienManagerGenerateBulletDelay                ; Get new delay                  
 
     ; LL_Random(&list)                                  ; Get Random alien
@@ -158,6 +162,31 @@ AlienManagerUpdate:
     add esp, 4
 
     .NoShoot:
+    ; Subtract elapsedSec from ufoDelay
+    fld dword [AlienUfoTimer]                           ; Load ufoDelay in float stack
+    call [GetElapsed]                                   ; Get ElapsedSec
+    mov [ebp-4], eax
+    fsub dword [ebp-4]                                  ; Remove from the timer
+    fstp dword [AlienUfoTimer]                          ; Store the result
+
+    ; Check it delay has passed
+    fldz                                                ; Load accumulated time
+    fcomp dword [AlienUfoTimer]                         ;  0 <= AlienUfoTimer ?
+    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
+    fwait
+    sahf                                                ; Transfer ax codes to status register
+    jbe .NoUfo                                          ; I can finally compare now
+                 
+    call AlienManagerGenerateUfoDelay                   ; Get new delay 
+
+    ; CreateUfo(&scene) ; Spawn an ufo
+    mov eax, [ebp+8]
+    mov eax, [eax + AlienManager.Gameobject]
+    push dword [eax + Gameobject.scene]
+    call CreateUfo
+    add esp, 4
+
+    .NoUfo:
     ; Add elapsedSec to jumpTimer
     fld dword [AlienJumpTimer]                          ; Load jump timer in float stack
     call [GetElapsed]                                   ; Get ElapsedSec
@@ -313,7 +342,7 @@ LayOutAlienGrid:
     ; Calculate starting Y
     mov dword [ebp-8], AlienOffset                          ; Offset for one alien
     add dword [ebp-8], AlienHeight                          ; 1 space = alien + offset
-    mov esi, 50
+    mov esi, 100
 
     ; Loop to create the grid
     mov dword [ebp-12], 0                                   ; Reset row count
@@ -437,51 +466,37 @@ CheckAliensLeft:
     ret
 
 ;
-; ResetAlienSpeed()
-;
-
-ResetAlienSpeed:
-    enter 0, 0
-
-    mov dword [AlienJumpTime], AlienStartJumpTime
-
-    leave
-    ret
-
-
-;
 ; AlienManagerGenerateBulletDelay()
 ;
 
 AlienManagerGenerateBulletDelay:
-    ; Local Variables
-    ; [ebp-4] temp float storage
-    enter 4, 0
-    push esi
-    push edi
+    enter 0, 0
 
-    mov dword [ebp-4], AlienDelayPrecision
+    ; RandomInRangeContinous(min, exclusiveMax, precision)
+    push AlienDelayPrecision
+    push AlienMaxBulletDelay
+    push AlienMinBulletDelay
+    call RandomInRangeContinous
+    add esp, 12
+    mov [AlienBulletTimer], eax                                          
 
-    mov eax, AlienMinBulletDelay
-    mul dword [ebp-4]
-    mov esi, eax                                        ; esi contains minimum delay*10
-                                          
-    mov eax, AlienMaxBulletDelay
-    mul dword [ebp-4]
-    mov edi, eax                                        ; edi contains maximum delay*10
+    leave
+    ret
 
-    ; RandomInRange(min, exclusiveMax)
-    push edi
-    push esi
-    call RandomInRange
-    add esp, 8
-    mov [AlienBulletDelay], eax                         ; Random delay
+;
+; AlienManagerGenerateUfoDelay()
+;
 
-    fild dword [AlienBulletDelay]                       ; Turn delay into float
-    fidiv dword [ebp-4]
-    fstp dword [AlienBulletDelay]
+AlienManagerGenerateUfoDelay:
+    enter 0, 0
 
-    pop edi
-    pop esi
+    ; RandomInRangeContinous(min, exclusiveMax, precision)
+    push AlienDelayPrecision
+    push AlienMaxUfoDelay
+    push AlienMinUfoDelay
+    call RandomInRangeContinous
+    add esp, 12
+    mov [AlienUfoTimer], eax                                          
+
     leave
     ret

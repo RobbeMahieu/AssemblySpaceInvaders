@@ -125,7 +125,6 @@ CreateGameScene:
 
     ; Reset game
     call ScoreReset                                     ; Reset the score at the beginning of a game
-    call ResetAlienSpeed                                ; Reset the alien speed at the beginning of the game
 
     mov eax, ebx                                        ; Put scene address as return
 
