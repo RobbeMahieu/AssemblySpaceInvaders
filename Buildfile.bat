@@ -20,7 +20,7 @@ nasm -f win32 %ENGINE_NAME%.asm -o %BUILD_FOLDER%\%ENGINE_NAME%.obj
 cd %BUILD_FOLDER%
 GoLink %ENGINE_NAME%.obj user32.dll kernel32.dll Gdi32.dll /dll
 
-:: Build and Launch game
+:: Build game
 cd %GAME_FOLDER%
 nasm -f win32 %PROJECT_NAME%.asm -o %BUILD_FOLDER%\%PROJECT_NAME%.obj   
 
