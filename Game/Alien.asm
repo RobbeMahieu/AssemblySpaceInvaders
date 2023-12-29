@@ -264,7 +264,7 @@ OnAlienHit:
     mov eax, [ebp+8]
     mov ebx, [eax + Hitbox.Owner]
 
-    ; ScoreAdd(amount)                                      ; Add the amount to the totalScore
+    ; ScoreAdd(amount)                                  ; Add the amount to the totalScore
     push dword [ebx + Alien.Points]
     call ScoreAdd
     add esp, 4   

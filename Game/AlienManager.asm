@@ -14,6 +14,10 @@ Alien3Width equ 36
 AlienMaxWidth equ 36
 AlienHeight equ 24
 
+AlienMinBulletDelay equ 1
+AlienMaxBulletDelay equ 5
+AlienDelayPrecision equ 10
+
 AlienMoveDownCount equ 9
 AlienStartJumpTime equ 0x3f000000
 
@@ -32,6 +36,10 @@ AlienJumpTimer dd 0.0
 AlienJumpTimeDecrease dd 0.75
 AlienJumpDistance dd 5
 AlienMoveDownCounter dd 0
+
+AlienBulletDelay dd 0.5
+AlienBulletTimer dd 0.0
+
 AlienList dd 0                                          ; All aliens currently alive
 
 Alien1SpritePath db "Resources\Sprites\alien1.bmp", 0
@@ -66,6 +74,9 @@ CreateAlienManager:
     shr eax, 1
     inc eax                                             
     mov dword [AlienMoveDownCounter], eax               ; MoveDownCounter
+
+    mov dword [AlienBulletTimer], 0                     ; Reset Delay
+    call AlienManagerGenerateBulletDelay                ; Get new delay    
 
     ; CreateGameobject(&render, &data, &update, &render, &destroy)
     push AlienManagerDestroy
@@ -116,17 +127,45 @@ AlienManagerUpdate:
     enter 4, 0
     push ebx
 
-    ; Sub elapsedSec to jumpTimer
+    ; Add elapsedSec to bulletDelay
+    fld dword [AlienBulletTimer]                        ; Load jump timer in float stack
+    call [GetElapsed]                                   ; Get ElapsedSec
+    mov [ebp-4], eax
+    fadd dword [ebp-4]                                  ; Add to the timer
+    fstp dword [AlienBulletTimer]                       ; Store the result
+
+    ; Check it delay has passed
+    fld dword [AlienBulletDelay]                        ; Load accumulated time
+    fcomp dword [AlienBulletTimer]                      ;  BulletDelay <= AccuBulletTimer ?
+    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
+    fwait
+    sahf                                                ; Transfer ax codes to status register
+    ja .NoShoot                                        ; I can finally compare now
+
+    mov dword [AlienBulletTimer], 0                     ; Reset Delay
+    call AlienManagerGenerateBulletDelay                ; Get new delay                  
+
+    ; LL_Random(&list)                                  ; Get Random alien
+    push dword [AlienList]                      
+    call LL_Random
+    add esp, 4
+
+    ; AlienShoot(&alien)                                ; Let the alien shoot
+    push eax
+    call AlienShoot
+    add esp, 4
+
+    .NoShoot:
+    ; Add elapsedSec to jumpTimer
     fld dword [AlienJumpTimer]                          ; Load jump timer in float stack
     call [GetElapsed]                                   ; Get ElapsedSec
     mov [ebp-4], eax
-
     fadd dword [ebp-4]                                  ; Add to the timer
     fstp dword [AlienJumpTimer]                         ; Store the result
     
     ; Check jump condition
     fld dword [AlienJumpTime]                           ; Put jumptime in float stack
-    fcomp dword [AlienJumpTimer]                        ; JumpTime < Alien jumptimer?
+    fcomp dword [AlienJumpTimer]                        ; JumpTime <= Alien jumptimer?
     fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
     fwait
     sahf                                                ; Transfer ax codes to status register
@@ -151,15 +190,6 @@ AlienManagerUpdate:
     push dword [AlienList]
     call LL_ForEach
     add esp, 8
-
-    ; Let random alien shoot
-    push dword [AlienList]
-    call LL_Random
-    add esp, 4
-
-    push eax
-    call AlienShoot
-    add esp, 4
 
     jmp .UpdateHitbox
 
@@ -409,5 +439,43 @@ ResetAlienSpeed:
 
     mov dword [AlienJumpTime], AlienStartJumpTime
 
+    leave
+    ret
+
+
+;
+; AlienManagerGenerateBulletDelay()
+;
+
+AlienManagerGenerateBulletDelay:
+    ; Local Variables
+    ; [ebp-4] temp float storage
+    enter 4, 0
+    push esi
+    push edi
+
+    mov dword [ebp-4], AlienDelayPrecision
+
+    mov eax, AlienMinBulletDelay
+    mul dword [ebp-4]
+    mov esi, eax                                        ; esi contains minimum delay*10
+                                          
+    mov eax, AlienMaxBulletDelay
+    mul dword [ebp-4]
+    mov edi, eax                                        ; edi contains maximum delay*10
+
+    ; RandomInRange(min, exclusiveMax)
+    push edi
+    push esi
+    call RandomInRange
+    add esp, 8
+    mov [AlienBulletDelay], eax                         ; Random delay
+
+    fild dword [AlienBulletDelay]                       ; Turn delay into float
+    fidiv dword [ebp-4]
+    fstp dword [AlienBulletDelay]
+
+    pop edi
+    pop esi
     leave
     ret
