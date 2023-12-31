@@ -10,18 +10,18 @@
 
 struc Menu
     ; Owner
-    .Gameobject resd 1
+    .Gameobject             resd 1
 
     ; UI
-    .Title      resd 1
-    .Message    resd 1
+    .Title                  resd 1
+    .Message                resd 1
 
     ; Actions
-    .Select     resd 1
+    .Select                 resd 1
 
     ;Properties
-    .Activated resd 1
-    .ActivationAccuDelay resd 1
+    .Activated              resd 1
+    .ActivationAccuDelay    resd 1
 endstruc
 
 section .data
