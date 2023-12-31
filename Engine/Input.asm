@@ -7,9 +7,9 @@
 %include "windows.inc"
 
 ; Constants and Data
-PRESS equ 0
-HOLD equ 1
-RELEASE equ 2
+PRESS equ       0
+HOLD equ        1
+RELEASE equ     2
 
 KEY_A equ       30
 KEY_D equ       32
@@ -21,17 +21,18 @@ KEY_SPACE equ   57
 %define IN_KEYSTATESHIFT    31
 %define IN_REPEATCOUNTMASK  0x0000FFFF
 
-section .bss
-CurrentInputState resb 32
-PreviousInputState resb 32
-Actions resd 1
-
 struc Action
     .keycode:       resd 1
     .state:         resd 1
     .callback:      resd 1
     .callbackData:  resd 1
 endstruc
+
+section .bss
+
+CurrentInputState   resb 32
+PreviousInputState  resb 32
+Actions             resd 1
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -112,6 +113,7 @@ UpdateInput:
 
     ; Manipulate flags in correct position
     mov edi, 8                                          ; Get the correct byte
+    xor edx, edx                                        ; Clear high dword
     div edi                                             ; eax / 8 => byte number is eax, offset in the byte is edx
     mov ebx, 1                                          ; Create bitmask
 
@@ -122,7 +124,7 @@ UpdateInput:
     shl ecx, 1                                          ; Shift state
     shl ebx, 1                                          ; Shift mask
 
-    sub edx, 1
+    dec edx
     jmp .ShiftBits
 
     .DoneShifting:                                      ; Save the state
@@ -166,7 +168,7 @@ HandleInput:
 
     ; Manipulate state in correct position
     mov edi, 8                                          ; Get the correct byte
-    mov edx, 0                                          ; Clear high dword
+    xor edx, edx                                        ; Clear high dword
     div edi                                             ; eax / 8 => byte number is eax, offset in the byte is edx
 
     mov edi, [CurrentInputState + eax]                  ; edi contains current state
@@ -179,7 +181,7 @@ HandleInput:
     shr edi, 1                                       
     shr ecx, 1 
 
-    sub edx, 1
+    dec edx
     jmp .ShiftBits
 
     .DoneShifting:
@@ -190,8 +192,7 @@ HandleInput:
 
     lea edx, .StateCheck                                ; edx contains jump address
     mov ecx, dword[esi + Action.state]                  ; Jump address offset
-    shl ecx, 1                                          ; Instructions are 2 bytes long, so double the offset
-    add edx, ecx                                        ; Calculate correct address
+    lea edx, [edx + ecx*2]                              ; Instructions are 2 bytes long, so double the offset 
     jmp edx
 
     .StateCheck:                                        ; Jump table

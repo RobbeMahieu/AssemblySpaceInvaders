@@ -68,6 +68,7 @@ MemoryFree:
     push 0
     push dword [Heap]
     call HeapSize
+
     sub dword [HeapAllocatedSize], eax                  ; Decrease allocated size
 
     ; HeapFree(Heap, settings, object)                  ; Deallocate memory
@@ -89,11 +90,13 @@ CleanupMemory:
     cmp dword [HeapAllocatedSize], 0
     je .Done
 
-    push MemoryLeakMessage
+    ; DebugString(&string)
+    push MemoryLeakMessage                              ; Memory leaks detected!    
     call DebugString
     add esp, 4
 
-    push formatDecimal
+    ; DebugValue(format, value)
+    push formatDecimal                                  ; Memory leak amount
     push dword [HeapAllocatedSize]
     call DebugValue
     add esp, 8

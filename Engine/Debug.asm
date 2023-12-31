@@ -7,13 +7,16 @@
 %include "windows.inc"
 
 ; Constants and Data
+
 section .data
+
 caption db "Debug", 0
 formatDecimal db "%d", 0                                ; Format string decimal
 formatHex db "0x%08x", 0                                ; Format string hex
 DebugEnabled dd 1                                       ; If debugs will show
 
 section .bss
+
 buffer resb 20                                          ; Max 20 characters
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -93,7 +96,6 @@ DebugPrintValue:
 
     mov eax, dword [WindowHeight]                       ; Calculate y position
     sub eax, 45                                         ; Bottom ScreenOffset
-
 
     ; DrawString(&text, x, y, width, height, color, size, justification)
     push TEXT_JUSTIFY_LEFT

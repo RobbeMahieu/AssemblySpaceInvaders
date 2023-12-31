@@ -9,12 +9,14 @@
 ; Constants and Data
 
 struc Gameobject
-    .scene: resd 1
-    .objectData: resd 1
-    .update: resd 1
-    .render: resd 1
-    .destroy: resd 1
-    .destroyFlag: resd 1
+    .scene:         resd 1
+    .objectData:    resd 1
+
+    .update:        resd 1
+    .render:        resd 1
+    .destroy:       resd 1
+    
+    .destroyFlag:   resd 1
 endstruc
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -43,8 +45,6 @@ CreateGameObject:
     mov ebx, eax                                        ; Cache the address in ebx
 
     ; Fill in fields
-    mov eax, [ebp+8]
-    mov [ebx + Gameobject.scene], eax                   ; Link scene to gameobject
     mov eax, [ebp+12]                                    
     mov [ebx + Gameobject.objectData], eax              ; Link data to gameobject
     mov eax, [ebp+16]

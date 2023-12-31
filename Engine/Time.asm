@@ -10,6 +10,7 @@
 %define TARGET_FPS 69
 
 section .data
+
 PreviousTickCount dq 0
 CurrentTickCount  dq 0
 TickFrequency  dq 0
@@ -32,7 +33,7 @@ InitTime:
     call QueryPerformanceFrequency
 
     mov eax, [TickFrequency]                            ; Calculate counter increase per frame
-    mov edx, [TickFrequency+4]
+    mov edx, [TickFrequency+4]                          ; edx:eax contains frequency
     mov ecx, TARGET_FPS
     div ecx
     mov [CounterIncreasPerFrame], eax
@@ -64,7 +65,7 @@ CalculateElapsedTime:
     mov eax, [CurrentTickCount]                         ; Store current ticks in edx:eax
     mov edx, [CurrentTickCount+4]
 
-    mov esi, [PreviousTickCount]                        ; Store current ticks in esi:edi
+    mov esi, [PreviousTickCount]                        ; Store previous ticks in esi:edi
     mov edi, [PreviousTickCount+4]
 
     sub eax, esi                                        ; Subtract 64 bit number
@@ -72,16 +73,16 @@ CalculateElapsedTime:
 
     mov ecx, 1000000                                    ; Store multiplier in ecx
     mov edi, edx                                        ; Copy highest part to edi
-    mul ecx                                             ; Convert lowest to µs
+    mul ecx                                             ; Convert lowest to µs => eax * ecx = edx:eax
     mov esi, eax                                        ; Save part result
     mov eax, edi                                        ; Get ready highest part
-    mov edi, edx                                        ; Save overflow
+    mov edi, edx                                        ; Save overflow => edi:esi lowest part *ecx
     mul ecx                                             ; Convert highest to µs
-    add edi, edx                                        ; Add it to the overflow
+    add edi, eax                                        ; Add it to the overflow
 
-    mov eax, esi                                        ; Store in correct registers for division
+    mov eax, esi                                        ; Store in correct registers for division (edx:eax)
     mov edx, edi
-    div dword[TickFrequency]                            ; Divide by frequency
+    div dword[TickFrequency]                            ; Divide by frequency => since truncation max elapsed sec is 4294 seconds (should be okay)
 
     push eax                                            ; Load the time to float register 0
     fild dword [esp]
@@ -150,10 +151,11 @@ LockFramerate:
 RandomInRange:
     enter 0, 0
 
-    rdtsc                                           ; Get timestamp in edx:eax
+    mov eax, [CurrentTickCount]                     ; Get tickcount in edx:eax
+    mov edx, [CurrentTickCount+4]
     mov ecx, [ebp+12]                               ; max in ecx
     sub ecx, [ebp+8]                                ; ecx contains max - min
-    xor edx, edx                                    ; zero edx for division
+    xor edx, edx                                    ; Zero edx for division
     div ecx                                         ; eax / ecx => remainder in edx
     add edx, [ebp+8]                                ; This is our random number
     mov eax, edx
@@ -188,9 +190,9 @@ RandomInRangeContinous:
     push ecx
     call RandomInRange
     add esp, 8
-    mov [ebp-4], eax                                    ; Random delay
+    mov [ebp-4], eax                                    ; Random number
 
-    fild dword [ebp-4]                                  ; Turn delay into float
+    fild dword [ebp-4]                                  ; Turn number into float
     fidiv dword [ebp+16]                                ; Divide back by precision
     fstp dword [ebp-4]
     mov eax, [ebp-4]                                    ; Set value as return value in eax

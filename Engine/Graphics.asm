@@ -18,6 +18,7 @@ COLOR_CYAN equ      0x00FFFF00
 COLOR_MAGENTA equ   0x00FF00FF
 COLOR_YELLOW equ    0x0000FFFF
 
+; Text allignments
 TEXT_JUSTIFY_LEFT equ   DT_LEFT
 TEXT_JUSTIFY_RIGHT equ  DT_RIGHT
 TEXT_JUSTIFY_TOP equ    DT_TOP
@@ -25,7 +26,8 @@ TEXT_JUSTIFY_BOTTOM equ DT_BOTTOM
 TEXT_JUSTIFY_CENTER equ DT_CENTER
 
 section .bss
-HDC resd 1
+
+HDC resd 1  ; Drawing HDC
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -121,7 +123,7 @@ DrawString:
     ; [ebp-16] RECT
     ; [ebp-20] Font Handle
     ; [ebp-24] Previous font Handle
-    enter 20, 0
+    enter 24, 0
     push ebx
 
     ; Create rectangle

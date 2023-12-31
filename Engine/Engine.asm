@@ -77,7 +77,7 @@ LoadEngine:
     call InitInput                                      ; Initialize input module
     call InitPhysics                                    ; Initialize physics module
     call InitWindow                                     ; Create the window
-    mov [HWND], eax                                     ; Move the window handle to the local variable
+    mov [HWND], eax                                     ; Move the window handle to the variable
 
     leave
     ret 
@@ -211,7 +211,7 @@ CleanupEngine:
 
     call CleanupInput                                   ; Clean up input memory
     call CleanupPhysics                                 ; Clean up physics memory
-    call CleanupMemory                                  ; Clean up hep (check if everything is released)
+    call CleanupMemory                                  ; Clean up heap (check if everything is released)
 
     push dword [ebp-4]
     call [ExitProcess]                                  ; Stop process
@@ -280,7 +280,6 @@ GameLoop:
     ; [ebp-12] Previous bitmap
     ; [ebp-16] Screen HDC
     enter 16,0
-    push ebx
 
     push dword [HWND]                                   ; GetDC(HWND)
     call [GetDC]
@@ -307,8 +306,7 @@ GameLoop:
     mov eax, [ebp-4]
     mov [HDC], eax
 
-    ; Clear Screen
-    ; FillRectangle(x, y, width, height, color)
+    ; FillRectangle(x, y, width, height, color)         ; Clear Screen
     push COLOR_BLACK                                    
     push dword [WindowHeight]
     push dword [WindowWidth]
@@ -322,7 +320,7 @@ GameLoop:
     call dword [GameUpdateFunction]                     ; Update game
     call dword [GameRenderFunction]                     ; Render game
 
-    ; BitBlt(HDC, x, y, width, height, HDC2, x1, y1, mode); Swap buffer
+    ; BitBlt(HDC, x, y, width, height, HDC2, x1, y1, mode)  ; Swap buffer
     push SRCCOPY
     push 0
     push 0
@@ -340,10 +338,9 @@ GameLoop:
     push dword [ebp-4]                                  ; Delete buffer DC
     call [DeleteDC]                                       
 
-    push dword [ebp-16]                                 ; HDC
+    push dword [ebp-16]                                 ; Release HDC after painting
     push dword [HWND]
     call [ReleaseDC]
     
-    pop ebx
     leave
     ret

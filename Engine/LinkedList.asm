@@ -9,14 +9,14 @@
 ; Constants and Data
 
 struc LinkedList
-    .start resd 1
-    .end resd 1
-    .count resd 1
+    .start      resd 1
+    .end        resd 1
+    .count      resd 1
 endstruc
 
 struc Node
     .content:   resd 1
-    .next:     resd 1
+    .next:      resd 1
 endstruc
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -47,42 +47,21 @@ LL_Create:
 
 LL_Delete:
     enter 0, 0
-    push ebx
-    push esi
 
-    mov ebx, [ebp+8]
-    mov ebx, [ebx + LinkedList.start]                   ; ebx contains base address of node
+    ; LL_ForEach(&list, &callback)
+    push DeleteNode                                     ; Deallocate leftover nodes
+    push dword [ebp+8]
+    call LL_ForEach
+    add esp, 8
 
-    .NextNode:
-    cmp ebx, 0
-    jz .FinishedList
-
-    ; Load node data
-    mov esi, ebx                                        ; esi contains base address of node
-    mov ebx, [ebx + Node.next]                          ; Cache next address
-
-    ; MemoryFree(&object)                               ; Deallocate data
-    push dword [esi + Node.content]
-    call MemoryFree
-    add esp, 4
-
-    ; MemoryFree(&object)                               ; Deallocate node
-    push esi
-    call MemoryFree
-    add esp, 4                 
-
-    jmp .NextNode                                       ; Loop through all nodes
-
-    .FinishedList:
     ; MemoryFree(&object)                               ; Deallocate list
     push dword [ebp+8]
     call MemoryFree
     add esp, 4
 
-    pop esi
-    pop ebx
     leave
     ret
+    
 ;
 ; LL_Add(&list, &data)
 ; [ebp+8] list
@@ -179,20 +158,39 @@ LL_Remove:
     cmp dword [ebp+16], 1
     jne .DestroyNode
 
-    ; MemoryFree(&object)                               ; Deallocate object
-    push dword [ebx + Node.content]
-    call MemoryFree
-    add esp, 4
-
-    .DestroyNode:
-    ; MemoryFree(&object)                               ; Deallocate node
+    ; LL_DeleteNode(&node)
     push ebx
-    call MemoryFree
+    call LL_DeleteNode
     add esp, 4
 
     .Done:
     pop edi
     pop esi
+    pop ebx
+    leave
+    ret
+
+;
+; LL_DeleteNode(&node)
+; [ebp+8] node
+;
+
+DeleteNode:
+    enter 0, 0
+    push ebx
+
+    mov ebx, [ebp+8]
+
+    ; MemoryFree(&object)                               ; Deallocate data
+    push dword [ebx + Node.content]
+    call MemoryFree
+    add esp, 4
+
+    ; MemoryFree(&object)                               ; Deallocate node
+    push ebx
+    call MemoryFree
+    add esp, 4 
+
     pop ebx
     leave
     ret
@@ -226,7 +224,6 @@ LL_ForEach:
     jmp .NextNode                                       ; Loop through all nodes
 
     .FinishedList:
-
     pop ebx
     leave
     ret
@@ -241,7 +238,6 @@ LL_ForEach:
 LL_Random:
     enter 0, 0
     push ebx
-    push edi
 
     mov eax, [ebp+8]
     mov ebx, [eax + LinkedList.start]                   ; ebx contains base address of node
@@ -251,21 +247,19 @@ LL_Random:
     push 0
     call RandomInRange
     add esp, 8
-    mov edi, eax                                        ; edi contains random number
 
     ; Get random node
     .NextNode:
-    cmp edi, 0
+    cmp eax, 0
     je .Done
 
     mov ebx, [ebx + Node.next]                          ; Cache next address
-    dec edi
+    dec eax
     jmp .NextNode
 
     .Done:
     mov eax, dword [ebx + Node.content]                 ; eax contains base address of content
 
-    pop edi
     pop ebx
     leave
     ret
