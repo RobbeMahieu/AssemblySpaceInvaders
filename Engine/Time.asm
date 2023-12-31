@@ -74,14 +74,6 @@ CalculateElapsedTime:
     mov ecx, 1000000                                    ; Store multiplier in ecx
     mov edi, edx                                        ; Copy highest part to edi
     mul ecx                                             ; Convert lowest to µs => eax * ecx = edx:eax
-    mov esi, eax                                        ; Save part result
-    mov eax, edi                                        ; Get ready highest part
-    mov edi, edx                                        ; Save overflow => edi:esi lowest part *ecx
-    mul ecx                                             ; Convert highest to µs
-    add edi, eax                                        ; Add it to the overflow
-
-    mov eax, esi                                        ; Store in correct registers for division (edx:eax)
-    mov edx, edi
     div dword[TickFrequency]                            ; Divide by frequency => since truncation max elapsed sec is 4294 seconds (should be okay)
 
     push eax                                            ; Load the time to float register 0
