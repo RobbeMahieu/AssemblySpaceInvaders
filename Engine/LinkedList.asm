@@ -158,9 +158,15 @@ LL_Remove:
     cmp dword [ebp+16], 1
     jne .DestroyNode
 
-    ; LL_DeleteNode(&node)
+    ; MemoryFree(&object)                               ; Deallocate data
+    push dword [ebx + Node.content]
+    call MemoryFree
+    add esp, 4
+
+    .DestroyNode:
+    ; MemoryFree(&object)                               ; Deallocate node
     push ebx
-    call LL_DeleteNode
+    call MemoryFree
     add esp, 4
 
     .Done:
