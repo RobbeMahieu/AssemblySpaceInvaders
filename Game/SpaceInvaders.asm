@@ -11,9 +11,9 @@ cpu x64                                                 ; Limit instructions to 
 ; Includes
 %include "engine.inc"
 
-%define HL_FRIENDLY         C_HITLAYER_1
-%define HL_ENEMY            C_HITLAYER_2
-%define HL_ENEMYPROJECTILE  C_HITLAYER_3
+%define HL_FRIENDLY C_HITLAYER_1
+%define HL_ENEMY C_HITLAYER_2
+%define HL_ENEMYPROJECTILE C_HITLAYER_3
 
 %include "./GameManager.asm"
 %include "./Score.asm"

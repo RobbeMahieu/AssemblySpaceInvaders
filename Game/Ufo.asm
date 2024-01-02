@@ -22,16 +22,16 @@ struc Ufo
     .Sprite     resd 1
 
     ; Bounds
-    .Xpos       resd 1
-    .Ypos       resd 1
-    .Width      resd 1
-    .Height     resd 1
-    .Hitbox     resd 1
+    .Xpos resd 1
+    .Ypos resd 1
+    .Width resd 1
+    .Height resd 1
+    .Hitbox resd 1
 
     ; Properties
-    .Points     resd 1
-    .Lifetime   resd 1
-    .Speed      resd 1
+    .Points resd 1
+    .Lifetime resd 1
+    .Speed resd 1
 endstruc
 
 section .data
@@ -154,12 +154,12 @@ UfoUpdate:
     call [GetElapsed]                                       ; Get ElapsedSec
     mov [ebp-4], eax
 
-    fild dword [ebx + Ufo.Speed]                            ; Update Xpos
+    fild dword [ebx + Ufo.Speed]
     fmul dword [ebp-4]
     fadd dword [ebx + Ufo.Xpos]
     fstp dword [ebx + Ufo.Xpos]
 
-    push ebx                                                ; Update hitbox
+    push ebx
     call UfoUpdateHitbox
     add esp, 4
 

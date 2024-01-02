@@ -13,7 +13,6 @@ GAME_SCENE equ 1
 LOSE_SCENE equ 2
 
 section .data
-
 ActiveScene dd 0
 NewScene dd 0
 SceneIndex dd 0
@@ -36,7 +35,7 @@ InitializeGame:
 
     call LoadHighScore
 
-    mov dword [SceneIndex], MENU_SCENE                  ; Set up starting scene
+    mov dword [SceneIndex], MENU_SCENE
     call LoadScene
 
     leave
@@ -55,6 +54,7 @@ UpdateGame:
 
     cmp dword [NewScene], 1                             ; Check if scene needs to change
     jne .Done
+
     call LoadScene                                      ; Load new scene
     mov dword [NewScene], 0                             ; Set bool to false
 
@@ -149,8 +149,8 @@ CreateMenuScene:
     ; CreateMenu(&scene, &title, &message)
     push MenuMessage
     push MenuTitle
-    push ebx
-    call CreateMenu 
+    push ebx                                            ; Put scene on the stack
+    call CreateMenu                                     ; CreateMenu(&scene)   
     add esp, 12
 
     mov eax, ebx                                        ; Put scene address as return
@@ -177,7 +177,7 @@ CreateLoseScene:
     ; CreateMenu(&scene, &title, &message)
     push LoseMessage
     push LoseTitle
-    push ebx
+    push ebx                                            ; Put scene on the stack
     call CreateMenu 
     add esp, 12
 
@@ -230,8 +230,8 @@ LoadScene:
 
     .MemoryReleased:
     lea edx, .SceneSwitch                               ; edx contains jump address
-    mov ecx, dword[SceneIndex]                          ; Jump offset
-    lea edx, [edx + ecx*2]                              ; Instructions are 2 bytes long, so double the offset
+    shl dword[SceneIndex], 1                            ; Instructions are 2 bytes long, so double the offset
+    add edx, dword[SceneIndex]                          ; Calculate correct address
     jmp edx
 
     .SceneSwitch:                                       ; Jump table

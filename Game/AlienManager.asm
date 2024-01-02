@@ -8,28 +8,26 @@
 
 ; Constants and Data
 
-Alien1Width equ         24
-Alien2Width equ         33
-Alien3Width equ         36
-AlienMaxWidth equ       36
-AlienHeight equ         24
+Alien1Width equ 24
+Alien2Width equ 33
+Alien3Width equ 36
+AlienMaxWidth equ 36
+AlienHeight equ 24
 
-AlienBulletSpeed equ    200
 AlienMinBulletDelay equ 1
 AlienMaxBulletDelay equ 5
 
-AlienMinUfoDelay equ    10
-AlienMaxUfoDelay equ    40
+AlienMinUfoDelay equ 10
+AlienMaxUfoDelay equ 40
 
 AlienDelayPrecision equ 10
 
-AlienMoveDownCount equ  9
-AlienStartJumpTime equ  0x3f000000
+AlienMoveDownCount equ 9
+AlienStartJumpTime equ 0x3f000000
 
-AlienOffset equ         16
-AlienStartingYpos equ   100
-AlienRows equ           5
-AlienColumns equ        11
+AlienOffset equ 16
+AlienRows equ 5
+AlienColumns equ 11
 
 struc AlienManager
     ; Owner
@@ -124,19 +122,124 @@ CreateAlienManager:
 ;
 
 AlienManagerUpdate:
-    enter 0, 0
+    ; [ebp-4] float stack temporary
+    enter 4, 0
+    push ebx
 
-    ; CheckAliensLeft(&scene)
     mov eax, [ebp+8]
     mov eax, [eax + AlienManager.Gameobject]
+
+    ; CheckAliensLeft(&scene)
     push dword [eax + Gameobject.scene]
     call CheckAliensLeft
     add esp, 4
 
-    call AlienManagerUpdateShooting                     ; Shooting behaviour
-    call AlienManagerUpdateUfo                          ; Ufo spawing
-    call AlienManagerUpdateAlienMovement                ; Alien movement
+    ; Subtract elapsedSec from bulletDelay
+    fld dword [AlienBulletTimer]                        ; Load bulletDelay in float stack
+    call [GetElapsed]                                   ; Get ElapsedSec
+    mov [ebp-4], eax
+    fsub dword [ebp-4]                                  ; Remove from the timer
+    fstp dword [AlienBulletTimer]                       ; Store the result
 
+    ; Check it delay has passed
+    fldz                                                ; Load accumulated time
+    fcomp dword [AlienBulletTimer]                      ;  0 <= AccuBulletTimer ?
+    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
+    fwait
+    sahf                                                ; Transfer ax codes to status register
+    jbe .NoShoot                                        ; I can finally compare now
+
+    call AlienManagerGenerateBulletDelay                ; Get new delay                  
+
+    ; LL_Random(&list)                                  ; Get Random alien
+    push dword [AlienList]                      
+    call LL_Random
+    add esp, 4
+
+    ; AlienShoot(&alien)                                ; Let the alien shoot
+    push eax
+    call AlienShoot
+    add esp, 4
+
+    .NoShoot:
+    ; Subtract elapsedSec from ufoDelay
+    fld dword [AlienUfoTimer]                           ; Load ufoDelay in float stack
+    call [GetElapsed]                                   ; Get ElapsedSec
+    mov [ebp-4], eax
+    fsub dword [ebp-4]                                  ; Remove from the timer
+    fstp dword [AlienUfoTimer]                          ; Store the result
+
+    ; Check it delay has passed
+    fldz                                                ; Load accumulated time
+    fcomp dword [AlienUfoTimer]                         ;  0 <= AlienUfoTimer ?
+    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
+    fwait
+    sahf                                                ; Transfer ax codes to status register
+    jbe .NoUfo                                          ; I can finally compare now
+                 
+    call AlienManagerGenerateUfoDelay                   ; Get new delay 
+
+    ; CreateUfo(&scene) ; Spawn an ufo
+    mov eax, [ebp+8]
+    mov eax, [eax + AlienManager.Gameobject]
+    push dword [eax + Gameobject.scene]
+    call CreateUfo
+    add esp, 4
+
+    .NoUfo:
+    ; Add elapsedSec to jumpTimer
+    fld dword [AlienJumpTimer]                          ; Load jump timer in float stack
+    call [GetElapsed]                                   ; Get ElapsedSec
+    mov [ebp-4], eax
+    fadd dword [ebp-4]                                  ; Add to the timer
+    fstp dword [AlienJumpTimer]                         ; Store the result
+    
+    ; Check jump condition
+    fld dword [AlienJumpTime]                           ; Put jumptime in float stack
+    fcomp dword [AlienJumpTimer]                        ; JumpTime <= Alien jumptimer?
+    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
+    fwait
+    sahf                                                ; Transfer ax codes to status register
+    ja .UpdateRet                                       ; I can finally compare now
+
+    .Jump:
+    fld dword [AlienJumpTime]                           ; Reset JumpTimer
+    fsub dword [AlienJumpTimer]
+    fstp dword [AlienJumpTimer] 
+
+    ; Check if alien has to move down a row
+    inc dword [AlienMoveDownCounter]                    ; Increase MoveDownCounter
+    cmp dword [AlienMoveDownCounter], AlienMoveDownCount
+    jle .NoRowDown
+
+    .RowDown:
+    mov dword [AlienMoveDownCounter], 0                 ; Reset counter
+    neg dword [AlienJumpDistance]                       ; Invert Jump
+
+    ; LL_ForEach(&list, &callback)
+    push AlienMoveDown
+    push dword [AlienList]
+    call LL_ForEach
+    add esp, 8
+
+    jmp .UpdateHitbox
+
+    .NoRowDown:
+    ; LL_ForEach(&list, &callback)
+    push AlienJump
+    push dword [AlienList]
+    call LL_ForEach
+    add esp, 8       
+
+    .UpdateHitbox:
+    ; LL_ForEach(&list, &callback)
+    push AlienUpdateHitbox
+    push dword [AlienList]
+    call LL_ForEach
+    add esp, 8 
+
+    .UpdateRet:
+    pop ebx
     leave
     ret
 
@@ -186,23 +289,6 @@ AlienManagerDestroy:
     ret
 
 ;
-; AddAlienToManager(&alien)
-; [ebp+8] alien
-;
-
-AddAlienToManager:
-    enter 0, 0
-
-    ; LL_Add(&scene, &object)
-    push dword [ebp+8]
-    push dword [AlienList]
-    call [LL_Add]
-    add esp, 8
-
-    leave
-    ret
-
-;
 ; DeleteAlienFromManager(&alien)
 ; [ebp+8] alien
 ;
@@ -236,6 +322,7 @@ LayOutAlienGrid:
     ; [ebp-28] jmp address
     enter 28, 0
     push ebx
+    push esi
                    
     mov eax, AlienMoveDownCount                         ; Start at half (aliens start in the middle)
     shr eax, 1
@@ -243,36 +330,38 @@ LayOutAlienGrid:
     mov dword [AlienMoveDownCounter], eax               ; MoveDownCounter
 
     ; Calculate starting X
-    mov dword [ebp-4], AlienOffset                      ; Offset for one alien
-    add dword [ebp-4], AlienMaxWidth                    ; 1 space = alien + offset
-    mov eax, AlienColumns                               ; Total width of alien grid = cols * space
+    mov dword [ebp-4], AlienOffset                          ; Offset for one alien
+    add dword [ebp-4], AlienMaxWidth                        ; 1 space = alien + offset
+    mov eax, AlienColumns                                   ; Total width of alien grid = cols * space
     mul dword [ebp-4]
-    sub eax, AlienOffset                                ; This is one offset too much (last one doesn't need it)
-    mov ebx, WindowWidth                                ; Substract this from the total width
+    sub eax, AlienOffset                                    ; This is one offset too much (last one doesn't need it)
+    mov ebx, WindowWidth                                    ; Substract this from the total width
     sub ebx, eax
-    shr ebx, 1                                          ; And divide the leftover space by two => starting x
+    shr ebx, 1                                              ; And divide the leftover space by two => starting x
 
     ; Calculate starting Y
-    mov dword [ebp-8], AlienOffset                      ; Offset for one alien
-    add dword [ebp-8], AlienHeight                      ; 1 space = alien + offset
+    mov dword [ebp-8], AlienOffset                          ; Offset for one alien
+    add dword [ebp-8], AlienHeight                          ; 1 space = alien + offset
+    mov esi, 100
 
     ; Loop to create the grid
-    mov dword [ebp-12], 0                               ; Reset row count
-    mov dword [ebp-24], AlienStartingYpos               ; Reset y pos
+    mov dword [ebp-12], 0                                   ; Reset row count
+    mov dword [ebp-24], esi                                 ; Reset y pos
 
     .NewRow:
-    mov dword [ebp-16], 0                               ; Reset col count
-    mov dword [ebp-20], ebx                             ; Reset x pos
+    mov dword [ebp-16], 0                                   ; Reset col count
+    mov dword [ebp-20], ebx                                 ; Reset x pos
 
-    lea edx, .SwitchTable                               ; edx contains jump address
-    mov ecx, dword[ebp-12]                              ; Jump address offset
-    inc ecx                                             ; First row should only appear once
-    shr ecx, 1                                          ; I only want to change every 2 rows                    
-    lea edx, [edx + ecx*2]                              ; Instructions are 2 bytes long, so double the offset
+    lea edx, .SwitchTable                                   ; edx contains jump address
+    mov ecx, dword[ebp-12]                                  ; Jump address offset
+    inc ecx                                                 ; First row should only appear once
+    shr ecx, 1                                              ; I only want to change every 2 rows
+    shl ecx, 1                                              ; Instructions are 2 bytes long, so double the offset
+    add edx, ecx                                            ; Calculate correct address
     mov [ebp-28], edx
 
     .NewCol:
-    jmp dword[ebp-28]                                   ; Create correct alien
+    jmp dword[ebp-28]                                       ; Create correct alien
 
     .SwitchTable:
     jmp .Alien1
@@ -280,8 +369,8 @@ LayOutAlienGrid:
     jmp .Alien3
 
     .Alien1:
-    mov eax, AlienMaxWidth                              ; Calculate x offset on spawnpoint
-    sub eax, Alien1Width                                ; Based on the alien's width
+    mov eax, AlienMaxWidth                                  ; Calculate x offset on spawnpoint
+    sub eax, Alien1Width                                    ; Based on the alien's width
     shr eax, 1
     add eax, dword [ebp-20]
 
@@ -298,8 +387,8 @@ LayOutAlienGrid:
     jmp .CreatedAlien
 
     .Alien2:
-    mov eax, AlienMaxWidth                              ; Calculate x offset on spawnpoint
-    sub eax, Alien2Width                                ; Based on the alien's width
+    mov eax, AlienMaxWidth                                  ; Calculate x offset on spawnpoint
+    sub eax, Alien2Width                                    ; Based on the alien's width
     shr eax, 1
     add eax, dword [ebp-20]
 
@@ -316,8 +405,8 @@ LayOutAlienGrid:
     jmp .CreatedAlien
 
     .Alien3:
-    mov eax, AlienMaxWidth                              ; Calculate x offset on spawnpoint
-    sub eax, Alien3Width                                ; Based on the alien's width
+    mov eax, AlienMaxWidth                                  ; Calculate x offset on spawnpoint
+    sub eax, Alien3Width                                    ; Based on the alien's width
     shr eax, 1
     add eax, dword [ebp-20]
 
@@ -334,18 +423,19 @@ LayOutAlienGrid:
     jmp .CreatedAlien
 
     .CreatedAlien:
-    mov eax, [ebp-4]                                    ; Increase x pos
+    mov eax, [ebp-4]                                        ; Increase x pos
     add [ebp-20], eax
     inc dword [ebp-16]                      
     cmp dword [ebp-16], AlienColumns
     jne .NewCol
 
-    mov eax, [ebp-8]                                    ; Increase y pos
+    mov eax, [ebp-8]                                        ; Increase y pos
     add [ebp-24], eax
     inc dword [ebp-12]                      
     cmp dword [ebp-12], AlienRows
     jne .NewRow
 
+    pop esi
     pop ebx
     leave
     ret
@@ -408,146 +498,5 @@ AlienManagerGenerateUfoDelay:
     add esp, 12
     mov [AlienUfoTimer], eax                                          
 
-    leave
-    ret
-
-;
-; AlienManagerUpdateShooting()
-;
-
-AlienManagerUpdateShooting:
-    ; Local variables
-    ; [ebp-4] float storage
-    enter 4, 0
-
-    ; Subtract elapsedSec from bulletDelay
-    fld dword [AlienBulletTimer]                        ; Load bulletDelay in float stack
-    call [GetElapsed]                                   ; Get ElapsedSec
-    mov [ebp-4], eax
-    fsub dword [ebp-4]                                  ; Remove from the timer
-    fstp dword [AlienBulletTimer]                       ; Store the result
-
-    ; Check it delay has passed
-    fldz                                                ; Load accumulated time
-    fcomp dword [AlienBulletTimer]                      ;  0 <= AccuBulletTimer ?
-    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
-    fwait
-    sahf                                                ; Transfer ax codes to status register
-    jbe .NoShoot                                        ; I can finally compare now
-
-    call AlienManagerGenerateBulletDelay                ; Get new delay                  
-
-    ; LL_Random(&list)                                  ; Get Random alien
-    push dword [AlienList]                      
-    call LL_Random
-    add esp, 4
-
-    ; AlienShoot(&alien)                                ; Let the alien shoot
-    push eax
-    call AlienShoot
-    add esp, 4
-
-    .NoShoot:
-    leave
-    ret
-
-;
-; AlienManagerUpdateUfo()
-;
-
-AlienManagerUpdateUfo:
-    ; Local variables
-    ; [ebp-4] float storage
-    enter 4, 0
-
-    ; Subtract elapsedSec from ufoDelay
-    fld dword [AlienUfoTimer]                           ; Load ufoDelay in float stack
-    call [GetElapsed]                                   ; Get ElapsedSec
-    mov [ebp-4], eax
-    fsub dword [ebp-4]                                  ; Remove from the timer
-    fstp dword [AlienUfoTimer]                          ; Store the result
-
-    ; Check it delay has passed
-    fldz                                                ; Load accumulated time
-    fcomp dword [AlienUfoTimer]                         ;  0 <= AlienUfoTimer ?
-    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
-    fwait
-    sahf                                                ; Transfer ax codes to status register
-    jbe .NoUfo                                          ; I can finally compare now
-                 
-    call AlienManagerGenerateUfoDelay                   ; Get new delay 
-
-    ; CreateUfo(&scene) ; Spawn an ufo
-    mov eax, [ebp+8]
-    mov eax, [eax + AlienManager.Gameobject]
-    push dword [eax + Gameobject.scene]
-    call CreateUfo
-    add esp, 4
-
-    .NoUfo:
-    leave
-    ret
-
-;
-; AlienManagerUpdateAlienMovement()
-;
-
-AlienManagerUpdateAlienMovement:
-    ; Local variables
-    ; [ebp-4] float storage
-    enter 4, 0
-
-    ; Add elapsedSec to jumpTimer
-    fld dword [AlienJumpTimer]                          ; Load jump timer in float stack
-    call [GetElapsed]                                   ; Get ElapsedSec
-    mov [ebp-4], eax
-    fadd dword [ebp-4]                                  ; Add to the timer
-    fstp dword [AlienJumpTimer]                         ; Store the result
-    
-    ; Check jump condition
-    fld dword [AlienJumpTime]                           ; Put jumptime in float stack
-    fcomp dword [AlienJumpTimer]                        ; JumpTime <= Alien jumptimer?
-    fstsw ax                                            ; Copy compare flags to ax (only 16 bit)
-    fwait
-    sahf                                                ; Transfer ax codes to status register
-    ja .Done                                            ; I can finally compare now
-
-    .Jump:
-    fld dword [AlienJumpTime]                           ; Reset JumpTimer
-    fsub dword [AlienJumpTimer]
-    fstp dword [AlienJumpTimer] 
-
-    ; Check if alien has to move down a row
-    inc dword [AlienMoveDownCounter]                    ; Increase MoveDownCounter
-    cmp dword [AlienMoveDownCounter], AlienMoveDownCount
-    jle .NoRowDown
-
-    .RowDown:
-    mov dword [AlienMoveDownCounter], 0                 ; Reset counter
-    neg dword [AlienJumpDistance]                       ; Invert Jump
-
-    ; LL_ForEach(&list, &callback)
-    push AlienMoveDown
-    push dword [AlienList]
-    call LL_ForEach
-    add esp, 8
-
-    jmp .UpdateHitbox
-
-    .NoRowDown:
-    ; LL_ForEach(&list, &callback)
-    push AlienJump
-    push dword [AlienList]
-    call LL_ForEach
-    add esp, 8       
-
-    .UpdateHitbox:
-    ; LL_ForEach(&list, &callback)
-    push AlienUpdateHitbox
-    push dword [AlienList]
-    call LL_ForEach
-    add esp, 8 
-
-    .Done:
     leave
     ret

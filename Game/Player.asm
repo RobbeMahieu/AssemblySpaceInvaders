@@ -19,32 +19,32 @@ PlayerLivesDisplayYpos equ WindowHeight - 60
 
 struc Player
     ; Owner
-    .Gameobject         resd 1
+    .Gameobject resd 1
 
     ; Visuals
-    .Sprite             resd 1
-    .LivesDisplay       resd 1
+    .Sprite resd 1
+    .LivesDisplay resd 1
 
     ; Bounds
-    .Xpos               resd 1
-    .Ypos               resd 1
-    .Width              resd 1
-    .Height             resd 1
-    .Hitbox             resd 1
+    .Xpos resd 1
+    .Ypos resd 1
+    .Width resd 1
+    .Height resd 1
+    .Hitbox resd 1
 
     ; Properties
-    .Speed              resd 1
-    .Lives              resd 1
-    .LivesText          resb 5
+    .Speed resd 1
+    .Lives resd 1
+    .LivesText resb 20
 
     ; Bullet
-    .BulletSpeed        resd 1
-    .AccuBulletDelay    resd 1
+    .BulletSpeed resd 1
+    .AccuBulletDelay resd 1
 
     ; Actions
-    .MoveLeftAction     resd 1
-    .MoveRightAction    resd 1
-    .ShootAction        resd 1
+    .MoveLeftAction resd 1
+    .MoveRightAction resd 1
+    .ShootAction resd 1
 
 endstruc
 
@@ -270,7 +270,7 @@ PlayerRender:
     call DrawImage
     add esp, 20
 
-    ; Draw Lives Display
+    ; Draw Lives Dispaly
     push dword [ebx + Player.LivesDisplay]
     call TextboxRender
     add esp, 4
@@ -279,7 +279,7 @@ PlayerRender:
     mov [ebp-12], eax
     mov dword [ebp-4], PlayerLivesDisplayXpos
 
-    .Loop:                                                  ; Draw an image for each remaining life
+    .Loop:
     cmp dword [ebp-12], 0
     je .Done
     dec dword [ebp-12]
@@ -464,7 +464,7 @@ OnPlayerHit:
     mov ebx, [ebp+8]
     mov ebx, [ebx + Hitbox.Owner]
 
-    dec dword [ebx + Player.Lives]                      ; Decrease life
+    dec dword [ebx + Player.Lives]                      ; Decrease live
 
     ; wsprintfA(&string, &format, extra variables)      ; Update lives string
     lea eax, dword [ebx + Player.LivesText]
