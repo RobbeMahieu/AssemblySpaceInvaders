@@ -8,29 +8,29 @@
 
 ; Constants and Data
 
-BulletWidth equ 3
-BulletHeight equ 21
+BulletWidth equ     3
+BulletHeight equ    21
 
 struc Bullet
     ; Owner
     .Gameobject resd 1
 
     ; Bounds
-    .Xpos resd 1
-    .Ypos resd 1
-    .Width resd 1
-    .Height resd 1
-    .Hitbox resd 1
+    .Xpos       resd 1
+    .Ypos       resd 1
+    .Width      resd 1
+    .Height     resd 1
+    .Hitbox     resd 1
 
     ; Properties
-    .Speed resd 1
-    .Lifetime resd 1
-    .Color resd 1
+    .Speed      resd 1
+    .Lifetime   resd 1
+    .Color      resd 1
 endstruc
 
 section .data
-BulletLifetime dd 5.0
 
+BulletLifetime dd 5.0
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -179,26 +179,24 @@ BulletRender:
     ; [ebp-4] XposInt
     ; [ebp-8] YposInt
     enter 8, 0
-    push ebx
 
-    mov ebx, [ebp+8]                                        ; Object data in ebx
+    mov eax, [ebp+8]                                        ; Object data in ebx
 
     ; Convert to int
-    fld dword [ebx + Bullet.Xpos]
+    fld dword [eax + Bullet.Xpos]
     fistp dword [ebp-4]
-    fld dword [ebx + Bullet.Ypos]
+    fld dword [eax + Bullet.Ypos]
     fistp dword [ebp-8]
 
     ; FillRectangle(x, y, width, height, color)
-    push dword [ebx + Bullet.Color]                                    
-    push dword [ebx + Bullet.Height]
-    push dword [ebx + Bullet.Width]
+    push dword [eax + Bullet.Color]                                    
+    push dword [eax + Bullet.Height]
+    push dword [eax + Bullet.Width]
     push dword [ebp-8]
     push dword [ebp-4]
     call [FillRectangle]
     add esp, 20
 
-    pop ebx
     leave
     ret
 
@@ -209,16 +207,14 @@ BulletRender:
 
 BulletDestroy:
     enter 0, 0
-    push ebx
 
-    mov ebx, [ebp+8]
+    mov eax, [ebp+8]
 
     ; DeleteHitbox(&hitbox)
-    push dword [ebx + Bullet.Hitbox]
+    push dword [eax + Bullet.Hitbox]
     call DeleteHitbox
     add esp, 4
 
-    pop ebx
     leave
     ret
 
@@ -229,16 +225,14 @@ BulletDestroy:
 
 BulletDespawn:
     enter 0, 0
-    push ebx
 
-    mov ebx, [ebp+8]
+    mov eax, [ebp+8]
 
     ; DestroyGameObject(&object)
-    push dword [ebx + Bullet.Gameobject]
+    push dword [eax + Bullet.Gameobject]
     call DestroyGameObject
     add esp, 4
 
-    pop ebx
     leave
     ret
 
@@ -250,7 +244,6 @@ BulletDespawn:
 
 OnBulletHit:
     enter 0, 0
-    push ebx
 
     mov eax, [ebp+8]   
 
@@ -259,6 +252,5 @@ OnBulletHit:
     call BulletDespawn
     add esp, 4
 
-    pop ebx
     leave
     ret

@@ -16,14 +16,14 @@ struc Alien
     .Sprite     resd 1
 
     ; Bounds
-    .Xpos resd 1
-    .Ypos resd 1
-    .Width resd 1
-    .Height resd 1
-    .Hitbox resd 1
+    .Xpos       resd 1
+    .Ypos       resd 1
+    .Width      resd 1
+    .Height     resd 1
+    .Hitbox     resd 1
 
     ; Properties
-    .Points resd 1
+    .Points     resd 1
 endstruc
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -46,7 +46,6 @@ section .text                                           ; Code
 CreateAlien:
     enter 0, 0
     push ebx
-    push esi
 
     push Alien_size                                     ; Create Alien struct
     call [MemoryAlloc]
@@ -96,15 +95,13 @@ CreateAlien:
     mov dword [ebx + Alien.Hitbox], eax                 ; Store the hitbox address
     mov dword [eax + Hitbox.Owner], ebx                 ; Set reference to owner in hitbox
 
-    ; LL_Add(&scene, &object)
+    ; AddAlienToManager(&alien)                         ; Add the alien to the manager
     push ebx
-    push dword [AlienList]
-    call [LL_Add]
-    add esp, 8
+    call AddAlienToManager
+    add esp, 4
 
     mov eax, dword [ebx + Alien.Gameobject]             ; Return gameobject address
 
-    pop esi
     pop ebx
     leave
     ret
@@ -128,26 +125,24 @@ AlienRender:
     ; [ebp-4] XposInt
     ; [ebp-8] YposInt
     enter 8, 0
-    push ebx
 
-    mov ebx, [ebp+8]                                        ; Object data in ebx
+    mov eax, [ebp+8]                                        ; Object data in ebx
 
     ; Convert to int
-    fld dword [ebx + Alien.Xpos]
+    fld dword [eax + Alien.Xpos]
     fistp dword [ebp-4]
-    fld dword [ebx + Alien.Ypos]
+    fld dword [eax + Alien.Ypos]
     fistp dword [ebp-8]
 
     ; DrawImage(&image, x, y, width, height)
-    push dword [ebx + Alien.Height]
-    push dword [ebx + Alien.Width]
+    push dword [eax + Alien.Height]
+    push dword [eax + Alien.Width]
     push dword [ebp-8]
     push dword [ebp-4]
-    push dword [ebx + Alien.Sprite]
+    push dword [eax + Alien.Sprite]
     call DrawImage
     add esp, 20
 
-    pop ebx
     leave
     ret
 
@@ -183,15 +178,13 @@ AlienDestroy:
 
 AlienJump:
     enter 0, 0
-    push ebx
 
-    mov ebx, [ebp+8]
+    mov eax, [ebp+8]
 
     fild dword [AlienJumpDistance]                       ; Update Xpos
-    fadd dword [ebx + Alien.Xpos]
-    fstp dword [ebx + Alien.Xpos]
+    fadd dword [eax + Alien.Xpos]
+    fstp dword [eax + Alien.Xpos]
 
-    pop ebx
     leave
     ret
 
@@ -204,16 +197,14 @@ AlienMoveDown:
     ; Local variables
     ; [ebp-4] temp float storage
     enter 4, 0
-    push ebx
 
-    mov ebx, [ebp+8]
+    mov eax, [ebp+8]
 
     mov dword [ebp-4], AlienOffset                      ; Update Ypos
     fild dword [ebp-4]
-    fadd dword [ebx + Alien.Ypos]
-    fstp dword [ebx + Alien.Ypos]
+    fadd dword [eax + Alien.Ypos]
+    fstp dword [eax + Alien.Ypos]
 
-    pop ebx
     leave
     ret
 
@@ -224,20 +215,18 @@ AlienMoveDown:
 
 AlienUpdateHitbox:
     enter 0, 0
-    push ebx
 
-    mov ebx, [ebp+8]
+    mov eax, [ebp+8]
 
     ; SetHitboxBounds(&hitbox, x, y, width, height)     ; Update HitboxPosition
-    push dword [ebx + Alien.Height]
-    push dword [ebx + Alien.Width]
-    push dword [ebx + Alien.Ypos]
-    push dword [ebx + Alien.Xpos]
-    push dword [ebx + Alien.Hitbox]
+    push dword [eax + Alien.Height]
+    push dword [eax + Alien.Width]
+    push dword [eax + Alien.Ypos]
+    push dword [eax + Alien.Xpos]
+    push dword [eax + Alien.Hitbox]
     call SetHitboxBounds
     add esp, 20
 
-    pop ebx
     leave
     ret
 
@@ -283,7 +272,7 @@ AlienShoot:
     mov ebx, [ebp+8]
 
     ; Calculate xpos
-    mov eax, dword [ebx + Alien.Width]                 ; Calculate Xpos
+    mov eax, dword [ebx + Alien.Width]                  ; Calculate Xpos
     shr eax, 1                                          ; divide by 2
     mov [ebp-4], eax                                         
     fild dword [ebp-4]                                  ; Convert to float
@@ -291,16 +280,16 @@ AlienShoot:
     fstp dword [ebp-4]                                  ; Bullet Xpos
 
     mov eax, [ebx + Alien.Gameobject]
-    mov eax, [ebx + Gameobject.scene]
+    mov eax, [eax + Gameobject.scene]
 
     ; CreateBullet(&scene, x, y, speed, color, layer, hitLayers)
     push HL_FRIENDLY
     push HL_ENEMYPROJECTILE
     push dword [COLOR_WHITE]
-    push 200
+    push AlienBulletSpeed
     push dword [ebx + Alien.Ypos] 
     push dword [ebp-4]
-    push dword [eax]
+    push eax
     call CreateBullet
     add esp, 28
 

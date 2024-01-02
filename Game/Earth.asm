@@ -14,11 +14,11 @@ struc Earth
     .Gameobject resd 1
 
     ; Bounds
-    .Xpos resd 1
-    .Ypos resd 1
-    .Width resd 1
-    .Height resd 1
-    .Hitbox resd 1
+    .Xpos       resd 1
+    .Ypos       resd 1
+    .Width      resd 1
+    .Height     resd 1
+    .Hitbox     resd 1
 endstruc
 
 ;-------------------------------------------------------------------------------------------------------------------
@@ -111,16 +111,14 @@ EarthRender:
 
 EarthDestroy:
     enter 0, 0
-    push ebx
 
-    mov ebx, [ebp+8]
+    mov eax, [ebp+8]
 
     ; DeleteHitbox(&hitbox)
-    push dword [ebx + Earth.Hitbox]
+    push dword [eax + Earth.Hitbox]
     call DeleteHitbox
     add esp, 4
 
-    pop ebx
     leave
     ret
 

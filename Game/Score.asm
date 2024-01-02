@@ -10,14 +10,15 @@
 
 struc Score
     ; Owner
-    .Gameobject resd 1
+    .Gameobject         resd 1
 
     ; UI
-    .ScoreTextbox      resd 1
+    .ScoreTextbox       resd 1
     .HighScoreTextbox   resd 1
 endstruc
 
 section .data
+
 ScoreAmount dd 0
 ScoreTextformat db "Score: %08d", 0
 
