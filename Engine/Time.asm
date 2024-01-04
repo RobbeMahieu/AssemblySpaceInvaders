@@ -58,6 +58,8 @@ GetElapsed:
 
 CalculateElapsedTime:
     enter 0, 0
+    push esi
+    push edi
 
     push CurrentTickCount                               ; Get current tick count
     call QueryPerformanceCounter
@@ -87,6 +89,8 @@ CalculateElapsedTime:
     mov eax, [CurrentTickCount+4]
     mov [PreviousTickCount+4] , eax
 
+    pop edi
+    pop esi
     leave
     ret
 
