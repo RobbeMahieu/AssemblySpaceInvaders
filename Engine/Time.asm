@@ -16,7 +16,6 @@ CurrentTickCount  dq 0
 TickFrequency  dq 0
 ElapsedSec dd 0 
 CounterIncreasPerFrame dd 0
-SecConversionConst dd 1000000.0
 
 ;-------------------------------------------------------------------------------------------------------------------
 section .text                                           ; Code
@@ -57,7 +56,9 @@ GetElapsed:
 ; 
 
 CalculateElapsedTime:
-    enter 0, 0
+    ; Local variables
+    ; [ebp-4] float storage
+    enter 4, 0
     push esi
     push edi
 
@@ -73,15 +74,14 @@ CalculateElapsedTime:
     sub eax, esi                                        ; Subtract 64 bit number
     sbb edx, edi                                        ; edx:eax contains difference
 
-    mov ecx, 1000000                                    ; Store multiplier in ecx
-    mov edi, edx                                        ; Copy highest part to edi
-    mul ecx                                             ; Convert lowest to µs => eax * ecx = edx:eax
-    div dword[TickFrequency]                            ; Divide by frequency => since truncation max elapsed sec is 4294 seconds (should be okay)
+    cmp edx, 0
+    je .DifferenceGood
+    mov eax, 0xFFFFFFFF                                 ; Limit the max tick difference. Max difference is 0xFFFF FFFF / frequency 
 
-    push eax                                            ; Load the time to float register 0
-    fild dword [esp]
-    add esp, 4  
-    fdiv dword [SecConversionConst]                     ; Convert time to µs
+    .DifferenceGood:
+    mov dword [ebp-4], eax                                 
+    fild dword [ebp-4]                                  ; Load the time to float register 0
+    fidiv dword[TickFrequency]                          ; Convert time to seconds
     fstp dword [ElapsedSec]                             ; Save the float to elapsedSec
 
     mov eax, [CurrentTickCount]                         ; Update previous value
